@@ -111,13 +111,12 @@ public enum Event: Decodable, Sendable {
 
     public init(from decoder: any Decoder) throws {
         let kind = try decoder.container(keyedBy: CodingKeys.self).decode(String.self, forKey: .kind)
-        if kind == "note" {
-            self = .note(try Note(from: decoder))
-        } else if kind == "rest" {
-            self = .rest(try Rest(from: decoder))
-        } else {
-            self = .unknown
-        }
+        self =
+            switch kind {
+            case "note": .note(try Note(from: decoder))
+            case "rest": .rest(try Rest(from: decoder))
+            default: .unknown
+            }
     }
 }
 
@@ -158,13 +157,12 @@ public enum Mark: Decodable, Sendable {
 
     public init(from decoder: any Decoder) throws {
         let kind = try decoder.container(keyedBy: CodingKeys.self).decode(String.self, forKey: .kind)
-        if kind == "tempo" {
-            self = .tempo(try TempoMark(from: decoder))
-        } else if kind == "section" {
-            self = .section(try SectionMark(from: decoder))
-        } else {
-            self = .other
-        }
+        self =
+            switch kind {
+            case "tempo": .tempo(try TempoMark(from: decoder))
+            case "section": .section(try SectionMark(from: decoder))
+            default: .other
+            }
     }
 }
 

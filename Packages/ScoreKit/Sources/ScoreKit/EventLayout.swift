@@ -29,19 +29,24 @@ struct EventBox {
 }
 
 func eventBox(_ event: Event) -> EventBox? {
-    if case .note(let note) = event {
-        let shape = Shape(value: note.value, dots: note.dots)
-        return EventBox(
+    switch event {
+    case .note(let note):
+        EventBox(
             id: note.id, start: note.start, degree: note.pitch.degree, octave: note.pitch.octave,
+            shape: Shape(value: note.value, dots: note.dots))
+    case .rest(let rest):
+        EventBox(id: rest.id, start: rest.start, degree: 0, octave: 0, shape: Shape(value: rest.value, dots: rest.dots))
+    case .unknown:
+        nil
+    }
+}
+
+extension EventBox {
+    fileprivate init(id: String, start: Int, degree: Int, octave: Int, shape: Shape) {
+        self.init(
+            id: id, start: start, degree: degree, octave: octave,
             underlines: shape.underlines, augmentationDots: shape.augmentationDots, extensions: shape.dashes)
     }
-    if case .rest(let rest) = event {
-        let shape = Shape(value: rest.value, dots: rest.dots)
-        return EventBox(
-            id: rest.id, start: rest.start, degree: 0, octave: 0,
-            underlines: shape.underlines, augmentationDots: shape.augmentationDots, extensions: shape.dashes)
-    }
-    return nil
 }
 
 /// How jianpu writes a written length: 减时线 below, 附点 beside, or 增时线 after.

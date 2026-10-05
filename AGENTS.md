@@ -14,6 +14,17 @@ Run `scripts/check.sh` after every change. Work is done only when it prints `All
 | Project | XcodeGen | `App/Dizi.xcodeproj` out of date with `App/project.yml` |
 | Build and test | `xcodebuild test` on the iOS simulator (`SIMULATOR`, default `iPhone 17e`) | compiler warnings (treated as errors), failing unit or UI tests |
 
+## Code style: functional
+
+Write code the Elixir / Clojure way: **data in, transformations, data out**.
+
+- **Immutable values**: `struct` and `enum` with `let`; build new values instead of mutating.
+- **Results by return value, not side effects**: a function computes and returns; it does not change state it was not given.
+- **Pure core, thin effectful edge**: layout, decoding, and timing are pure functions (testable); only the edges paint, play audio, read files, or log. Example: layout items map to `Ink` values purely; the `Canvas` only paints them.
+- **Collections through `map`, `filter`, `flatMap`, `reduce`**, not `for` loops with `var` accumulators. Never mutate outside state inside a `map`.
+- **`switch` is pattern matching**: use it as an expression returning a value, and keep it exhaustive (no `default` on our own enums) so a new case breaks the build where it must be handled. A `switch` statement only at the edge, where each branch is an effect.
+- `for` loops only for effects at the edge (painting, I/O).
+
 ## Project facts
 
 - `App/project.yml` defines the Xcode project; never edit `App/Dizi.xcodeproj` by hand. Run `xcodegen generate` in `App/` after changing the spec, and commit both.

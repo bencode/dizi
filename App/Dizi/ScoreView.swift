@@ -7,6 +7,7 @@ struct ScoreView: View {
     private let metrics = ScoreMetrics(fontSize: 24)
     private var digitFont: Font { .system(size: metrics.fontSize, weight: .medium, design: .rounded) }
     private var stroke: CGFloat { metrics.fontSize / 16 }
+    private var dotRadius: CGFloat { metrics.fontSize / 12 }
     private let margin: CGFloat = 16
 
     var body: some View {
@@ -25,9 +26,10 @@ struct ScoreView: View {
     }
 
     private func notation(_ layout: ScoreLayout) -> some View {
-        Canvas { context, _ in
-            for item in layout.lines.flatMap(\.items) {
-                draw(item, in: &context)
+        let inks = layout.lines.flatMap(\.items).flatMap(ink)
+        return Canvas { context, _ in
+            for ink in inks {
+                render(ink, in: &context)
             }
         }
         .frame(height: layout.height)
@@ -35,42 +37,50 @@ struct ScoreView: View {
         .accessibilityIdentifier("score")
     }
 
-    private func draw(_ item: ScoreLayout.Item, in context: inout GraphicsContext) {
+    /// What one layout item looks like: pure, so the canvas only paints the result.
+    private func ink(_ item: ScoreLayout.Item) -> [Ink] {
         switch item {
         case .digit(_, _, let degree, let center):
-            context.draw(Text("\(degree)").font(digitFont), at: center)
+            [.digit(degree, center: center)]
         case .octaveDot(_, let center), .augmentationDot(_, let center):
-            let radius = metrics.fontSize / 12
-            let rect = CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2)
-            context.fill(Path(ellipseIn: rect), with: .foreground)
+            [.shape(Path(ellipseIn: CGRect(origin: center, size: .zero).insetBy(dx: -dotRadius, dy: -dotRadius)))]
         case .dash(_, let center, let width):
-            let rect = CGRect(x: center.x - width / 2, y: center.y - stroke, width: width, height: stroke * 2)
-            context.fill(Path(rect), with: .foreground)
+            [.shape(Path(CGRect(x: center.x - width / 2, y: center.y - stroke, width: width, height: stroke * 2)))]
         case .underline(_, let left, let right, let lineY):
-            let rect = CGRect(x: left, y: lineY - stroke / 2, width: right - left, height: stroke)
-            context.fill(Path(rect), with: .foreground)
+            [.shape(Path(CGRect(x: left, y: lineY - stroke / 2, width: right - left, height: stroke)))]
         case .barline(let style, let centerX, let top, let bottom):
-            drawBarline(style, centerX: centerX, top: top, bottom: bottom, in: &context)
+            barlineStrokes(style).map { offset, width in
+                .shape(Path(CGRect(x: centerX + offset, y: top, width: width, height: bottom - top)))
+            }
         }
     }
 
-    private func drawBarline(
-        _ style: Barline, centerX: CGFloat, top: CGFloat, bottom: CGFloat, in context: inout GraphicsContext
-    ) {
+    /// Thin and thick strokes of a bar line, as offsets from its center.
+    private func barlineStrokes(_ style: Barline) -> [(offset: CGFloat, width: CGFloat)] {
         let thin = stroke * 0.7
         let thick = stroke * 2.5
         let gap = stroke * 1.5
-        let strokes: [(offset: CGFloat, width: CGFloat)] =
-            switch style {
-            case .single: [(-thin / 2, thin)]
-            case .double: [(-gap - thin, thin), (gap, thin)]
-            case .final: [(-gap - thin - thick / 2, thin), (-thick / 2, thick)]
-            }
-        for stroke in strokes {
-            let rect = CGRect(x: centerX + stroke.offset, y: top, width: stroke.width, height: bottom - top)
-            context.fill(Path(rect), with: .foreground)
+        return switch style {
+        case .single: [(-thin / 2, thin)]
+        case .double: [(-gap - thin, thin), (gap, thin)]
+        case .final: [(-gap - thin - thick / 2, thin), (-thick / 2, thick)]
         }
     }
+
+    private func render(_ ink: Ink, in context: inout GraphicsContext) {
+        switch ink {
+        case .shape(let path):
+            context.fill(path, with: .foreground)
+        case .digit(let degree, let center):
+            context.draw(Text("\(degree)").font(digitFont), at: center)
+        }
+    }
+}
+
+/// What the canvas paints.
+private enum Ink {
+    case shape(Path)
+    case digit(Int, center: CGPoint)
 }
 
 /// `1=F  2/4  ♩=72`
@@ -94,12 +104,9 @@ private func startingTempo(_ mark: Mark) -> String? {
     guard case .tempo(let tempo) = mark, tempo.tick == 0 else { return nil }
     // An unusual beat shows the number alone rather than a wrong note symbol.
     let beat = [240: "♪=", 480: "♩=", 720: "♩.=", 960: "𝅗𝅥="][tempo.beat] ?? ""
-    switch tempo.bpm {
-    case .exact(let bpm):
-        return "\(beat)\(bpm)"
-    case .range(let low, let high):
-        return "\(beat)\(low)~\(high)"
-    case nil:
-        return tempo.text
+    return switch tempo.bpm {
+    case .exact(let bpm): "\(beat)\(bpm)"
+    case .range(let low, let high): "\(beat)\(low)~\(high)"
+    case nil: tempo.text
     }
 }

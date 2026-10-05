@@ -76,20 +76,23 @@ private func naturalWidth(_ boxes: [EventBox], _ metrics: ScoreMetrics) -> CGFlo
     boxes.map { $0.naturalWidth(metrics) }.reduce(0, +)
 }
 
+/// Packs measures into lines: a measure starts a new line when it would not fit or when it starts a section.
 private func lineGroups(widths: [CGFloat], forcedStarts: Set<Int>, available: CGFloat) -> [[Int]] {
-    var groups: [[Int]] = []
-    var current: [Int] = []
-    var used: CGFloat = 0
-    for (index, width) in widths.enumerated() {
-        if !current.isEmpty && (used + width > available || forcedStarts.contains(index)) {
-            groups.append(current)
-            current = []
-            used = 0
+    widths.enumerated().reduce(into: (lines: [[Int]](), used: CGFloat(0))) { packed, measure in
+        let (index, width) = measure
+        if packed.lines.isEmpty || forcedStarts.contains(index) || packed.used + width > available {
+            packed.lines.append([index])
+            packed.used = width
+        } else {
+            packed.lines[packed.lines.count - 1].append(index)
+            packed.used += width
         }
-        current.append(index)
-        used += width
-    }
-    return current.isEmpty ? groups : groups + [current]
+    }.lines
+}
+
+/// Where each of `widths` starts when laid end to end from `origin`.
+private func starts(of widths: [CGFloat], from origin: CGFloat) -> [CGFloat] {
+    widths.dropLast().reduce(into: [origin]) { lefts, width in lefts.append((lefts.last ?? origin) + width) }
 }
 
 /// What every line of one layout shares.
@@ -100,25 +103,38 @@ private struct LineContext {
     let metrics: ScoreMetrics
 }
 
+/// One line's stretch factor and vertical position.
+private struct LineFrame {
+    let scale: CGFloat
+    let baseline: CGFloat
+}
+
 private func layoutLine(_ measures: [Int], row: Int, scale: CGFloat, _ context: LineContext) -> ScoreLayout.Line {
     let metrics = context.metrics
-    let baseline = metrics.lineHeight * (CGFloat(row) + 0.5)
-    var items: [ScoreLayout.Item] = []
-    var cursor: CGFloat = 0
-    let top = baseline - metrics.lineHeight * 0.3
-    let bottom = baseline + metrics.lineHeight * 0.3
-    for index in measures {
-        let placed = context.boxes[index].map { box in
-            defer { cursor += box.naturalWidth(metrics) * scale }
-            return placeBox(box, left: cursor, scale: scale, baseline: baseline, metrics: metrics)
-        }
-        items += placed.flatMap(\.items)
-        items += underlines(placed, beams: context.part.measures[index].beams, baseline: baseline, metrics: metrics)
-        cursor += metrics.barGap / 2
-        items.append(.barline(context.score.measures[index].barline, centerX: cursor, top: top, bottom: bottom))
-        cursor += metrics.barGap / 2
+    let frame = LineFrame(scale: scale, baseline: metrics.lineHeight * (CGFloat(row) + 0.5))
+    let widths = measures.map { naturalWidth(context.boxes[$0], metrics) * scale + metrics.barGap }
+    let items = zip(measures, starts(of: widths, from: 0)).flatMap { index, left in
+        measureItems(index, left: left, frame, context)
     }
-    return ScoreLayout.Line(measures: measures, items: items, width: cursor)
+    return ScoreLayout.Line(measures: measures, items: items, width: widths.reduce(0, +))
+}
+
+/// A measure's notes, its 减时线, and the bar line closing it.
+private typealias Item = ScoreLayout.Item
+
+private func measureItems(_ index: Int, left: CGFloat, _ frame: LineFrame, _ context: LineContext) -> [Item] {
+    let (metrics, scale, baseline) = (context.metrics, frame.scale, frame.baseline)
+    let boxes = context.boxes[index]
+    let placed = zip(boxes, starts(of: boxes.map { $0.naturalWidth(metrics) * scale }, from: left)).map { box, left in
+        placeBox(box, left: left, scale: scale, baseline: baseline, metrics: metrics)
+    }
+    let barX = left + naturalWidth(boxes, metrics) * scale + metrics.barGap / 2
+    let barline = Item.barline(
+        context.score.measures[index].barline, centerX: barX,
+        top: baseline - metrics.lineHeight * 0.3, bottom: baseline + metrics.lineHeight * 0.3)
+    return placed.flatMap(\.items)
+        + underlines(placed, beams: context.part.measures[index].beams, baseline: baseline, metrics: metrics)
+        + [barline]
 }
 
 extension Mark {
