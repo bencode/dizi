@@ -37,9 +37,10 @@ public struct ScoreLayout: Sendable {
     }
 
     public enum Item: Sendable, Equatable {
-        /// A note or rest digit centered at `center`; `degree` is 0 for a rest. A long rest repeats its 0 under
-        /// the same id; the first one is the rest's position.
-        case digit(id: String, start: Int, degree: Int, center: CGPoint)
+        /// A note's digit centered at `center`.
+        case note(id: String, start: Int, degree: Int, center: CGPoint)
+        /// A rest's 0. A long rest repeats its 0 under the same id; the first one is the rest's position.
+        case rest(id: String, start: Int, center: CGPoint)
         case octaveDot(noteID: String, center: CGPoint)
         /// 附点
         case augmentationDot(noteID: String, center: CGPoint)
@@ -51,25 +52,30 @@ public struct ScoreLayout: Sendable {
     }
 }
 
-/// Lays out the solo part. Lines take as many measures as fit, a section mark starts a new line,
-/// and every line but the last is stretched to the full width.
-public func layoutScore(_ score: Score, width: CGFloat, metrics: ScoreMetrics = ScoreMetrics()) -> ScoreLayout {
-    guard let part = score.parts.first else { return ScoreLayout(lines: [], height: 0) }
-    let boxes = part.measures.map { $0.events.compactMap(eventBox) }
-    let sectionStarts = Set(score.marks.compactMap(\.sectionTick))
-    let groups = lineGroups(
-        widths: boxes.map { naturalWidth($0, metrics) + metrics.barGap },
-        forcedStarts: Set(score.measures.filter { sectionStarts.contains($0.start) }.map(\.index)),
-        available: width)
-    let context = LineContext(score: score, part: part, boxes: boxes, metrics: metrics)
-    let lines = groups.enumerated().map { row, measures in
-        let natural = measures.map { naturalWidth(boxes[$0], metrics) }.reduce(0, +)
-        let gaps = CGFloat(measures.count) * metrics.barGap
-        let isLast = row == groups.count - 1
-        let scale = isLast || natural == 0 ? 1 : max(1, (width - gaps) / natural)
-        return layoutLine(measures, row: row, scale: scale, context)
+extension ScoreLayout {
+    /// Lays out the solo part. Lines take as many measures as fit, a section mark starts a new line,
+    /// and every line but the last is stretched to the full width.
+    public init(score: Score, width: CGFloat, metrics: ScoreMetrics = ScoreMetrics()) {
+        guard let part = score.parts.first else {
+            self.init(lines: [], height: 0)
+            return
+        }
+        let boxes = part.measures.map { $0.events.compactMap(eventBox) }
+        let sectionStarts = Set(score.marks.compactMap(\.sectionTick))
+        let groups = lineGroups(
+            widths: boxes.map { naturalWidth($0, metrics) + metrics.barGap },
+            forcedStarts: Set(score.measures.filter { sectionStarts.contains($0.start) }.map(\.index)),
+            available: width)
+        let context = LineContext(score: score, part: part, boxes: boxes, metrics: metrics)
+        let lines = groups.enumerated().map { row, measures in
+            let natural = measures.map { naturalWidth(boxes[$0], metrics) }.reduce(0, +)
+            let gaps = CGFloat(measures.count) * metrics.barGap
+            let isLast = row == groups.count - 1
+            let scale = isLast || natural == 0 ? 1 : max(1, (width - gaps) / natural)
+            return line(measures, row: row, scale: scale, context)
+        }
+        self.init(lines: lines, height: metrics.lineHeight * CGFloat(lines.count))
     }
-    return ScoreLayout(lines: lines, height: metrics.lineHeight * CGFloat(lines.count))
 }
 
 private func naturalWidth(_ boxes: [EventBox], _ metrics: ScoreMetrics) -> CGFloat {
@@ -109,7 +115,7 @@ private struct LineFrame {
     let baseline: CGFloat
 }
 
-private func layoutLine(_ measures: [Int], row: Int, scale: CGFloat, _ context: LineContext) -> ScoreLayout.Line {
+private func line(_ measures: [Int], row: Int, scale: CGFloat, _ context: LineContext) -> ScoreLayout.Line {
     let metrics = context.metrics
     let frame = LineFrame(scale: scale, baseline: metrics.lineHeight * (CGFloat(row) + 0.5))
     let widths = measures.map { naturalWidth(context.boxes[$0], metrics) * scale + metrics.barGap }
@@ -126,7 +132,7 @@ private func measureItems(_ index: Int, left: CGFloat, _ frame: LineFrame, _ con
     let (metrics, scale, baseline) = (context.metrics, frame.scale, frame.baseline)
     let boxes = context.boxes[index]
     let placed = zip(boxes, starts(of: boxes.map { $0.naturalWidth(metrics) * scale }, from: left)).map { box, left in
-        placeBox(box, left: left, scale: scale, baseline: baseline, metrics: metrics)
+        placed(box, left: left, scale: scale, baseline: baseline, metrics: metrics)
     }
     let barX = left + naturalWidth(boxes, metrics) * scale + metrics.barGap / 2
     let barline = Item.barline(

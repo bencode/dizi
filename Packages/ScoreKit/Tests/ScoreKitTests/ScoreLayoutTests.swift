@@ -53,8 +53,10 @@ private let wide: CGFloat = 2000
 
 private func digitCenter(_ id: String, in items: [ScoreLayout.Item]) -> CGPoint? {
     items.lazy.compactMap { item -> CGPoint? in
-        guard case .digit(id, _, _, let center) = item else { return nil }
-        return center
+        switch item {
+        case .note(id, _, _, let center), .rest(id, _, let center): center
+        default: nil
+        }
     }.first
 }
 
@@ -75,7 +77,7 @@ private func levelOneUnderlines(in items: [ScoreLayout.Item]) -> [ClosedRange<CG
 }
 
 @Test func stretchesEveryLineButTheLastToTheFullWidth() throws {
-    let lines = layoutScore(try molihua(), width: phone).lines
+    let lines = ScoreLayout(score: try molihua(), width: phone).lines
 
     #expect(lines.count > 1)
     #expect(lines.dropLast().allSatisfy { abs($0.width - phone) < 0.001 })
@@ -83,7 +85,7 @@ private func levelOneUnderlines(in items: [ScoreLayout.Item]) -> [ClosedRange<CG
 }
 
 @Test func startsALineAtASection() throws {
-    let lines = layoutScore(try sectioned(), width: wide).lines
+    let lines = ScoreLayout(score: try sectioned(), width: wide).lines
 
     #expect(lines.map(\.measures) == [[0], [1, 2]])
 }
@@ -91,13 +93,13 @@ private func levelOneUnderlines(in items: [ScoreLayout.Item]) -> [ClosedRange<CG
 @Test func wrapsAtABarLineWhenTooNarrow() throws {
     let metrics = ScoreMetrics()
 
-    let lines = layoutScore(try molihua(), width: metrics.quarterWidth * 2, metrics: metrics).lines
+    let lines = ScoreLayout(score: try molihua(), width: metrics.quarterWidth * 2, metrics: metrics).lines
 
     #expect(lines.prefix(4).map(\.measures) == [[0], [1], [2], [3]])
 }
 
 @Test func putsOneDotAboveAHighNote() throws {
-    let items = layoutScore(try molihua(), width: wide).lines[0].items
+    let items = ScoreLayout(score: try molihua(), width: wide).lines[0].items
     let dots = items.compactMap { item -> CGPoint? in
         guard case .octaveDot("n5", let center) = item else { return nil }
         return center
@@ -109,7 +111,7 @@ private func levelOneUnderlines(in items: [ScoreLayout.Item]) -> [ClosedRange<CG
 }
 
 @Test func joinsBeamedEighthsUnderOneLine() throws {
-    let items = layoutScore(try molihua(), width: wide).lines[0].items
+    let items = ScoreLayout(score: try molihua(), width: wide).lines[0].items
     let quarter = try #require(digitCenter("n1", in: items))
     let first = try #require(digitCenter("n2", in: items))
     let second = try #require(digitCenter("n3", in: items))
@@ -121,7 +123,7 @@ private func levelOneUnderlines(in items: [ScoreLayout.Item]) -> [ClosedRange<CG
 }
 
 @Test func underlinesALoneEighthAndDotsADottedQuarter() throws {
-    let items = layoutScore(try sectioned(), width: wide).lines[0].items
+    let items = ScoreLayout(score: try sectioned(), width: wide).lines[0].items
     let dotted = try #require(digitCenter("n1", in: items))
     let eighth = try #require(digitCenter("n2", in: items))
     let dots = items.compactMap { item -> CGPoint? in
@@ -136,7 +138,7 @@ private func levelOneUnderlines(in items: [ScoreLayout.Item]) -> [ClosedRange<CG
 }
 
 @Test func followsAHalfNoteWithOneDash() throws {
-    let items = layoutScore(try molihua(), width: wide).lines.flatMap(\.items)
+    let items = ScoreLayout(score: try molihua(), width: wide).lines.flatMap(\.items)
     let dashes = items.filter { item in
         if case .dash("n11", _, _) = item { return true }
         return false
@@ -147,8 +149,8 @@ private func levelOneUnderlines(in items: [ScoreLayout.Item]) -> [ClosedRange<CG
 
 @Test func scalesWithTheFontSize() throws {
     let score = try molihua()
-    let small = layoutScore(score, width: phone, metrics: ScoreMetrics(fontSize: 20))
-    let large = layoutScore(score, width: phone * 2, metrics: ScoreMetrics(fontSize: 40))
+    let small = ScoreLayout(score: score, width: phone, metrics: ScoreMetrics(fontSize: 20))
+    let large = ScoreLayout(score: score, width: phone * 2, metrics: ScoreMetrics(fontSize: 40))
 
     #expect(large.height == small.height * 2)
     #expect(large.lines.map(\.measures) == small.lines.map(\.measures))
@@ -161,5 +163,5 @@ private func levelOneUnderlines(in items: [ScoreLayout.Item]) -> [ClosedRange<CG
     let json = try String(contentsOf: molihuaURL(), encoding: .utf8).replacingOccurrences(of: "\"n3\"", with: "\"n2\"")
     let score = try Score.decode(from: Data(json.utf8))
 
-    #expect(!layoutScore(score, width: phone).lines.isEmpty)
+    #expect(!ScoreLayout(score: score, width: phone).lines.isEmpty)
 }

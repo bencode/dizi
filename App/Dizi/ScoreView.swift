@@ -12,7 +12,7 @@ struct ScoreView: View {
 
     var body: some View {
         GeometryReader { proxy in
-            let layout = layoutScore(score, width: proxy.size.width - margin * 2, metrics: metrics)
+            let layout = ScoreLayout(score: score, width: proxy.size.width - margin * 2, metrics: metrics)
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     Text(headerText(score))
@@ -40,8 +40,10 @@ struct ScoreView: View {
     /// What one layout item looks like: pure, so the canvas only paints the result.
     private func ink(_ item: ScoreLayout.Item) -> [Ink] {
         switch item {
-        case .digit(_, _, let degree, let center):
+        case .note(_, _, let degree, let center):
             [.digit(degree, center: center)]
+        case .rest(_, _, let center):
+            [.digit(0, center: center)]
         case .octaveDot(_, let center), .augmentationDot(_, let center):
             [.shape(Path(ellipseIn: CGRect(origin: center, size: .zero).insetBy(dx: -dotRadius, dy: -dotRadius)))]
         case .dash(_, let center, let width):

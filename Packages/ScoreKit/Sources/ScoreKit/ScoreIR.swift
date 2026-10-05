@@ -77,8 +77,13 @@ public enum Barline: String, Decodable, Sendable {
 
 public struct Part: Decodable, Sendable {
     public let id: String
-    public let role: String
+    public let role: Role
     public let measures: [PartMeasure]
+}
+
+public enum Role: String, Decodable, Sendable {
+    case solo
+    case accompaniment
 }
 
 public struct PartMeasure: Decodable, Sendable {
@@ -124,9 +129,8 @@ public struct Note: Decodable, Sendable {
     public let id: String
     public let start: Int
     public let duration: Int
-    /// Written value: 4 = quarter, 8 = eighth.
-    public let value: Int
-    public let dots: Int
+    public let value: NoteValue
+    public let dots: Dots
     public let pitch: Pitch
 }
 
@@ -134,15 +138,50 @@ public struct Rest: Decodable, Sendable {
     public let id: String
     public let start: Int
     public let duration: Int
-    public let value: Int
-    public let dots: Int
+    public let value: NoteValue
+    public let dots: Dots
+}
+
+/// The written length; any other number fails decoding.
+public enum NoteValue: Int, Decodable, Sendable {
+    case whole = 1
+    case half = 2
+    case quarter = 4
+    case eighth = 8
+    case sixteenth = 16
+    case thirtySecond = 32
+    case sixtyFourth = 64
+}
+
+/// Augmentation dots (附点): none, one, or two.
+public enum Dots: Int, Decodable, Sendable {
+    case none = 0
+    case single = 1
+    case double = 2
 }
 
 public struct Pitch: Decodable, Sendable {
+    /// 1...7; any other number fails decoding.
     public let degree: Int
     public let accidental: Accidental?
     public let octave: Int
     public let semitones: Int
+
+    private enum CodingKeys: String, CodingKey {
+        case degree, accidental, octave, semitones
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        degree = try container.decode(Int.self, forKey: .degree)
+        guard (1...7).contains(degree) else {
+            throw DecodingError.dataCorruptedError(
+                forKey: .degree, in: container, debugDescription: "Degree \(degree) is not 1–7")
+        }
+        accidental = try container.decodeIfPresent(Accidental.self, forKey: .accidental)
+        octave = try container.decode(Int.self, forKey: .octave)
+        semitones = try container.decode(Int.self, forKey: .semitones)
+    }
 }
 
 public enum Mark: Decodable, Sendable {

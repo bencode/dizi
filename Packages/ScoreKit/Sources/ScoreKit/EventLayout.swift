@@ -3,11 +3,14 @@ import CoreGraphics
 /// One note or rest as jianpu writes it: a digit with its 减时线, 附点, and octave dots, then 增时线
 /// (or, for a long rest, more 0s).
 struct EventBox {
+    enum Head {
+        case note(degree: Int, octave: Int)
+        case rest
+    }
+
     let id: String
     let start: Int
-    /// 0 for a rest.
-    let degree: Int
-    let octave: Int
+    let head: Head
     let underlines: Int
     let augmentationDots: Int
     let extensions: Int
@@ -32,19 +35,19 @@ func eventBox(_ event: Event) -> EventBox? {
     switch event {
     case .note(let note):
         EventBox(
-            id: note.id, start: note.start, degree: note.pitch.degree, octave: note.pitch.octave,
+            id: note.id, start: note.start, head: .note(degree: note.pitch.degree, octave: note.pitch.octave),
             shape: Shape(value: note.value, dots: note.dots))
     case .rest(let rest):
-        EventBox(id: rest.id, start: rest.start, degree: 0, octave: 0, shape: Shape(value: rest.value, dots: rest.dots))
+        EventBox(id: rest.id, start: rest.start, head: .rest, shape: Shape(value: rest.value, dots: rest.dots))
     case .unknown:
         nil
     }
 }
 
 extension EventBox {
-    fileprivate init(id: String, start: Int, degree: Int, octave: Int, shape: Shape) {
+    fileprivate init(id: String, start: Int, head: Head, shape: Shape) {
         self.init(
-            id: id, start: start, degree: degree, octave: octave,
+            id: id, start: start, head: head,
             underlines: shape.underlines, augmentationDots: shape.augmentationDots, extensions: shape.dashes)
     }
 }
@@ -55,17 +58,17 @@ private struct Shape {
     let augmentationDots: Int
     let dashes: Int
 
-    init(value: Int, dots: Int) {
+    init(value: NoteValue, dots: Dots) {
         dashes = dashCount(value: value, dots: dots)
-        underlines = value > 4 ? value.trailingZeroBitCount - 2 : 0
-        augmentationDots = dashes == 0 ? dots : 0
+        underlines = value.rawValue > 4 ? value.rawValue.trailingZeroBitCount - 2 : 0
+        augmentationDots = dashes == 0 ? dots.rawValue : 0
     }
 }
 
 /// 增时线 after a note of this written length: none for a quarter or shorter.
-func dashCount(value: Int, dots: Int) -> Int {
-    guard value <= 2 else { return 0 }
-    let quarters = (4 / value) * ((1 << (dots + 1)) - 1) / (1 << dots)
+func dashCount(value: NoteValue, dots: Dots) -> Int {
+    guard value.rawValue <= 2 else { return 0 }
+    let quarters = (4 / value.rawValue) * ((1 << (dots.rawValue + 1)) - 1) / (1 << dots.rawValue)
     return quarters - 1
 }
 
@@ -76,7 +79,7 @@ struct PlacedBox {
     let span: ClosedRange<CGFloat>
 }
 
-func placeBox(_ box: EventBox, left: CGFloat, scale: CGFloat, baseline: CGFloat, metrics: ScoreMetrics) -> PlacedBox {
+func placed(_ box: EventBox, left: CGFloat, scale: CGFloat, baseline: CGFloat, metrics: ScoreMetrics) -> PlacedBox {
     let dotsWidth = CGFloat(box.augmentationDots) * metrics.augmentationDotWidth
     let digitX = left + (box.headWidth(metrics) - dotsWidth) * scale / 2
     let digit = CGPoint(x: digitX, y: baseline)
@@ -87,23 +90,30 @@ func placeBox(_ box: EventBox, left: CGFloat, scale: CGFloat, baseline: CGFloat,
     let extensions = (0..<box.extensions).map { index in
         let center = CGPoint(
             x: left + (box.headWidth(metrics) + metrics.quarterWidth * (CGFloat(index) + 0.5)) * scale, y: baseline)
-        return box.degree == 0
-            ? ScoreLayout.Item.digit(id: box.id, start: box.start, degree: 0, center: center)
-            : .dash(noteID: box.id, center: center, width: metrics.dashWidth)
+        let item: ScoreLayout.Item =
+            switch box.head {
+            case .note: .dash(noteID: box.id, center: center, width: metrics.dashWidth)
+            case .rest: .rest(id: box.id, start: box.start, center: center)
+            }
+        return item
     }
-    let items =
-        [.digit(id: box.id, start: box.start, degree: box.degree, center: digit)]
-        + octaveDots(box, digit: digit, metrics: metrics) + augmentationDots + extensions
+    let head: ScoreLayout.Item =
+        switch box.head {
+        case .note(let degree, _): .note(id: box.id, start: box.start, degree: degree, center: digit)
+        case .rest: .rest(id: box.id, start: box.start, center: digit)
+        }
+    let items = [head] + octaveDots(box, digit: digit, metrics: metrics) + augmentationDots + extensions
     let right = digitX + metrics.digitHalfWidth + dotsWidth
     return PlacedBox(box: box, items: items, span: (digitX - metrics.digitHalfWidth)...right)
 }
 
 private func octaveDots(_ box: EventBox, digit: CGPoint, metrics: ScoreMetrics) -> [ScoreLayout.Item] {
-    let above = box.octave > 0
+    guard case .note(_, let octave) = box.head else { return [] }
+    let above = octave > 0
     let underlineDepth =
         box.underlines > 0 ? metrics.underlineGap + CGFloat(box.underlines) * metrics.underlineSpacing : 0
     let firstOffset = metrics.digitHeight / 2 + metrics.dotGap + (above ? 0 : underlineDepth)
-    return (0..<abs(box.octave)).map { level in
+    return (0..<abs(octave)).map { level in
         let offset = firstOffset + CGFloat(level) * metrics.dotSpacing
         let center = CGPoint(x: digit.x, y: digit.y + (above ? -offset : offset))
         return .octaveDot(noteID: box.id, center: center)
