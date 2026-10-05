@@ -5,15 +5,18 @@ import Testing
 @testable import ScoreKit
 
 /// docs/examples/molihua.ir.json, the fixture the spec publishes and the app bundles.
-private func molihua() throws -> Score {
+private func molihuaURL() -> URL {
     let repository = URL(fileURLWithPath: #filePath)
         .deletingLastPathComponent()  // ScoreKitTests
         .deletingLastPathComponent()  // Tests
         .deletingLastPathComponent()  // ScoreKit
         .deletingLastPathComponent()  // Packages
         .deletingLastPathComponent()
-    let url = repository.appending(path: "docs/examples/molihua.ir.json")
-    return try Score.decode(from: Data(contentsOf: url))
+    return repository.appending(path: "docs/examples/molihua.ir.json")
+}
+
+private func molihua() throws -> Score {
+    try Score.decode(from: Data(contentsOf: molihuaURL()))
 }
 
 /// `5. 3_ | 【二】 5 - | 1 - |]` in 2/4: a dotted quarter, a lone eighth, and a section on measure 2.
@@ -55,7 +58,7 @@ private func digitCenter(_ id: String, in items: [ScoreLayout.Item]) -> CGPoint?
     }.first
 }
 
-private func underlines(in items: [ScoreLayout.Item]) -> [ClosedRange<CGFloat>] {
+private func levelOneUnderlines(in items: [ScoreLayout.Item]) -> [ClosedRange<CGFloat>] {
     items.compactMap { item in
         guard case .underline(1, let left, let right, _) = item else { return nil }
         return left...right
@@ -111,10 +114,10 @@ private func underlines(in items: [ScoreLayout.Item]) -> [ClosedRange<CGFloat>] 
     let first = try #require(digitCenter("n2", in: items))
     let second = try #require(digitCenter("n3", in: items))
 
-    let spanning = underlines(in: items).filter { $0.contains(first.x) || $0.contains(second.x) }
+    let spanning = levelOneUnderlines(in: items).filter { $0.contains(first.x) || $0.contains(second.x) }
     #expect(spanning.count == 1)
     #expect(spanning.allSatisfy { $0.contains(first.x) && $0.contains(second.x) })
-    #expect(!underlines(in: items).contains { $0.contains(quarter.x) })
+    #expect(!levelOneUnderlines(in: items).contains { $0.contains(quarter.x) })
 }
 
 @Test func underlinesALoneEighthAndDotsADottedQuarter() throws {
@@ -126,8 +129,8 @@ private func underlines(in items: [ScoreLayout.Item]) -> [ClosedRange<CGFloat>] 
         return center
     }
 
-    #expect(underlines(in: items).count == 1)
-    #expect(underlines(in: items).first?.contains(eighth.x) == true)
+    #expect(levelOneUnderlines(in: items).count == 1)
+    #expect(levelOneUnderlines(in: items).first?.contains(eighth.x) == true)
     #expect(dots.count == 1)
     #expect(dots.allSatisfy { $0.x > dotted.x && $0.x < eighth.x })
 }
@@ -152,4 +155,11 @@ private func underlines(in items: [ScoreLayout.Item]) -> [ClosedRange<CGFloat>] 
     let smallDigit = try #require(digitCenter("n5", in: small.lines[0].items))
     let largeDigit = try #require(digitCenter("n5", in: large.lines[0].items))
     #expect(abs(largeDigit.x - smallDigit.x * 2) < 0.001)
+}
+
+@Test func survivesARepeatedIDInsteadOfCrashing() throws {
+    let json = try String(contentsOf: molihuaURL(), encoding: .utf8).replacingOccurrences(of: "\"n3\"", with: "\"n2\"")
+    let score = try Score.decode(from: Data(json.utf8))
+
+    #expect(!layoutScore(score, width: phone).lines.isEmpty)
 }

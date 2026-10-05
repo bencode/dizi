@@ -64,8 +64,12 @@ func dashCount(value: Int, dots: Int) -> Int {
     return quarters - 1
 }
 
-/// Items of one box, and the horizontal span its 减时线 must cover.
-typealias PlacedBox = (items: [ScoreLayout.Item], span: ClosedRange<CGFloat>)
+/// A box placed on a line: its items, and the horizontal span its 减时线 must cover.
+struct PlacedBox {
+    let box: EventBox
+    let items: [ScoreLayout.Item]
+    let span: ClosedRange<CGFloat>
+}
 
 func placeBox(_ box: EventBox, left: CGFloat, scale: CGFloat, baseline: CGFloat, metrics: ScoreMetrics) -> PlacedBox {
     let dotsWidth = CGFloat(box.augmentationDots) * metrics.augmentationDotWidth
@@ -86,7 +90,7 @@ func placeBox(_ box: EventBox, left: CGFloat, scale: CGFloat, baseline: CGFloat,
         [.digit(id: box.id, start: box.start, degree: box.degree, center: digit)]
         + octaveDots(box, digit: digit, metrics: metrics) + augmentationDots + extensions
     let right = digitX + metrics.digitHalfWidth + dotsWidth
-    return (items, (digitX - metrics.digitHalfWidth)...right)
+    return PlacedBox(box: box, items: items, span: (digitX - metrics.digitHalfWidth)...right)
 }
 
 private func octaveDots(_ box: EventBox, digit: CGPoint, metrics: ScoreMetrics) -> [ScoreLayout.Item] {
@@ -102,10 +106,9 @@ private func octaveDots(_ box: EventBox, digit: CGPoint, metrics: ScoreMetrics) 
 }
 
 /// 减时线 of one measure: a beam of a level joins its notes into one line; other short notes get their own.
-func underlines(
-    _ placed: [(box: EventBox, span: ClosedRange<CGFloat>)], beams: [Beam], baseline: CGFloat, metrics: ScoreMetrics
-) -> [ScoreLayout.Item] {
-    let position = Dictionary(uniqueKeysWithValues: placed.enumerated().map { ($1.box.id, $0) })
+func underlines(_ placed: [PlacedBox], beams: [Beam], baseline: CGFloat, metrics: ScoreMetrics) -> [ScoreLayout.Item] {
+    // A malformed score may repeat an id; keep the first rather than trap.
+    let position = Dictionary(placed.enumerated().map { ($1.box.id, $0) }, uniquingKeysWith: { first, _ in first })
     let deepest = placed.map(\.box.underlines).max() ?? 0
     return (0..<deepest).flatMap { depth in
         let level = depth + 1

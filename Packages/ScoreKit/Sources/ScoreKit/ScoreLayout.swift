@@ -37,7 +37,8 @@ public struct ScoreLayout: Sendable {
     }
 
     public enum Item: Sendable, Equatable {
-        /// A note or rest digit centered at `center`; `degree` is 0 for a rest.
+        /// A note or rest digit centered at `center`; `degree` is 0 for a rest. A long rest repeats its 0 under
+        /// the same id; the first one is the rest's position.
         case digit(id: String, start: Int, degree: Int, center: CGPoint)
         case octaveDot(noteID: String, center: CGPoint)
         /// 附点
@@ -60,12 +61,12 @@ public func layoutScore(_ score: Score, width: CGFloat, metrics: ScoreMetrics = 
         widths: boxes.map { naturalWidth($0, metrics) + metrics.barGap },
         forcedStarts: Set(score.measures.filter { sectionStarts.contains($0.start) }.map(\.index)),
         available: width)
+    let context = LineContext(score: score, part: part, boxes: boxes, metrics: metrics)
     let lines = groups.enumerated().map { row, measures in
         let natural = measures.map { naturalWidth(boxes[$0], metrics) }.reduce(0, +)
         let gaps = CGFloat(measures.count) * metrics.barGap
         let isLast = row == groups.count - 1
         let scale = isLast || natural == 0 ? 1 : max(1, (width - gaps) / natural)
-        let context = LineContext(score: score, part: part, boxes: boxes, metrics: metrics)
         return layoutLine(measures, row: row, scale: scale, context)
     }
     return ScoreLayout(lines: lines, height: metrics.lineHeight * CGFloat(lines.count))
@@ -112,9 +113,7 @@ private func layoutLine(_ measures: [Int], row: Int, scale: CGFloat, _ context: 
             return placeBox(box, left: cursor, scale: scale, baseline: baseline, metrics: metrics)
         }
         items += placed.flatMap(\.items)
-        items += underlines(
-            zip(context.boxes[index], placed.map(\.span)).map { ($0, $1) }, beams: context.part.measures[index].beams,
-            baseline: baseline, metrics: metrics)
+        items += underlines(placed, beams: context.part.measures[index].beams, baseline: baseline, metrics: metrics)
         cursor += metrics.barGap / 2
         items.append(.barline(context.score.measures[index].barline, centerX: cursor, top: top, bottom: bottom))
         cursor += metrics.barGap / 2

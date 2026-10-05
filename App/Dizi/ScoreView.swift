@@ -7,10 +7,11 @@ struct ScoreView: View {
     private let metrics = ScoreMetrics(fontSize: 24)
     private var digitFont: Font { .system(size: metrics.fontSize, weight: .medium, design: .rounded) }
     private var stroke: CGFloat { metrics.fontSize / 16 }
+    private let margin: CGFloat = 16
 
     var body: some View {
         GeometryReader { proxy in
-            let layout = layoutScore(score, width: proxy.size.width - 32, metrics: metrics)
+            let layout = layoutScore(score, width: proxy.size.width - margin * 2, metrics: metrics)
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     Text(headerText(score))
@@ -18,7 +19,7 @@ struct ScoreView: View {
                         .foregroundStyle(.secondary)
                     notation(layout)
                 }
-                .padding(16)
+                .padding(margin)
             }
         }
     }
@@ -56,11 +57,14 @@ struct ScoreView: View {
     private func drawBarline(
         _ style: Barline, centerX: CGFloat, top: CGFloat, bottom: CGFloat, in context: inout GraphicsContext
     ) {
+        let thin = stroke * 0.7
+        let thick = stroke * 2.5
+        let gap = stroke * 1.5
         let strokes: [(offset: CGFloat, width: CGFloat)] =
             switch style {
-            case .single: [(-0.5, 1)]
-            case .double: [(-2.5, 1), (1.5, 1)]
-            case .final: [(-3.5, 1), (0, 3)]
+            case .single: [(-thin / 2, thin)]
+            case .double: [(-gap - thin, thin), (gap, thin)]
+            case .final: [(-gap - thin - thick / 2, thin), (-thick / 2, thick)]
             }
         for stroke in strokes {
             let rect = CGRect(x: centerX + stroke.offset, y: top, width: stroke.width, height: bottom - top)
@@ -88,12 +92,13 @@ private func timeText(_ time: TimeSignature) -> String? {
 
 private func startingTempo(_ mark: Mark) -> String? {
     guard case .tempo(let tempo) = mark, tempo.tick == 0 else { return nil }
-    let beat = [240: "♪", 480: "♩", 720: "♩.", 960: "𝅗𝅥"][tempo.beat] ?? "♩"
+    // An unusual beat shows the number alone rather than a wrong note symbol.
+    let beat = [240: "♪=", 480: "♩=", 720: "♩.=", 960: "𝅗𝅥="][tempo.beat] ?? ""
     switch tempo.bpm {
     case .exact(let bpm):
-        return "\(beat)=\(bpm)"
+        return "\(beat)\(bpm)"
     case .range(let low, let high):
-        return "\(beat)=\(low)~\(high)"
+        return "\(beat)\(low)~\(high)"
     case nil:
         return tempo.text
     }
