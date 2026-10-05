@@ -7,12 +7,15 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
+    SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+    GCC_TREAT_WARNINGS_AS_ERRORS: YES
 targets:
   Dizi:
     type: application
     platform: iOS
     sources: [Dizi]
-    scheme: {}
+    scheme:
+      testTargets: [DiziUITests]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.upivot.dizi
@@ -28,3 +31,14 @@ targets:
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         LOCALIZATION_PREFERS_STRING_CATALOGS: YES
         SWIFT_EMIT_LOC_STRINGS: YES
+  DiziUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [DiziUITests]
+    dependencies:
+      - target: Dizi
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.upivot.dizi.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Dizi

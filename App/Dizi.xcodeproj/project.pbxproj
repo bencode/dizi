@@ -11,11 +11,24 @@
 		1C82DAB466F726D3BC86ACBC /* PieceListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D9FBF8D0C34328E8A93612 /* PieceListView.swift */; };
 		694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7DDEBD62C1197359510C59D /* DiziApp.swift */; };
 		C50C666DD7C22E635F515C10 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */; };
+		E2AD70163AE8542ADACCE077 /* NavigationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216C0414C7628D24C53FCDA3 /* NavigationTests.swift */; };
 		E4E731720DFB69589538B60F /* PieceDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1657F2512FB10BB5DB9A727B /* PieceDetailView.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		983350C54CBBB25EF70D89D6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 63E0437AA3A39897355DDF4A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3DD3E2455B24139F1493FDC3;
+			remoteInfo = Dizi;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		1657F2512FB10BB5DB9A727B /* PieceDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceDetailView.swift; sourceTree = "<group>"; };
+		216C0414C7628D24C53FCDA3 /* NavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationTests.swift; sourceTree = "<group>"; };
+		86587596978C7D7A172CA03E /* DiziUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DiziUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		89D7C1647EEC53579F92423C /* Dizi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Dizi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A5D9FBF8D0C34328E8A93612 /* PieceListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceListView.swift; sourceTree = "<group>"; };
@@ -28,6 +41,7 @@
 			isa = PBXGroup;
 			children = (
 				89D7C1647EEC53579F92423C /* Dizi.app */,
+				86587596978C7D7A172CA03E /* DiziUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -36,6 +50,7 @@
 			isa = PBXGroup;
 			children = (
 				91B23B00863E128D038FF620 /* Dizi */,
+				9A08F97B0119846354B5A61D /* DiziUITests */,
 				1A83B36BBECD2864FF2A8DC1 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -50,6 +65,14 @@
 				A5D9FBF8D0C34328E8A93612 /* PieceListView.swift */,
 			);
 			path = Dizi;
+			sourceTree = "<group>";
+		};
+		9A08F97B0119846354B5A61D /* DiziUITests */ = {
+			isa = PBXGroup;
+			children = (
+				216C0414C7628D24C53FCDA3 /* NavigationTests.swift */,
+			);
+			path = DiziUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -73,6 +96,24 @@
 			productReference = 89D7C1647EEC53579F92423C /* Dizi.app */;
 			productType = "com.apple.product-type.application";
 		};
+		DD8A6C6A520470990E557B91 /* DiziUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C42842063BB26902E408A692 /* Build configuration list for PBXNativeTarget "DiziUITests" */;
+			buildPhases = (
+				9AD47E2346F2DF1F1C69DA12 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5A8459015E120438FC444E26 /* PBXTargetDependency */,
+			);
+			name = DiziUITests;
+			packageProductDependencies = (
+			);
+			productName = DiziUITests;
+			productReference = 86587596978C7D7A172CA03E /* DiziUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -84,6 +125,9 @@
 				TargetAttributes = {
 					3DD3E2455B24139F1493FDC3 = {
 						ProvisioningStyle = Automatic;
+					};
+					DD8A6C6A520470990E557B91 = {
+						TestTargetID = 3DD3E2455B24139F1493FDC3;
 					};
 				};
 			};
@@ -102,6 +146,7 @@
 			projectRoot = "";
 			targets = (
 				3DD3E2455B24139F1493FDC3 /* Dizi */,
+				DD8A6C6A520470990E557B91 /* DiziUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -129,9 +174,42 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		9AD47E2346F2DF1F1C69DA12 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E2AD70163AE8542ADACCE077 /* NavigationTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		5A8459015E120438FC444E26 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3DD3E2455B24139F1493FDC3 /* Dizi */;
+			targetProxy = 983350C54CBBB25EF70D89D6 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		6F1292FB675183A1511E7390 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.upivot.dizi.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Dizi;
+			};
+			name = Release;
+		};
 		82499F3251A15D79D70FA8E4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -227,6 +305,7 @@
 					"$(inherited)",
 					"DEBUG=1",
 				);
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -241,7 +320,25 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		F5C744B4443B038CB5EE3611 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.upivot.dizi.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Dizi;
 			};
 			name = Debug;
 		};
@@ -284,6 +381,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -297,6 +395,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
@@ -318,6 +417,15 @@
 			buildConfigurations = (
 				E77C7D6983CF334766A423FC /* Debug */,
 				F664F18733A024BC92DEC2B9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C42842063BB26902E408A692 /* Build configuration list for PBXNativeTarget "DiziUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F5C744B4443B038CB5EE3611 /* Debug */,
+				6F1292FB675183A1511E7390 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

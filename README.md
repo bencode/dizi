@@ -6,7 +6,11 @@ See [the product](docs/product.md).
 
 ## Development
 
-Requires Xcode 27 and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`).
+Requires Xcode 27, [XcodeGen](https://github.com/yonaskolb/XcodeGen), and [SwiftLint](https://github.com/realm/SwiftLint):
+
+```sh
+brew install xcodegen swiftlint
+```
 
 ```sh
 cd App
@@ -15,3 +19,11 @@ open Dizi.xcodeproj
 ```
 
 `App/project.yml` defines the project; the generated `Dizi.xcodeproj` is committed so it opens without XcodeGen.
+
+Before committing, run every check (format, lint, project sync, build, tests):
+
+```sh
+scripts/check.sh
+```
+
+See [AGENTS.md](AGENTS.md) for what each check enforces.
