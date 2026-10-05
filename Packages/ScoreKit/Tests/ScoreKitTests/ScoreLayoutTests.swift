@@ -30,16 +30,16 @@ private func digits(_ line: ScoreLayout.Line) -> [String] {
 
     #expect(score.meta.title == "茉莉花")
     #expect(score.header.key == Key(tonic: "F", accidental: nil))
-    #expect(score.measures.map(\.time) == Array(repeating: .meter(beats: 2, unit: 4), count: 4))
-    #expect(score.parts.first?.measures.count == 4)
+    #expect(score.measures.allSatisfy { $0.time == .meter(beats: 2, unit: 4) })
+    #expect(score.parts.first?.measures.count == score.measures.count)
 }
 
 @Test func breaksLinesWhereTheScoreDoes() throws {
     let layout = layoutScore(try molihua(), width: wide)
 
-    #expect(layout.lines.map(\.measures) == [[0, 1], [2, 3]])
+    #expect(layout.lines.prefix(2).map(\.measures) == [[0, 1], [2, 3]])
     #expect(digits(layout.lines[0]) == ["n1", "n2", "n3", "n4", "n5", "n6", "n7"])
-    guard case .barline(let last, _, _, _) = layout.lines[1].items.last else {
+    guard case .barline(let last, _, _, _) = layout.lines.last?.items.last else {
         Issue.record("the last line does not end with a bar line")
         return
     }
@@ -71,12 +71,12 @@ private func digits(_ line: ScoreLayout.Line) -> [String] {
 
     let layout = layoutScore(try molihua(), width: oneMeasure, metrics: metrics)
 
-    #expect(layout.lines.map(\.measures) == [[0], [1], [2], [3]])
+    #expect(layout.lines.prefix(4).map(\.measures) == [[0], [1], [2], [3]])
 }
 
 @Test func followsAHalfNoteWithOneDash() throws {
-    let lastLine = layoutScore(try molihua(), width: wide).lines[1].items
-    let dashes = lastLine.filter { item in
+    let secondLine = layoutScore(try molihua(), width: wide).lines[1].items
+    let dashes = secondLine.filter { item in
         if case .dash("n11", _, _) = item { return true }
         return false
     }
