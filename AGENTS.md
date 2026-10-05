@@ -16,14 +16,18 @@ Run `scripts/check.sh` after every change. Work is done only when it prints `All
 
 ## Code style: functional
 
-Write code the Elixir / Clojure way: **data in, transformations, data out**.
+Programs are data flowing through transformations; effects stay at the edge. Sources and examples: the study note behind these rules (kept privately) cites Hickey, Normand, Bernhardt, Minsky, Wlaschin, Armstrong, Carmack, and Apple's Swift guidance.
 
-- **Immutable values**: `struct` and `enum` with `let`; build new values instead of mutating.
-- **Results by return value, not side effects**: a function computes and returns; it does not change state it was not given.
-- **Pure core, thin effectful edge**: layout, decoding, and timing are pure functions (testable); only the edges paint, play audio, read files, or log. Example: layout items map to `Ink` values purely; the `Canvas` only paints them.
-- **Collections through `map`, `filter`, `flatMap`, `reduce`**, not `for` loops with `var` accumulators. Never mutate outside state inside a `map`.
-- **`switch` is pattern matching**: use it as an expression returning a value, and keep it exhaustive (no `default` on our own enums) so a new case breaks the build where it must be handled. A `switch` statement only at the edge, where each branch is an effect.
-- `for` loops only for effects at the edge (painting, I/O).
+1. **Data, calculations, actions.** Sort code into data (inert values), calculations (pure: same input, same output), and actions (depend on when or how often they run: drawing, audio, files, time, logging). Move logic out of actions into calculations.
+2. **Functional core, imperative shell.** `Packages/ScoreKit` is the core and has no effects; the app is a thin shell that reads, paints, and plays the values the core returns. Pass plain values across boundaries.
+3. **Values, not places.** `struct` and `enum` with `let`; a change produces a new value. State that changes over time (playhead, settings) has one source of truth and is replaced, not edited in place; everything shown is derived from it. A SwiftUI `body` is a pure function of state.
+4. **Purity is judged from outside.** A local `var`, `inout`, or `reduce(into:)` inside a function is fine when no caller can observe it. Never change state you were not given, and never cause effects inside `map`/`filter`/`reduce`.
+5. **Pipelines of small transformations.** Prefer `map`, `filter`, `flatMap`, `reduce`; use a plain loop when it is clearer (early exit, several accumulators, sequential `await`, effects at the edge).
+6. **Make illegal states unrepresentable.** Use enums with associated values instead of flags, sentinel values, or loose optionals. Decode input into types that only admit valid values ("parse, don't validate").
+7. **`switch` is pattern matching.** Use `switch`/`if` as expressions; keep `switch` over our own enums exhaustive with no `default`, so a new case fails the build where it must be handled.
+8. **Two kinds of failure.** Expected failures (a downloaded score that does not decode) are values the UI shows: `throws` by default, `Result` only to store an outcome. Programmer errors are not defended against at every step; let them fail fast.
+9. **Name by side effect.** Pure functions read as nouns or past participles (`sorted()`, `underlines(…)`); functions with effects read as verbs (`sort()`, `render(…)`).
+10. **Pragmatic.** Almost pure beats pure at any cost; mind the cost of copying large values.
 
 ## Project facts
 
