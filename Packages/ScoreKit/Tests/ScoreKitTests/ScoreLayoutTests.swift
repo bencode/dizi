@@ -16,12 +16,49 @@ private func molihua() throws -> Score {
     return try Score.decode(from: Data(contentsOf: url))
 }
 
-private let wide: CGFloat = 1000
+/// `5. 3_ | 【二】 5 - | 1 - |]` in 2/4: a dotted quarter, a lone eighth, and a section on measure 2.
+private func sectioned() throws -> Score {
+    func note(_ id: String, _ start: Int, _ value: Int, _ dots: Int, _ degree: Int) -> String {
+        let duration = 1920 / value * ((1 << (dots + 1)) - 1) / (1 << dots)
+        return """
+            {"kind": "note", "id": "\(id)", "start": \(start), "duration": \(duration), "value": \(value), \
+            "dots": \(dots), "pitch": {"degree": \(degree), "octave": 0, "semitones": 0}}
+            """
+    }
+    func measure(_ index: Int, _ barline: String) -> String {
+        """
+        {"index": \(index), "start": \(index * 960), "duration": 960, "time": {"beats": 2, "unit": 4}, \
+        "barline": "\(barline)"}
+        """
+    }
+    let json = """
+        {"irVersion": 1, "meta": {}, "header": {"key": {"tonic": "D"}}, "ticksPerQuarter": 480,
+         "measures": [\(measure(0, "single")), \(measure(1, "single")), \(measure(2, "final"))],
+         "playOrder": [0, 1, 2],
+         "parts": [{"id": "solo", "role": "solo", "measures": [
+            {"events": [\(note("n1", 0, 4, 1, 5)), \(note("n2", 720, 8, 0, 3))], "beams": []},
+            {"events": [\(note("n3", 960, 2, 0, 5))], "beams": []},
+            {"events": [\(note("n4", 1920, 2, 0, 1))], "beams": []}]}],
+         "spans": [],
+         "marks": [{"kind": "section", "at": 960, "label": "【二】"}]}
+        """
+    return try Score.decode(from: Data(json.utf8))
+}
 
-private func digits(_ line: ScoreLayout.Line) -> [String] {
-    line.items.compactMap { item in
-        guard case .digit(let id, _, _, _) = item else { return nil }
-        return id
+private let phone: CGFloat = 360
+private let wide: CGFloat = 2000
+
+private func digitCenter(_ id: String, in items: [ScoreLayout.Item]) -> CGPoint? {
+    items.lazy.compactMap { item -> CGPoint? in
+        guard case .digit(id, _, _, let center) = item else { return nil }
+        return center
+    }.first
+}
+
+private func underlines(in items: [ScoreLayout.Item]) -> [ClosedRange<CGFloat>] {
+    items.compactMap { item in
+        guard case .underline(1, let left, let right, _) = item else { return nil }
+        return left...right
     }
 }
 
@@ -34,52 +71,85 @@ private func digits(_ line: ScoreLayout.Line) -> [String] {
     #expect(score.parts.first?.measures.count == score.measures.count)
 }
 
-@Test func breaksLinesWhereTheScoreDoes() throws {
-    let layout = layoutScore(try molihua(), width: wide)
+@Test func stretchesEveryLineButTheLastToTheFullWidth() throws {
+    let lines = layoutScore(try molihua(), width: phone).lines
 
-    #expect(layout.lines.prefix(2).map(\.measures) == [[0, 1], [2, 3]])
-    #expect(digits(layout.lines[0]) == ["n1", "n2", "n3", "n4", "n5", "n6", "n7"])
-    guard case .barline(let last, _, _, _) = layout.lines.last?.items.last else {
-        Issue.record("the last line does not end with a bar line")
-        return
-    }
-    #expect(last == .final)
+    #expect(lines.count > 1)
+    #expect(lines.dropLast().allSatisfy { abs($0.width - phone) < 0.001 })
+    #expect(lines.last.map { $0.width < phone } == true)
 }
 
-@Test func putsOneDotAboveAHighNote() throws {
-    let items = layoutScore(try molihua(), width: wide).lines[0].items
-    let digit = items.first { item in
-        if case .digit("n5", _, _, _) = item { return true }
-        return false
-    }
-    let dots = items.compactMap { item -> CGPoint? in
-        guard case .octaveDot("n5", let center) = item else { return nil }
-        return center
-    }
+@Test func startsALineAtASection() throws {
+    let lines = layoutScore(try sectioned(), width: wide).lines
 
-    guard case .digit(_, _, _, let center) = digit else {
-        Issue.record("no digit for n5")
-        return
-    }
-    #expect(dots.count == 1)
-    #expect(dots.allSatisfy { $0.y < center.y && $0.x == center.x })
+    #expect(lines.map(\.measures) == [[0], [1, 2]])
 }
 
 @Test func wrapsAtABarLineWhenTooNarrow() throws {
     let metrics = ScoreMetrics()
-    let oneMeasure = metrics.slotWidth * 4 + metrics.barGap
 
-    let layout = layoutScore(try molihua(), width: oneMeasure, metrics: metrics)
+    let lines = layoutScore(try molihua(), width: metrics.quarterWidth * 2, metrics: metrics).lines
 
-    #expect(layout.lines.prefix(4).map(\.measures) == [[0], [1], [2], [3]])
+    #expect(lines.prefix(4).map(\.measures) == [[0], [1], [2], [3]])
+}
+
+@Test func putsOneDotAboveAHighNote() throws {
+    let items = layoutScore(try molihua(), width: wide).lines[0].items
+    let dots = items.compactMap { item -> CGPoint? in
+        guard case .octaveDot("n5", let center) = item else { return nil }
+        return center
+    }
+    let digit = try #require(digitCenter("n5", in: items))
+
+    #expect(dots.count == 1)
+    #expect(dots.allSatisfy { $0.y < digit.y && $0.x == digit.x })
+}
+
+@Test func joinsBeamedEighthsUnderOneLine() throws {
+    let items = layoutScore(try molihua(), width: wide).lines[0].items
+    let quarter = try #require(digitCenter("n1", in: items))
+    let first = try #require(digitCenter("n2", in: items))
+    let second = try #require(digitCenter("n3", in: items))
+
+    let spanning = underlines(in: items).filter { $0.contains(first.x) || $0.contains(second.x) }
+    #expect(spanning.count == 1)
+    #expect(spanning.allSatisfy { $0.contains(first.x) && $0.contains(second.x) })
+    #expect(!underlines(in: items).contains { $0.contains(quarter.x) })
+}
+
+@Test func underlinesALoneEighthAndDotsADottedQuarter() throws {
+    let items = layoutScore(try sectioned(), width: wide).lines[0].items
+    let dotted = try #require(digitCenter("n1", in: items))
+    let eighth = try #require(digitCenter("n2", in: items))
+    let dots = items.compactMap { item -> CGPoint? in
+        guard case .augmentationDot("n1", let center) = item else { return nil }
+        return center
+    }
+
+    #expect(underlines(in: items).count == 1)
+    #expect(underlines(in: items).first?.contains(eighth.x) == true)
+    #expect(dots.count == 1)
+    #expect(dots.allSatisfy { $0.x > dotted.x && $0.x < eighth.x })
 }
 
 @Test func followsAHalfNoteWithOneDash() throws {
-    let secondLine = layoutScore(try molihua(), width: wide).lines[1].items
-    let dashes = secondLine.filter { item in
+    let items = layoutScore(try molihua(), width: wide).lines.flatMap(\.items)
+    let dashes = items.filter { item in
         if case .dash("n11", _, _) = item { return true }
         return false
     }
 
     #expect(dashes.count == 1)
+}
+
+@Test func scalesWithTheFontSize() throws {
+    let score = try molihua()
+    let small = layoutScore(score, width: phone, metrics: ScoreMetrics(fontSize: 20))
+    let large = layoutScore(score, width: phone * 2, metrics: ScoreMetrics(fontSize: 40))
+
+    #expect(large.height == small.height * 2)
+    #expect(large.lines.map(\.measures) == small.lines.map(\.measures))
+    let smallDigit = try #require(digitCenter("n5", in: small.lines[0].items))
+    let largeDigit = try #require(digitCenter("n5", in: large.lines[0].items))
+    #expect(abs(largeDigit.x - smallDigit.x * 2) < 0.001)
 }

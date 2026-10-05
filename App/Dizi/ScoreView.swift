@@ -4,8 +4,9 @@ import SwiftUI
 /// The score page's notation: header and jianpu, drawn from the layout.
 struct ScoreView: View {
     let score: Score
-    private let metrics = ScoreMetrics()
-    private let digitFont = Font.system(size: 24, weight: .medium, design: .rounded)
+    private let metrics = ScoreMetrics(fontSize: 24)
+    private var digitFont: Font { .system(size: metrics.fontSize, weight: .medium, design: .rounded) }
+    private var stroke: CGFloat { metrics.fontSize / 16 }
 
     var body: some View {
         GeometryReader { proxy in
@@ -37,12 +38,15 @@ struct ScoreView: View {
         switch item {
         case .digit(_, _, let degree, let center):
             context.draw(Text("\(degree)").font(digitFont), at: center)
-        case .octaveDot(_, let center):
-            let radius: CGFloat = 2
+        case .octaveDot(_, let center), .augmentationDot(_, let center):
+            let radius = metrics.fontSize / 12
             let rect = CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2)
             context.fill(Path(ellipseIn: rect), with: .foreground)
         case .dash(_, let center, let width):
-            let rect = CGRect(x: center.x - width / 2, y: center.y - 1, width: width, height: 2)
+            let rect = CGRect(x: center.x - width / 2, y: center.y - stroke, width: width, height: stroke * 2)
+            context.fill(Path(rect), with: .foreground)
+        case .underline(_, let left, let right, let lineY):
+            let rect = CGRect(x: left, y: lineY - stroke / 2, width: right - left, height: stroke)
             context.fill(Path(rect), with: .foreground)
         case .barline(let style, let centerX, let top, let bottom):
             drawBarline(style, centerX: centerX, top: top, bottom: bottom, in: &context)

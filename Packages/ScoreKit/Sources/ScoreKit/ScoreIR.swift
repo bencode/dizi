@@ -83,6 +83,20 @@ public struct Part: Decodable, Sendable {
 
 public struct PartMeasure: Decodable, Sendable {
     public let events: [Event]
+    public let beams: [Beam]
+}
+
+/// Short notes joined per beat: one 减时线 in jianpu. `level` 1 = eighths, 2 = sixteenths.
+public struct Beam: Decodable, Sendable {
+    public let level: Int
+    public let first: String
+    public let last: String
+
+    private enum CodingKeys: String, CodingKey {
+        case level
+        case first = "from"
+        case last = "to"
+    }
 }
 
 public enum Event: Decodable, Sendable {
@@ -134,6 +148,7 @@ public struct Pitch: Decodable, Sendable {
 
 public enum Mark: Decodable, Sendable {
     case tempo(TempoMark)
+    case section(SectionMark)
     /// A mark the app does not use yet.
     case other
 
@@ -143,7 +158,13 @@ public enum Mark: Decodable, Sendable {
 
     public init(from decoder: any Decoder) throws {
         let kind = try decoder.container(keyedBy: CodingKeys.self).decode(String.self, forKey: .kind)
-        self = kind == "tempo" ? .tempo(try TempoMark(from: decoder)) : .other
+        if kind == "tempo" {
+            self = .tempo(try TempoMark(from: decoder))
+        } else if kind == "section" {
+            self = .section(try SectionMark(from: decoder))
+        } else {
+            self = .other
+        }
     }
 }
 
@@ -157,6 +178,17 @@ public struct TempoMark: Decodable, Sendable {
     private enum CodingKeys: String, CodingKey {
         case tick = "at"
         case beat, bpm, text
+    }
+}
+
+/// 【一】, 引子, 散板 …: a new line starts here.
+public struct SectionMark: Decodable, Sendable {
+    public let tick: Int
+    public let label: String
+
+    private enum CodingKeys: String, CodingKey {
+        case tick = "at"
+        case label
     }
 }
 

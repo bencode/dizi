@@ -69,6 +69,9 @@ Then interaction: playhead, playback, beat.
 ```
 
 - The transport bar sits at the bottom, where the thumb reaches.
-- Line breaks follow the score's layout hints; a line too wide for the screen wraps.
-- One fixed score size in phase 1, readable while holding the flute; no zoom.
+- **Lines fill the width**: each line takes as many measures as fit, so lines hold different numbers of measures. Every line but the last is stretched to both edges.
+- **A section starts a new line**: 【一】, 引子, 散板 … always begin at the left edge.
+- **Printed line breaks are not followed**: they are only the engraver's choice for paper width. The IR keeps them (`layoutHints`) for a later "match the printed page" mode.
+- **Spacing follows length**: shorter notes sit closer; each 增时线 takes a quarter's width.
+- **Everything scales from one font size**: landscape is a wider width, larger or smaller text is a different font size; both are just a relayout. One fixed size in phase 1; the size control and landscape come later.
 - Light and dark follow the system.

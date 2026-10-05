@@ -61,7 +61,7 @@ type Score = {
   parts: Part[]                // solo first
   spans: Span[]                // form C
   marks: Mark[]                // form D
-  layoutHints?: { lineBreaksAfter: number[] }   // measure indices where the source breaks the line
+  layoutHints?: { lineBreaksAfter: number[] }   // where the source breaks lines; renderers may ignore it
 }
 
 type Measure = {
