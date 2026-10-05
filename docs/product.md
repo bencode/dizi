@@ -47,10 +47,21 @@ Piece list ─tap─▶ score page (jianpu) ─▶ set the tempo / (optional) ta
 
 **Foundations** laid in phase 1:
 
-- **Score parser**: everything else depends on it.
-- **Timeline**: each note's start time and length, computed from the score. The cursor, click, and demo melody follow it; phase 2 aligns pitch with it.
+- **Score IR**: the [music of a score as JSON](score-ir.md), the same on iOS, Android, and Web. Start times and lengths are in it; the cursor, click, and demo melody follow them, and phase 2 aligns pitch with them.
+- **Score parser**, in TypeScript: compiles score text into the IR on the server and in scripts, so no platform writes its own.
+- **Score page**: layout and drawing in [layers](score-page.md) over one shared layout.
 - **Audio out**: click and demo melody through AVAudioEngine.
 - **Library service**: static files, no backend code (see [The library](#the-library)).
+
+**Iterations**, each ending in something to see on the phone:
+
+| # | Iteration | State |
+| --- | --- | --- |
+| 0 | App skeleton: project, piece list, empty score page; checks (format, lint, UI test) | done |
+| 1 | Score page with static notation, drawn from a hand-written IR ([茉莉花](examples/molihua.ir.json)), in steps | next |
+| 2 | Playback: playhead, count-in, click, page turning, tempo, start from any note | |
+| 3 | Demo melody | |
+| 4 | TypeScript parser; library: pieces, publish script, OSS, download and cache | |
 
 Interface language: Chinese first; strings kept in a String Catalog for later languages.
 

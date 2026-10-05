@@ -1,0 +1,268 @@
+{
+  "irVersion": 1,
+  "meta": {
+    "title": "茉莉花"
+  },
+  "header": {
+    "key": {
+      "tonic": "F"
+    }
+  },
+  "ticksPerQuarter": 480,
+  "measures": [
+    {
+      "index": 0,
+      "start": 0,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 1,
+      "start": 960,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 2,
+      "start": 1920,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 3,
+      "start": 2880,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "final"
+    }
+  ],
+  "playOrder": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "parts": [
+    {
+      "id": "solo",
+      "role": "solo",
+      "measures": [
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n1",
+              "start": 0,
+              "duration": 480,
+              "value": 4,
+              "dots": 0,
+              "pitch": {
+                "degree": 3,
+                "octave": 0,
+                "semitones": 4
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n2",
+              "start": 480,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 3,
+                "octave": 0,
+                "semitones": 4
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n3",
+              "start": 720,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            }
+          ],
+          "beams": [
+            {
+              "level": 1,
+              "from": "n2",
+              "to": "n3"
+            }
+          ]
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n4",
+              "start": 960,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 6,
+                "octave": 0,
+                "semitones": 9
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n5",
+              "start": 1200,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 1,
+                "octave": 1,
+                "semitones": 12
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n6",
+              "start": 1440,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 1,
+                "octave": 1,
+                "semitones": 12
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n7",
+              "start": 1680,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 6,
+                "octave": 0,
+                "semitones": 9
+              }
+            }
+          ],
+          "beams": [
+            {
+              "level": 1,
+              "from": "n4",
+              "to": "n5"
+            },
+            {
+              "level": 1,
+              "from": "n6",
+              "to": "n7"
+            }
+          ]
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n8",
+              "start": 1920,
+              "duration": 480,
+              "value": 4,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n9",
+              "start": 2400,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n10",
+              "start": 2640,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 6,
+                "octave": 0,
+                "semitones": 9
+              }
+            }
+          ],
+          "beams": [
+            {
+              "level": 1,
+              "from": "n9",
+              "to": "n10"
+            }
+          ]
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n11",
+              "start": 2880,
+              "duration": 960,
+              "value": 2,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            }
+          ],
+          "beams": []
+        }
+      ]
+    }
+  ],
+  "spans": [],
+  "marks": [
+    {
+      "kind": "tempo",
+      "at": 0,
+      "beat": 480,
+      "bpm": 72
+    }
+  ],
+  "layoutHints": {
+    "lineBreaksAfter": [
+      1
+    ]
+  }
+}
