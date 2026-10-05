@@ -1,9 +1,8 @@
 {
   "sourceLanguage" : "zh-Hans",
   "strings" : {
-    "曲目" : {
-
-    }
+    "曲目" : {},
+    "曲谱无法打开" : {}
   },
   "version" : "1.0"
 }

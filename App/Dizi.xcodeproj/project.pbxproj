@@ -8,9 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		10F94D349285BC70691F27B3 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = F2AF968099F1CC1C2518E6DA /* Localizable.xcstrings */; };
+		19A7AB3A6A9B33437E1CA0F7 /* ScoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E825365B13D701E585670E85 /* ScoreView.swift */; };
 		1C82DAB466F726D3BC86ACBC /* PieceListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D9FBF8D0C34328E8A93612 /* PieceListView.swift */; };
 		694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7DDEBD62C1197359510C59D /* DiziApp.swift */; };
 		C50C666DD7C22E635F515C10 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */; };
+		D891F5DB445004C54E9B4F75 /* ScoreKit in Frameworks */ = {isa = PBXBuildFile; productRef = 45709811699F8732788DB871 /* ScoreKit */; };
+		E20B1CD218B639B1DF9676F8 /* molihua.ir.json in Resources */ = {isa = PBXBuildFile; fileRef = 60C030429385FF1F64E8EE08 /* molihua.ir.json */; };
 		E2AD70163AE8542ADACCE077 /* NavigationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216C0414C7628D24C53FCDA3 /* NavigationTests.swift */; };
 		E4E731720DFB69589538B60F /* PieceDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1657F2512FB10BB5DB9A727B /* PieceDetailView.swift */; };
 /* End PBXBuildFile section */
@@ -28,13 +31,27 @@
 /* Begin PBXFileReference section */
 		1657F2512FB10BB5DB9A727B /* PieceDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceDetailView.swift; sourceTree = "<group>"; };
 		216C0414C7628D24C53FCDA3 /* NavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationTests.swift; sourceTree = "<group>"; };
+		60C030429385FF1F64E8EE08 /* molihua.ir.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = molihua.ir.json; sourceTree = "<group>"; };
 		86587596978C7D7A172CA03E /* DiziUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DiziUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		89D7C1647EEC53579F92423C /* Dizi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Dizi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A5D9FBF8D0C34328E8A93612 /* PieceListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceListView.swift; sourceTree = "<group>"; };
+		B4E1E564EDDFF024A6BE2EA9 /* ScoreKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ScoreKit; path = ../Packages/ScoreKit; sourceTree = SOURCE_ROOT; };
+		E825365B13D701E585670E85 /* ScoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreView.swift; sourceTree = "<group>"; };
 		F2AF968099F1CC1C2518E6DA /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		F7DDEBD62C1197359510C59D /* DiziApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiziApp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		161B88ABCB883483BFE8924F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D891F5DB445004C54E9B4F75 /* ScoreKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		1A83B36BBECD2864FF2A8DC1 /* Products */ = {
@@ -46,11 +63,22 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		46AC104C3F260A254876FAB9 /* examples */ = {
+			isa = PBXGroup;
+			children = (
+				60C030429385FF1F64E8EE08 /* molihua.ir.json */,
+			);
+			name = examples;
+			path = ../docs/examples;
+			sourceTree = "<group>";
+		};
 		608B1C271A6B86974C7E03B0 = {
 			isa = PBXGroup;
 			children = (
 				91B23B00863E128D038FF620 /* Dizi */,
 				9A08F97B0119846354B5A61D /* DiziUITests */,
+				46AC104C3F260A254876FAB9 /* examples */,
+				C6CF4657377A14ED458DAD94 /* Packages */,
 				1A83B36BBECD2864FF2A8DC1 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -63,6 +91,7 @@
 				F2AF968099F1CC1C2518E6DA /* Localizable.xcstrings */,
 				1657F2512FB10BB5DB9A727B /* PieceDetailView.swift */,
 				A5D9FBF8D0C34328E8A93612 /* PieceListView.swift */,
+				E825365B13D701E585670E85 /* ScoreView.swift */,
 			);
 			path = Dizi;
 			sourceTree = "<group>";
@@ -75,6 +104,14 @@
 			path = DiziUITests;
 			sourceTree = "<group>";
 		};
+		C6CF4657377A14ED458DAD94 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				B4E1E564EDDFF024A6BE2EA9 /* ScoreKit */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -84,6 +121,7 @@
 			buildPhases = (
 				4C6BB102E325BDDDB1447AE7 /* Sources */,
 				8492D7E3142A1D5F26E6393B /* Resources */,
+				161B88ABCB883483BFE8924F /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -91,6 +129,7 @@
 			);
 			name = Dizi;
 			packageProductDependencies = (
+				45709811699F8732788DB871 /* ScoreKit */,
 			);
 			productName = Dizi;
 			productReference = 89D7C1647EEC53579F92423C /* Dizi.app */;
@@ -140,6 +179,9 @@
 			);
 			mainGroup = 608B1C271A6B86974C7E03B0;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AF19EB67D6206A6EA3E29960 /* XCLocalSwiftPackageReference "../Packages/ScoreKit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1A83B36BBECD2864FF2A8DC1 /* Products */;
 			projectDirPath = "";
@@ -158,6 +200,7 @@
 			files = (
 				C50C666DD7C22E635F515C10 /* Assets.xcassets in Resources */,
 				10F94D349285BC70691F27B3 /* Localizable.xcstrings in Resources */,
+				E20B1CD218B639B1DF9676F8 /* molihua.ir.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -171,6 +214,7 @@
 				694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */,
 				E4E731720DFB69589538B60F /* PieceDetailView.swift in Sources */,
 				1C82DAB466F726D3BC86ACBC /* PieceListView.swift in Sources */,
+				19A7AB3A6A9B33437E1CA0F7 /* ScoreView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -431,6 +475,20 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		AF19EB67D6206A6EA3E29960 /* XCLocalSwiftPackageReference "../Packages/ScoreKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../Packages/ScoreKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		45709811699F8732788DB871 /* ScoreKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ScoreKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 63E0437AA3A39897355DDF4A /* Project object */;
 }

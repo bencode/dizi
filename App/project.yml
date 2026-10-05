@@ -9,11 +9,19 @@ settings:
     SWIFT_VERSION: "6.0"
     SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
     GCC_TREAT_WARNINGS_AS_ERRORS: YES
+packages:
+  ScoreKit:
+    path: ../Packages/ScoreKit
 targets:
   Dizi:
     type: application
     platform: iOS
-    sources: [Dizi]
+    sources:
+      - Dizi
+      - path: ../docs/examples/molihua.ir.json
+        buildPhase: resources
+    dependencies:
+      - package: ScoreKit
     scheme:
       testTargets: [DiziUITests]
     settings:

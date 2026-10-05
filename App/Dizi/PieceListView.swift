@@ -19,7 +19,7 @@ struct PieceListView: View {
         }
         .navigationTitle("曲目")
         .navigationDestination(for: PlaceholderPiece.self) { piece in
-            PieceDetailView(title: piece.title)
+            PieceDetailView(piece: piece)
         }
     }
 }

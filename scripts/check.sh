@@ -23,6 +23,9 @@ if [[ "$(project_hash)" != "$before" ]]; then
     exit 1
 fi
 
+echo "==> ScoreKit tests"
+swift test --quiet --package-path Packages/ScoreKit
+
 echo "==> Build and test ($SIMULATOR)"
 xcodebuild test -quiet \
     -project App/Dizi.xcodeproj -scheme Dizi \
