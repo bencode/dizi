@@ -10,6 +10,12 @@ The most important screen: the score, and playing along with it.
 | 2 | **Transport** | start, pause, stop; start from any note |
 | 3 | **Beat and tempo** | which beat of the bar is sounding; change the tempo |
 
+## 走谱
+
+Pressing 开始 does not play the melody: the app counts in one bar, clicks every beat (accent on each bar's first beat), and moves the playhead along the score while the player plays. The demo melody is a separate switch (iteration 3).
+
+**Audio is the clock.** Clicks are scheduled sample-accurately in the audio engine; every frame the page reads the engine's time and a pure function (`Run.position`) says which note is sounding. Timers would drift.
+
 ## One playhead
 
 The start point and the playing position are one thing: the **playhead**, like the dot on a video's progress bar, but on the score.

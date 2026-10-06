@@ -9,6 +9,13 @@ public enum Transport: Sendable, Equatable {
     /// Paused on `entry`; resuming runs from there, a stop returns to `start`.
     case paused(entry: Int, start: Int)
 
+    /// The note a stop returns to.
+    public var start: Int {
+        switch self {
+        case .stopped(let start), .running(_, let start), .paused(_, let start): start
+        }
+    }
+
     public enum Action: Sendable, Equatable {
         case play
         /// Pause on the entry sounding now.

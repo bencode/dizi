@@ -28,6 +28,8 @@ private let slow = Tempo(bpm: 60, beat: 480)
     #expect(run.position(at: 2, in: timeline) == .entry(0))
     #expect(run.position(at: 3.25, in: timeline) == .entry(1))
     #expect(run.position(at: run.length(timeline), in: timeline) == .finished)
+    #expect(run.beat(at: 1, in: timeline) == nil)
+    #expect(run.beat(at: 3.5, in: timeline).map { [$0.index, $0.count] } == [1, 2])
 }
 
 @Test func clicksEveryBeatAndAccentsEachBar() throws {

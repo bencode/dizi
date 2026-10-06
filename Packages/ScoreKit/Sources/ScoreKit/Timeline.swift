@@ -138,6 +138,15 @@ public struct Run: Sendable, Equatable {
         return countIn + music
     }
 
+    /// The beat sounding at a moment, counted within its bar from 0; nil during the count-in, in 散板, and after the end.
+    public func beat(at seconds: Double, in timeline: Timeline) -> (index: Int, count: Int)? {
+        let tick = timeline.entries[from].start + tempo.ticks(seconds) - countIn(timeline)
+        guard tick >= timeline.entries[from].start, tick < timeline.end,
+            let bar = timeline.bars.last(where: { $0.start <= tick }), case .meter = bar.time
+        else { return nil }
+        return ((tick - bar.start) / tempo.beat, beatCount(bar))
+    }
+
     /// Seconds from time 0 to the end of the score.
     public func length(_ timeline: Timeline) -> Double {
         tempo.seconds(countIn(timeline) + timeline.end - timeline.entries[from].start)

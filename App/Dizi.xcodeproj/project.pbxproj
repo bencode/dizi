@@ -10,6 +10,9 @@
 		10F94D349285BC70691F27B3 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = F2AF968099F1CC1C2518E6DA /* Localizable.xcstrings */; };
 		19A7AB3A6A9B33437E1CA0F7 /* ScoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E825365B13D701E585670E85 /* ScoreView.swift */; };
 		1C82DAB466F726D3BC86ACBC /* PieceListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D9FBF8D0C34328E8A93612 /* PieceListView.swift */; };
+		1C9062B8ED35E1B68B1D6443 /* ClickTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2754544AAF40E1CDC9BDEB9A /* ClickTrack.swift */; };
+		28DC3C1319B643481CE61A0B /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2F03512C3298090F9FCB53 /* Player.swift */; };
+		432E2FAF7F8AC03D762AFCA7 /* TransportBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */; };
 		694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7DDEBD62C1197359510C59D /* DiziApp.swift */; };
 		C50C666DD7C22E635F515C10 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */; };
 		D891F5DB445004C54E9B4F75 /* ScoreKit in Frameworks */ = {isa = PBXBuildFile; productRef = 45709811699F8732788DB871 /* ScoreKit */; };
@@ -30,7 +33,10 @@
 
 /* Begin PBXFileReference section */
 		1657F2512FB10BB5DB9A727B /* PieceDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceDetailView.swift; sourceTree = "<group>"; };
+		1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportBar.swift; sourceTree = "<group>"; };
 		216C0414C7628D24C53FCDA3 /* NavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationTests.swift; sourceTree = "<group>"; };
+		2754544AAF40E1CDC9BDEB9A /* ClickTrack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClickTrack.swift; sourceTree = "<group>"; };
+		2C2F03512C3298090F9FCB53 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		60C030429385FF1F64E8EE08 /* molihua.ir.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = molihua.ir.json; sourceTree = "<group>"; };
 		86587596978C7D7A172CA03E /* DiziUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DiziUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		89D7C1647EEC53579F92423C /* Dizi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Dizi.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -87,11 +93,14 @@
 			isa = PBXGroup;
 			children = (
 				940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */,
+				2754544AAF40E1CDC9BDEB9A /* ClickTrack.swift */,
 				F7DDEBD62C1197359510C59D /* DiziApp.swift */,
 				F2AF968099F1CC1C2518E6DA /* Localizable.xcstrings */,
 				1657F2512FB10BB5DB9A727B /* PieceDetailView.swift */,
 				A5D9FBF8D0C34328E8A93612 /* PieceListView.swift */,
+				2C2F03512C3298090F9FCB53 /* Player.swift */,
 				E825365B13D701E585670E85 /* ScoreView.swift */,
+				1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */,
 			);
 			path = Dizi;
 			sourceTree = "<group>";
@@ -211,10 +220,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1C9062B8ED35E1B68B1D6443 /* ClickTrack.swift in Sources */,
 				694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */,
 				E4E731720DFB69589538B60F /* PieceDetailView.swift in Sources */,
 				1C82DAB466F726D3BC86ACBC /* PieceListView.swift in Sources */,
+				28DC3C1319B643481CE61A0B /* Player.swift in Sources */,
 				19A7AB3A6A9B33437E1CA0F7 /* ScoreView.swift in Sources */,
+				432E2FAF7F8AC03D762AFCA7 /* TransportBar.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

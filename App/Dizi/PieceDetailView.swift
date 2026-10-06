@@ -6,19 +6,27 @@ private let logger = Logger(subsystem: "io.upivot.dizi", category: "score")
 
 struct PieceDetailView: View {
     let piece: PlaceholderPiece
-    @State private var loaded: Result<Score, any Error>?
+    @State private var loaded: Result<Player, any Error>?
 
     var body: some View {
         content
             .navigationTitle(piece.title)
             .navigationBarTitleDisplayMode(.inline)
-            .task { loaded = loadScore(id: piece.id) }
+            .task { loaded = loadScore(id: piece.id).map { $0.map { Player(pieceID: piece.id, score: $0) } } }
+            .onDisappear {
+                if case .success(let player) = loaded {
+                    player.stop()
+                }
+            }
     }
 
     @ViewBuilder private var content: some View {
         switch loaded {
-        case .success(let score):
-            ScoreView(score: score)
+        case .success(let player):
+            VStack(spacing: 0) {
+                ScoreView(player: player)
+                TransportBar(player: player)
+            }
         case .failure:
             ContentUnavailableView("曲谱无法打开", systemImage: "exclamationmark.triangle")
         case nil:
