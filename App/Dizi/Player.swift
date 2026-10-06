@@ -59,14 +59,17 @@ final class Player {
         return run.beat(at: time, in: timeline)
     }
 
-    /// The entry to highlight: the sounding one while running, the chosen one otherwise.
-    var highlighted: Int? {
+    /// Where the playhead stands: the sounding entry and how much of it has passed while running,
+    /// the paused entry while paused, nothing while stopped.
+    var sweep: (entry: Int, progress: Double)? {
         switch transport {
         case .running:
-            guard case .entry(let entry) = position else { return nil }
-            return entry
-        case .paused(let entry, _), .stopped(let entry):
-            return entry
+            guard case .entry(let entry, let progress) = position else { return nil }
+            return (entry, progress)
+        case .paused(let entry, _):
+            return (entry, 0)
+        case .stopped:
+            return nil
         }
     }
 
@@ -114,7 +117,7 @@ final class Player {
     }
 
     private func pause() {
-        let entry = highlighted ?? run?.from ?? 0
+        let entry = sweep?.entry ?? run?.from ?? 0
         halt()
         transport = transport.next(.pause(entry: entry))
     }

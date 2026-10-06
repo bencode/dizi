@@ -31,10 +31,11 @@ struct ScoreView: View {
 
     /// The notation as it stands this frame: the current note lit, the start marked, the page following.
     private func playedNotation(_ layout: ScoreLayout, scroller: ScrollViewProxy) -> some View {
-        let current = player.highlighted.map { player.timeline.entries[$0].id }
+        let sweep = player.sweep.map { (id: player.timeline.entries[$0.entry].id, progress: $0.progress) }
+        let cursor = sweep.flatMap { layout.cursor(at: $0.id, progress: $0.progress) }
         let start = player.timeline.entries[player.transport.start].id
-        let row = current.flatMap { id in layout.lines.firstIndex { $0.items.contains { $0.head?.id == id } } }
-        return notation(layout, current: current, start: start)
+        let row = cursor?.row
+        return notation(layout, current: sweep?.id, cursor: cursor, start: start)
             .background(alignment: .top) { rowAnchors(layout) }
             .overlay { countdown }
             .onChange(of: row) { _, row in
@@ -43,9 +44,11 @@ struct ScoreView: View {
             }
     }
 
-    private func notation(_ layout: ScoreLayout, current: String?, start: String) -> some View {
+    private func notation(
+        _ layout: ScoreLayout, current: String?, cursor: (row: Int, x: CGFloat)?, start: String
+    ) -> some View {
         let inks =
-            playheadInks(layout, current: current, start: start)
+            playheadInks(layout, cursor: cursor, start: start)
             + layout.lines.flatMap(\.items).flatMap { ink($0, current: current) }
         return Canvas { context, _ in
             for ink in inks {
@@ -81,19 +84,20 @@ struct ScoreView: View {
         }
     }
 
-    /// A soft background under the current note and a small marker over the start note.
-    private func playheadInks(_ layout: ScoreLayout, current: String?, start: String) -> [Ink] {
-        let heads = layout.lines.flatMap(\.items).compactMap(\.head)
+    /// The played part of the current line filled in up to the cursor, and a small marker over the start note.
+    private func playheadInks(_ layout: ScoreLayout, cursor: (row: Int, x: CGFloat)?, start: String) -> [Ink] {
         let size = metrics.fontSize
-        let wash = heads.first { $0.id == current }.map { head in
-            Ink.shape(
-                Path(
-                    roundedRect: CGRect(
-                        x: head.center.x - size * 0.5, y: head.center.y - size * 0.75,
-                        width: size, height: size * 1.5), cornerRadius: size * 0.25),
-                .wash)
+        let rowHeight = layout.height / CGFloat(max(layout.lines.count, 1))
+        let sweep = cursor.map { cursor in
+            let band = CGRect(
+                x: 0, y: rowHeight * (CGFloat(cursor.row) + 0.12), width: cursor.x, height: rowHeight * 0.76)
+            return [
+                Ink.shape(Path(roundedRect: band, cornerRadius: size * 0.2), .wash),
+                Ink.shape(
+                    Path(CGRect(x: cursor.x - stroke, y: band.minY, width: stroke * 2, height: band.height)), .accent),
+            ]
         }
-        let marker = heads.first { $0.id == start }.map { head in
+        let marker = layout.lines.flatMap(\.items).compactMap(\.head).first { $0.id == start }.map { head in
             let tip = CGPoint(x: head.center.x, y: head.center.y - size * 1.05)
             return Ink.shape(
                 Path { path in
@@ -104,7 +108,7 @@ struct ScoreView: View {
                     path.closeSubpath()
                 }, .accent)
         }
-        return [wash, marker].compactMap { $0 }
+        return (sweep ?? []) + [marker].compactMap { $0 }
     }
 
     /// What one layout item looks like: pure, so the canvas only paints the result.

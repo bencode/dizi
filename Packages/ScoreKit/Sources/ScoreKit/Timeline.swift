@@ -108,7 +108,8 @@ public struct Run: Sendable, Equatable {
     public enum Position: Sendable, Equatable {
         /// `beatsLeft` counts down to 1 before the music starts.
         case countIn(beatsLeft: Int)
-        case entry(Int)
+        /// The entry sounding, and how much of it has passed (0 up to 1).
+        case entry(Int, progress: Double)
         case finished
     }
 
@@ -120,7 +121,10 @@ public struct Run: Sendable, Equatable {
     public func position(at seconds: Double, in timeline: Timeline) -> Position {
         let elapsed = tempo.ticks(seconds) - countIn(timeline)
         guard elapsed >= 0 else { return .countIn(beatsLeft: (-elapsed - 1) / tempo.beat + 1) }
-        return timeline.entry(at: timeline.entries[from].start + elapsed).map(Position.entry) ?? .finished
+        let tick = timeline.entries[from].start + elapsed
+        guard let index = timeline.entry(at: tick) else { return .finished }
+        let entry = timeline.entries[index]
+        return .entry(index, progress: Double(tick - entry.start) / Double(entry.duration))
     }
 
     /// The count-in and every beat from the start entry to the end, accented on each bar's first beat.

@@ -32,8 +32,17 @@ public struct ScoreLayout: Sendable {
         /// Indices into `Score.measures`.
         public let measures: [Int]
         public let items: [Item]
+        /// Each note's stretch of the line, left to right with no gaps: the playhead sweeps through them.
+        public let slots: [Slot]
         /// From the left edge to the end of the last bar line's gap.
         public let width: CGFloat
+    }
+
+    /// Where a note or rest lies on its line: from its left edge to the next one's (across a bar line).
+    public struct Slot: Sendable, Equatable {
+        public let id: String
+        public let left: CGFloat
+        public let right: CGFloat
     }
 
     public enum Item: Sendable, Equatable {
@@ -122,7 +131,14 @@ private func line(_ measures: [Int], row: Int, scale: CGFloat, _ context: LineCo
     let items = zip(measures, starts(of: widths, from: 0)).flatMap { index, left in
         measureItems(index, left: left, frame, context)
     }
-    return ScoreLayout.Line(measures: measures, items: items, width: widths.reduce(0, +))
+    let slotWidths = measures.flatMap { index in
+        context.boxes[index].enumerated().map { offset, box in
+            box.naturalWidth(metrics) * scale + (offset == context.boxes[index].count - 1 ? metrics.barGap : 0)
+        }
+    }
+    let slots = zip(measures.flatMap { context.boxes[$0].map(\.id) }, zip(starts(of: slotWidths, from: 0), slotWidths))
+        .map { id, span in ScoreLayout.Slot(id: id, left: span.0, right: span.0 + span.1) }
+    return ScoreLayout.Line(measures: measures, items: items, slots: slots, width: widths.reduce(0, +))
 }
 
 /// A measure's notes, its 减时线, and the bar line closing it.
@@ -157,6 +173,15 @@ extension ScoreLayout {
         let row = Int(point.y / (height / CGFloat(lines.count)))
         return lines[row].items.compactMap(\.head)
             .min { abs($0.center.x - point.x) < abs($1.center.x - point.x) }?.id
+    }
+}
+
+extension ScoreLayout {
+    /// The playhead: how far along its line a note has played. Nil when the note is not on the score.
+    public func cursor(at id: String, progress: Double) -> (row: Int, x: CGFloat)? {
+        lines.enumerated().lazy.compactMap { row, line in
+            line.slots.first { $0.id == id }.map { slot in (row, slot.left + (slot.right - slot.left) * progress) }
+        }.first
     }
 }
 

@@ -23,7 +23,7 @@ The start point and the playing position are one thing: the **playhead**, like t
 ```text
 stopped --tap a note--------------▶ stopped, playhead on that note
 stopped --Start-------------------▶ count-in ─▶ playing from the playhead
-playing --each note---------------▶ playhead moves, current note lit
+playing --as time passes----------▶ the line fills up to the playhead, continuously; current note lit
 playing --Pause-------------------▶ paused, playhead stays
 paused  --Start-------------------▶ count-in ─▶ playing from the playhead
 playing --Stop / end of score-----▶ stopped, playhead back at the chosen start

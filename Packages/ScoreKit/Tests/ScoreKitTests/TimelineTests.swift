@@ -25,8 +25,8 @@ private let slow = Tempo(bpm: 60, beat: 480)
 
     #expect(run.position(at: 0, in: timeline) == .countIn(beatsLeft: 2))
     #expect(run.position(at: 1, in: timeline) == .countIn(beatsLeft: 1))
-    #expect(run.position(at: 2, in: timeline) == .entry(0))
-    #expect(run.position(at: 3.25, in: timeline) == .entry(1))
+    #expect(run.position(at: 2, in: timeline) == .entry(0, progress: 0))
+    #expect(run.position(at: 3.25, in: timeline) == .entry(1, progress: 0.5))
     #expect(run.position(at: run.length(timeline), in: timeline) == .finished)
     #expect(run.beat(at: 1, in: timeline) == nil)
     #expect(run.beat(at: 3.5, in: timeline).map { [$0.index, $0.count] } == [1, 2])
@@ -54,6 +54,18 @@ private let slow = Tempo(bpm: 60, beat: 480)
     let run = Run(from: from, tempo: slow)
 
     #expect(tapped == "n4")
-    #expect(run.position(at: 2, in: timeline) == .entry(from))
+    #expect(run.position(at: 2, in: timeline) == .entry(from, progress: 0))
     #expect(run.clicks(timeline).dropFirst(2).first == Click(time: 2, accent: true))
+}
+
+@Test func sweepsTheLineWithoutJumps() throws {
+    let layout = ScoreLayout(score: try molihua(), width: 360)
+    let slots = layout.lines[0].slots
+
+    #expect(slots.first?.left == 0)
+    #expect(zip(slots, slots.dropFirst()).allSatisfy { $0.right == $1.left })
+    #expect(slots.last.map { abs($0.right - layout.lines[0].width) < 0.001 } == true)
+    let halfway = try #require(layout.cursor(at: "n11", progress: 0.5))
+    let slot = try #require(layout.lines.flatMap(\.slots).first { $0.id == "n11" })
+    #expect(halfway.x == (slot.left + slot.right) / 2)
 }
