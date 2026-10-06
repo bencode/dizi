@@ -149,3 +149,23 @@ extension Mark {
         return section.tick
     }
 }
+
+extension ScoreLayout {
+    /// The note or rest nearest to a tap: on the tapped line, the closest digit. Nil off the score.
+    public func note(near point: CGPoint) -> String? {
+        guard !lines.isEmpty, point.y >= 0, point.y < height else { return nil }
+        let row = Int(point.y / (height / CGFloat(lines.count)))
+        return lines[row].items.compactMap(\.head)
+            .min { abs($0.center.x - point.x) < abs($1.center.x - point.x) }?.id
+    }
+}
+
+extension ScoreLayout.Item {
+    /// The digit of a note or rest: its id and where it is drawn.
+    public var head: (id: String, center: CGPoint)? {
+        switch self {
+        case .note(let id, _, _, let center), .rest(let id, _, let center): (id, center)
+        case .octaveDot, .augmentationDot, .dash, .underline, .barline: nil
+        }
+    }
+}

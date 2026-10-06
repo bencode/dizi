@@ -8,6 +8,8 @@ public struct Score: Decodable, Sendable {
     public let header: Header
     public let ticksPerQuarter: Int
     public let measures: [Measure]
+    /// Measure indices in playing order, repeats unrolled.
+    public let playOrder: [Int]
     public let parts: [Part]
     public let marks: [Mark]
     public let layoutHints: LayoutHints?

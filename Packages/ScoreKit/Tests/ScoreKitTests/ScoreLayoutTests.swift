@@ -15,7 +15,8 @@ private func molihuaURL() -> URL {
     return repository.appending(path: "docs/examples/molihua.ir.json")
 }
 
-private func molihua() throws -> Score {
+/// Shared with the other test files.
+func molihua() throws -> Score {
     try Score.decode(from: Data(contentsOf: molihuaURL()))
 }
 
