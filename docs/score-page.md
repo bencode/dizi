@@ -30,6 +30,7 @@ playing --Stop / end of score-----▶ stopped, playhead back at the chosen start
 ```
 
 - The playhead **snaps to a note**: starting in the middle of a note makes no sense.
+- While playing it **reaches each note's digit exactly when the note should start**, and moves smoothly in between (a monotone cubic through those points), so bar lines and uneven spacing cause no lurch.
 - While playing, tempo and switches are locked; pause or stop to change them.
 
 ## Layers

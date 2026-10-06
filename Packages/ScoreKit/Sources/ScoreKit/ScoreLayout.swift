@@ -32,17 +32,12 @@ public struct ScoreLayout: Sendable {
         /// Indices into `Score.measures`.
         public let measures: [Int]
         public let items: [Item]
-        /// Each note's stretch of the line, left to right with no gaps: the playhead sweeps through them.
-        public let slots: [Slot]
+        /// Each note's digit at the tick it starts, in order: the points the playhead passes through.
+        public let anchors: [Anchor]
+        /// The tick where the line's last measure ends; the playhead reaches the line's end then.
+        public let endTick: Int
         /// From the left edge to the end of the last bar line's gap.
         public let width: CGFloat
-    }
-
-    /// Where a note or rest lies on its line: from its left edge to the next one's (across a bar line).
-    public struct Slot: Sendable, Equatable {
-        public let id: String
-        public let left: CGFloat
-        public let right: CGFloat
     }
 
     public enum Item: Sendable, Equatable {
@@ -131,14 +126,16 @@ private func line(_ measures: [Int], row: Int, scale: CGFloat, _ context: LineCo
     let items = zip(measures, starts(of: widths, from: 0)).flatMap { index, left in
         measureItems(index, left: left, frame, context)
     }
-    let slotWidths = measures.flatMap { index in
-        context.boxes[index].enumerated().map { offset, box in
-            box.naturalWidth(metrics) * scale + (offset == context.boxes[index].count - 1 ? metrics.barGap : 0)
+    // A long rest repeats its digit under one id; the first is where it starts.
+    let anchors = items.compactMap(\.anchor).reduce(into: [Anchor]()) { anchors, anchor in
+        if anchors.last?.id != anchor.id {
+            anchors.append(anchor)
         }
     }
-    let slots = zip(measures.flatMap { context.boxes[$0].map(\.id) }, zip(starts(of: slotWidths, from: 0), slotWidths))
-        .map { id, span in ScoreLayout.Slot(id: id, left: span.0, right: span.0 + span.1) }
-    return ScoreLayout.Line(measures: measures, items: items, slots: slots, width: widths.reduce(0, +))
+    let lastMeasure = measures.last.map { context.score.measures[$0] }
+    return ScoreLayout.Line(
+        measures: measures, items: items, anchors: anchors,
+        endTick: lastMeasure.map { $0.start + $0.duration } ?? 0, width: widths.reduce(0, +))
 }
 
 /// A measure's notes, its 减时线, and the bar line closing it.
@@ -177,15 +174,30 @@ extension ScoreLayout {
 }
 
 extension ScoreLayout {
-    /// The playhead: how far along its line a note has played. Nil when the note is not on the score.
+    /// The playhead while a note sounds: on the note's digit when it starts, on the next one's when that
+    /// starts, moving smoothly in between. Nil when the note is not on the score.
     public func cursor(at id: String, progress: Double) -> (row: Int, x: CGFloat)? {
-        lines.enumerated().lazy.compactMap { row, line in
-            line.slots.first { $0.id == id }.map { slot in (row, slot.left + (slot.right - slot.left) * progress) }
+        lines.enumerated().lazy.compactMap { row, line -> (row: Int, x: CGFloat)? in
+            guard let index = line.anchors.firstIndex(where: { $0.id == id }) else { return nil }
+            let points =
+                line.anchors.map { (tick: Double($0.tick), position: $0.position) }
+                + [(tick: Double(line.endTick), position: line.width)]
+            let tick = points[index].tick + progress * (points[index + 1].tick - points[index].tick)
+            return (row, smoothPosition(at: tick, through: points))
         }.first
     }
 }
 
 extension ScoreLayout.Item {
+    /// A note's or rest's digit as a point the playhead passes.
+    fileprivate var anchor: Anchor? {
+        switch self {
+        case .note(let id, let start, _, let center), .rest(let id, let start, let center):
+            Anchor(id: id, tick: start, position: center.x)
+        case .octaveDot, .augmentationDot, .dash, .underline, .barline: nil
+        }
+    }
+
     /// The digit of a note or rest: its id and where it is drawn.
     public var head: (id: String, center: CGPoint)? {
         switch self {

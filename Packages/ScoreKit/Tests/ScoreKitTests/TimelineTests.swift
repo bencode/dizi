@@ -58,14 +58,37 @@ private let slow = Tempo(bpm: 60, beat: 480)
     #expect(run.clicks(timeline).dropFirst(2).first == Click(time: 2, accent: true))
 }
 
-@Test func sweepsTheLineWithoutJumps() throws {
+@Test func reachesEachDigitWhenItsNoteStarts() throws {
     let layout = ScoreLayout(score: try molihua(), width: 360)
-    let slots = layout.lines[0].slots
+    let heads = layout.lines[0].items.compactMap(\.head)
 
-    #expect(slots.first?.left == 0)
-    #expect(zip(slots, slots.dropFirst()).allSatisfy { $0.right == $1.left })
-    #expect(slots.last.map { abs($0.right - layout.lines[0].width) < 0.001 } == true)
-    let halfway = try #require(layout.cursor(at: "n11", progress: 0.5))
-    let slot = try #require(layout.lines.flatMap(\.slots).first { $0.id == "n11" })
-    #expect(halfway.x == (slot.left + slot.right) / 2)
+    #expect(
+        heads.allSatisfy { head in
+            layout.cursor(at: head.id, progress: 0).map { abs($0.x - head.center.x) < 0.001 } == true
+        })
+}
+
+@Test func movesForwardSmoothlyAcrossABarLine() throws {
+    let layout = ScoreLayout(score: try molihua(), width: 360)
+    let samples = layout.lines[0].anchors.flatMap { anchor in
+        stride(from: 0.0, to: 1.0, by: 0.1).compactMap { layout.cursor(at: anchor.id, progress: $0)?.x }
+    }
+    // n3 is the last eighth of measure 1; n4 the first of measure 2. Both last 240 ticks.
+    let step = 0.01
+    let before =
+        try #require(layout.cursor(at: "n3", progress: 1)).x
+        - (try #require(layout.cursor(at: "n3", progress: 1 - step))).x
+    let after =
+        try #require(layout.cursor(at: "n4", progress: step)).x - (try #require(layout.cursor(at: "n4", progress: 0))).x
+
+    #expect(zip(samples, samples.dropFirst()).allSatisfy { $0 <= $1 })
+    #expect(abs(after / before - 1) < 0.05)
+}
+
+@Test func reachesTheLineEndWithItsLastNote() throws {
+    let layout = ScoreLayout(score: try molihua(), width: 360)
+    let line = layout.lines[0]
+    let last = try #require(line.anchors.last)
+
+    #expect(layout.cursor(at: last.id, progress: 1).map { abs($0.x - line.width) < 0.001 } == true)
 }

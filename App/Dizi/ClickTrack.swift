@@ -47,10 +47,13 @@ final class ClickTrack {
 
     /// Seconds since time 0 of the current run; nil when nothing is playing yet.
     var time: Double? {
-        guard let nodeTime = player.lastRenderTime, let playerTime = player.playerTime(forNodeTime: nodeTime) else {
-            return nil
-        }
-        return max(0, Double(playerTime.sampleTime) / playerTime.sampleRate)
+        guard let nodeTime = player.lastRenderTime, nodeTime.isHostTimeValid,
+            let playerTime = player.playerTime(forNodeTime: nodeTime)
+        else { return nil }
+        // The render time moves once per audio buffer; add the time since that render so every frame advances.
+        let sinceRender =
+            AVAudioTime.seconds(forHostTime: mach_absolute_time()) - AVAudioTime.seconds(forHostTime: nodeTime.hostTime)
+        return max(0, Double(playerTime.sampleTime) / playerTime.sampleRate + sinceRender)
     }
 }
 
