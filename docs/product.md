@@ -94,9 +94,9 @@ Interface language: Chinese first; strings kept in a String Catalog for later la
 - **Served as static files** from phase 1, so content updates without a release:
 
   ```text
-  library/ (this repository) ─publish script─▶ Aliyun OSS (Hong Kong) + CDN
-                                                ├── catalog.json        pieces, versions, score format version
-                                                └── scores/<id>.jianpu
+  priv/library/ (private) ─publish script─▶ Aliyun OSS (Hong Kong) + CDN
+                                            ├── catalog.json        pieces, versions, score format version
+                                            └── scores/<id>.jianpu
   App: fetch catalog.json ─▶ download new or changed scores ─▶ cache for offline use
   ```
 

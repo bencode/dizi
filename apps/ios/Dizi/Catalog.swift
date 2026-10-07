@@ -40,9 +40,5 @@ private func libraryURL(_ path: String) throws -> URL {
     guard let library = Bundle.main.url(forResource: "Library", withExtension: nil) else {
         throw LibraryError.missing("Library")
     }
-    let url = library.appending(path: path)
-    guard FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) else {
-        throw LibraryError.missing(path)
-    }
-    return url
+    return library.appending(path: path)
 }

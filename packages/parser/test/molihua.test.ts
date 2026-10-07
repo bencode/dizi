@@ -2,9 +2,9 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { compile } from '../src/index.ts'
 
-describe('library', () => {
+describe('spec example', () => {
   it('compiles 茉莉花 without diagnostics', () => {
-    const result = compile(readFileSync(new URL('../../../library/molihua.jianpu', import.meta.url), 'utf8'))
+    const result = compile(readFileSync(new URL('../../../docs/examples/molihua.jianpu', import.meta.url), 'utf8'))
 
     expect(result.diagnostics).toEqual([])
     expect(result.score?.measures).toHaveLength(27)

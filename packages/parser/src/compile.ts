@@ -39,6 +39,18 @@ export const compileScore = (header: Header, body: Body): Compiled => {
     placed.map((measure) => measure.measure),
     body.measures,
   )
+  const order = playOrder(measures)
+  const played = new Set(order)
+  const unplayedErrors = body.measures.flatMap((measure, index) =>
+    played.has(index)
+      ? []
+      : [
+          error(
+            measure.position,
+            `measure ${String(index + 1)} is never played; check its ending [n.] and the repeat signs`,
+          ),
+        ],
+  )
   const marks: Mark[] = [
     { kind: 'tempo', at: 0, beat: header.tempo.beat, bpm: header.tempo.bpm },
     ...placed.flatMap((measure, index) => measureMarks(measure.measure.start, body.measures[index])),
@@ -54,13 +66,13 @@ export const compileScore = (header: Header, body: Body): Compiled => {
     header: { key: header.key, ...(header.fingering === undefined ? {} : { fingering: header.fingering }) },
     ticksPerQuarter: 480,
     measures,
-    playOrder: playOrder(measures),
+    playOrder: order,
     parts: [{ id: 'solo', role: 'solo', measures: parts }],
     spans: spans(placed.flatMap((measure) => measure.slurs)),
     marks: marks.toSorted((a, b) => a.at - b.at),
     ...(breaks.length > 0 ? { layoutHints: { lineBreaksAfter: breaks } } : {}),
   }
-  return { score, diagnostics: [...shapeErrors, ...lengthErrors] }
+  return { score, diagnostics: [...shapeErrors, ...lengthErrors, ...unplayedErrors] }
 }
 
 /** Written length → note value and dots; nil when no single value writes it (the parser reports those). */

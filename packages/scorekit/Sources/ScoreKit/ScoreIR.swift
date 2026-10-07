@@ -49,10 +49,27 @@ public struct Measure: Decodable, Sendable {
     public let duration: Int
     public let time: TimeSignature
     public let barline: Barline
-    public let repeatStart: Bool?
-    public let repeatEnd: Bool?
+    public let repeatStart: Bool
+    public let repeatEnd: Bool
     /// The passes through a repeat this measure is played on (an ending: 1., 2.); nil outside endings.
     public let volta: [Int]?
+
+    private enum CodingKeys: String, CodingKey {
+        case index, start, duration, time, barline, repeatStart, repeatEnd, volta
+    }
+
+    /// The IR writes the repeat flags only when they are set.
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        index = try container.decode(Int.self, forKey: .index)
+        start = try container.decode(Int.self, forKey: .start)
+        duration = try container.decode(Int.self, forKey: .duration)
+        time = try container.decode(TimeSignature.self, forKey: .time)
+        barline = try container.decode(Barline.self, forKey: .barline)
+        repeatStart = try container.decodeIfPresent(Bool.self, forKey: .repeatStart) ?? false
+        repeatEnd = try container.decodeIfPresent(Bool.self, forKey: .repeatEnd) ?? false
+        volta = try container.decodeIfPresent([Int].self, forKey: .volta)
+    }
 }
 
 public enum TimeSignature: Decodable, Sendable, Equatable {

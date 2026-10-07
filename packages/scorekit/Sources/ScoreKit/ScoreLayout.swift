@@ -173,8 +173,8 @@ private func repeats(_ index: Int, span: ClosedRange<CGFloat>, _ frame: LineFram
         let label = volta.map { "\($0)." }.joined()
         return .ending(label: label, origin: CGPoint(x: left, y: baseline - metrics.lineHeight * 0.38))
     }
-    return (measure.repeatStart == true ? [dots(left + metrics.dotGap)] : [])
-        + (measure.repeatEnd == true ? [dots(barX - metrics.barGap * 0.4)] : [])
+    return (measure.repeatStart ? [dots(left + metrics.dotGap)] : [])
+        + (measure.repeatEnd ? [dots(barX - metrics.barGap * 0.4)] : [])
         + (ending.map { [$0] } ?? [])
 }
 

@@ -139,11 +139,10 @@ struct ScoreView: View {
             }
         case .repeatDots(let centerX, let top, let bottom):
             [top, bottom].map { dotY in
-                .shape(
-                    Path(
-                        ellipseIn: CGRect(x: centerX, y: dotY, width: 0, height: 0).insetBy(
-                            dx: -dotRadius, dy: -dotRadius)),
-                    .plain)
+                let center = CGPoint(x: centerX, y: dotY)
+                return .shape(
+                    Path(ellipseIn: CGRect(origin: center, size: .zero).insetBy(dx: -dotRadius, dy: -dotRadius)), .plain
+                )
             }
         case .ending(let label, let origin):
             [.label(label, origin: origin)]

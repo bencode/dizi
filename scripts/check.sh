@@ -26,12 +26,13 @@ if [[ "$(project_hash)" != "$before" ]]; then
     exit 1
 fi
 
-echo "==> Parser (typecheck, lint, tests)"
+echo "==> Parser and tools (typecheck, lint, tests)"
 npm run --silent --workspace packages/parser check
+npm run --silent check:tools
 
-echo "==> Score examples compiled from library/"
-if ! node packages/parser/src/cli.ts library/molihua.jianpu | diff -q - docs/examples/molihua.ir.json >/dev/null; then
-    echo "error: docs/examples/molihua.ir.json is out of date; run: node packages/parser/src/cli.ts library/molihua.jianpu > docs/examples/molihua.ir.json" >&2
+echo "==> Score examples (docs/examples)"
+if ! node packages/parser/src/cli.ts docs/examples/molihua.jianpu | diff -q - docs/examples/molihua.ir.json >/dev/null; then
+    echo "error: docs/examples/molihua.ir.json is out of date; run: node packages/parser/src/cli.ts docs/examples/molihua.jianpu > docs/examples/molihua.ir.json" >&2
     exit 1
 fi
 

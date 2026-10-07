@@ -29,6 +29,14 @@ describe('repeats and endings', () => {
     expect(score.playOrder).toEqual([0, 1, 2, 0, 1, 2, 0, 3])
   })
 
+  it('reports measures that no pass plays', () => {
+    // An ending outside a repeat: the second pass never comes.
+    expect(errors('1 2 | [2.] 3 4 | 5 6 |]')).toEqual([
+      '5:16 measure 2 is never played; check its ending [n.] and the repeat signs',
+      '5:22 measure 3 is never played; check its ending [n.] and the repeat signs',
+    ])
+  })
+
   it('rejects a malformed ending', () => {
     expect(errors('[1.] 1 [2.] 2 |]')).toEqual(['5:8 [2. …] must start a measure'])
   })

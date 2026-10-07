@@ -10,11 +10,11 @@ Run `scripts/check.sh` after every change. Work is done only when it prints `All
 | --- | --- | --- |
 | Format | `swift-format` (bundled with Xcode), config `.swift-format` | any formatting difference; fix with `xcrun swift-format format --in-place <files>` |
 | Lint | SwiftLint, config `.swiftlint.yml` | errors; warnings (e.g. a function over 40 lines, a file over 200) call for a second look, not a mechanical split |
-| Parser | `npm run --workspace packages/parser check`: TypeScript strict, ESLint (strict type-checked), Prettier, Vitest | type errors, lint or format issues, failing tests |
-| Score examples | the parser recompiles `library/molihua.jianpu` | `docs/examples/molihua.ir.json` differs from the compiled output |
-| ScoreKit tests | `swift test --package-path packages/scorekit` on the Mac | failing unit tests |
-| Library | `npm run library`: compiles `priv/library` (or, without it, `docs/examples`) into `apps/ios/Dizi/Library/` | a score with errors |
+| Library | `npm run library`: compiles `priv/library` (or, without it, `docs/examples`) into `apps/ios/Dizi/Library/` | a catalog problem or a score with errors |
 | Project | XcodeGen | `apps/ios/Dizi.xcodeproj` out of date with `apps/ios/project.yml` |
+| Parser and tools | `npm run --workspace packages/parser check`: TypeScript strict, ESLint (strict type-checked), Prettier, Vitest; `npm run check:tools`: the same for `tools/*.ts` | type errors, lint or format issues, failing tests |
+| Score examples | the parser recompiles `docs/examples/molihua.jianpu` | `docs/examples/molihua.ir.json` differs from the compiled output |
+| ScoreKit tests | `swift test --package-path packages/scorekit` on the Mac | failing unit tests |
 | Build and test | `xcodebuild test` on the iOS simulator (`SIMULATOR`, default `iPhone 17e`) | compiler warnings (treated as errors), failing unit or UI tests |
 
 ## Code style: functional
@@ -34,7 +34,7 @@ Programs are data flowing through transformations; effects stay at the edge. Sou
 
 ## Project facts
 
-- Layout: `apps/` holds runnable products (`apps/ios`; later server, web, android); `packages/` holds shared libraries in any language (`packages/scorekit` Swift, `packages/parser` TypeScript); `library/` holds score sources; `tools/` one-off scripts. TypeScript packages are npm workspaces listed explicitly in the root `package.json`.
+- Layout: `apps/` holds runnable products (`apps/ios`; later server, web, android); `packages/` holds shared libraries in any language (`packages/scorekit` Swift, `packages/parser` TypeScript); `tools/` build and one-off scripts; `docs/examples/` the spec's example score and its IR. TypeScript packages are npm workspaces listed explicitly in the root `package.json`.
 - `packages/parser` compiles score text ([format](docs/score-format.md)) into the [IR](docs/score-ir.md); Node 24 runs its `.ts` files directly, no build step. `node packages/parser/src/cli.ts <file>` prints the IR or the diagnostics.
 
 - `apps/ios/project.yml` defines the Xcode project; never edit `apps/ios/Dizi.xcodeproj` by hand. Run `xcodegen generate` in `apps/ios/` after changing the spec, and commit both.
