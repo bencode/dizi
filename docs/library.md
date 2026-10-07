@@ -36,7 +36,7 @@ type Catalog = {
 
 | When | What happens |
 | --- | --- |
-| Launch | The list shows the newest (by `updated`) of the bundled and the cached catalog, without waiting for the network |
+| Launch | The list shows the newest (by `updated`) of the bundled and the cached catalog whose scores are all on the phone, without waiting for the network |
 | Then, once per launch | Fetch `catalog.json`; if it is newer than the one shown, download the scores that are neither cached nor bundled, write the catalog, switch the list to it, and delete cached scores it no longer uses |
 | Any failure (offline, a bad file) | Nothing is replaced; the failure is logged; downloaded scores are kept for next time |
 | Opening a piece | The score is read from the cache, else from the bundle |

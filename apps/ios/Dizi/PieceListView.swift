@@ -10,10 +10,6 @@ struct PieceListView: View {
             .navigationDestination(for: LibraryPiece.self) { piece in
                 PieceDetailView(piece: piece)
             }
-            .task {
-                library.load()
-                await library.refresh()
-            }
     }
 
     @ViewBuilder private var content: some View {

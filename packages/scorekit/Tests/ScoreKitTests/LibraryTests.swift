@@ -16,9 +16,13 @@ private func catalog(updated: Int, scores: [String], version: Int = 1) throws ->
     let bundled = try catalog(updated: 100, scores: ["scores/a.json"])
     let cached = try catalog(updated: 200, scores: ["scores/b.json"])
 
-    #expect(newest(bundled, cached) == cached)
-    #expect(newest(bundled, nil) == bundled)
-    #expect(newest(cached, try catalog(updated: 200, scores: [])) == cached)
+    let available: Set = ["scores/a.json", "scores/b.json"]
+
+    #expect(newest(bundled, cached, available: available) == cached)
+    #expect(newest(bundled, nil, available: available) == bundled)
+    #expect(newest(cached, try catalog(updated: 200, scores: []), available: available) == cached)
+    // A newer catalog whose score is not on the phone gives way to a complete one.
+    #expect(newest(bundled, cached, available: ["scores/a.json"]) == bundled)
 }
 
 @Test func ignoresACatalogOfANewerScoreFormat() {

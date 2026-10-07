@@ -13,9 +13,9 @@ private let logger = Logger(subsystem: "io.upivot.dizi", category: "library")
     private let bundled = Bundle.main.url(forResource: "Library", withExtension: nil)
     private let cached = URL.applicationSupportDirectory.appending(path: "Library")
 
-    /// Shows the newest of the bundled and the cached catalog.
+    /// Shows the newest of the bundled and the cached catalog whose scores are all on the phone.
     func load() {
-        let shown = newest(readCatalog(in: cached), readCatalog(in: bundled))
+        let shown = newest(readCatalog(in: cached), readCatalog(in: bundled), available: availableScores())
         catalog = shown.map(Result.success) ?? .failure(CocoaError(.fileReadNoSuchFile))
     }
 

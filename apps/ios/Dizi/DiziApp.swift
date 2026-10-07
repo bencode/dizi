@@ -10,6 +10,11 @@ struct DiziApp: App {
                 PieceListView()
             }
             .environment(library)
+            // On the stack, not the list: the list's tasks restart each time a piece is closed.
+            .task {
+                library.load()
+                await library.refresh()
+            }
         }
     }
 }

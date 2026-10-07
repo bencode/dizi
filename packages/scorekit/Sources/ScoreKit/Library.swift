@@ -49,9 +49,10 @@ public enum LibraryError: Error, Equatable {
     case unsupportedVersion(Int)
 }
 
-/// The catalog to show: the most recently updated one; the first wins a tie.
-public func newest(_ catalogs: LibraryCatalog?...) -> LibraryCatalog? {
-    catalogs.compactMap(\.self).reduce(nil) { best, catalog in
+/// The catalog to show: the most recently updated one whose scores are all available; the first wins a tie.
+public func newest(_ catalogs: LibraryCatalog?..., available: Set<String>) -> LibraryCatalog? {
+    let complete = catalogs.compactMap(\.self).filter { missingScores($0, available: available).isEmpty }
+    return complete.reduce(nil) { best, catalog in
         best.map { $0.updated >= catalog.updated ? $0 : catalog } ?? catalog
     }
 }
