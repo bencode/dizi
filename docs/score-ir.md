@@ -209,7 +209,8 @@ type Mark =
 - `Part.measures[i]` covers `Score.measures[i]`: its events start at `measures[i].start` and their durations sum to `measures[i].duration` (except `'free'` measures, which take whatever their events add up to).
 - Events in a measure are in time order with no gaps: each `start` is the previous `start + duration`.
 - Every id referenced by a span or beam exists.
-- `playOrder` lists every measure the player passes, in order. With no repeats it is `[0, 1, 2, …]`.
+- `playOrder` lists every measure the player passes, in order. With no repeats it is `[0, 1, 2, …]`. The parser computes it: walk the measures; at a `repeatEnd`, go back to the last `repeatStart` (or measure 0) until the repeat has been played as many times as its highest ending (at least twice); on pass *n*, skip measures whose `volta` does not contain *n*.
+- An ending (`volta`) carries over the following measures until another ending starts, or ends after a measure with `repeatEnd` or a double or final bar line.
 
 ## Not covered yet
 

@@ -35,6 +35,10 @@ export const compileScore = (header: Header, body: Body): Compiled => {
     events: measure.events,
     beams: beams(measure, index === 0 && isShort(measure.measure)),
   }))
+  const measures = withRepeats(
+    placed.map((measure) => measure.measure),
+    body.measures,
+  )
   const marks: Mark[] = [
     { kind: 'tempo', at: 0, beat: header.tempo.beat, bpm: header.tempo.bpm },
     ...placed.flatMap((measure, index) => measureMarks(measure.measure.start, body.measures[index])),
@@ -49,8 +53,8 @@ export const compileScore = (header: Header, body: Body): Compiled => {
     },
     header: { key: header.key, ...(header.fingering === undefined ? {} : { fingering: header.fingering }) },
     ticksPerQuarter: 480,
-    measures: placed.map((measure) => measure.measure),
-    playOrder: placed.map((_, index) => index),
+    measures,
+    playOrder: playOrder(measures),
     parts: [{ id: 'solo', role: 'solo', measures: parts }],
     spans: spans(placed.flatMap((measure) => measure.slurs)),
     marks: marks.toSorted((a, b) => a.at - b.at),
@@ -211,4 +215,67 @@ const measureMarks = (at: number, written: WrittenMeasure | undefined): Mark[] =
     ...(changes.tempo === undefined ? [] : [{ kind: 'tempo' as const, at, ...changes.tempo }]),
     ...(changes.key === undefined ? [] : [{ kind: 'keyChange' as const, at, key: changes.key }]),
   ]
+}
+
+/**
+ * Repeat marks onto the measures. An ending (`[1.]`) carries on to the following measures until another
+ * ending starts, or ends after a measure that closes a repeat or has a double or final bar line.
+ */
+const withRepeats = (measures: Measure[], written: WrittenMeasure[]): Measure[] =>
+  measures.reduce<{ measures: Measure[]; volta: number[] | null }>(
+    (state, measure, index) => {
+      const source = written[index]
+      const volta = source?.changes.volta ?? state.volta
+      const closes = source !== undefined && (source.repeatEnd || source.barline !== 'single')
+      const marked: Measure = {
+        ...measure,
+        ...(source?.repeatStart === true ? { repeatStart: true as const } : {}),
+        ...(source?.repeatEnd === true ? { repeatEnd: true as const } : {}),
+        ...(volta === null ? {} : { volta }),
+      }
+      return { measures: [...state.measures, marked], volta: closes ? null : volta }
+    },
+    { measures: [], volta: null },
+  ).measures
+
+/**
+ * The order the measures are played in. At a repeat's end the music goes back to the repeat's start (or the
+ * beginning) until every ending has been played; on pass n, measures of other endings are skipped.
+ */
+export const playOrder = (measures: Measure[]): number[] => {
+  const order: number[] = []
+  let index = 0
+  let start = 0
+  let pass = 1
+  while (index < measures.length) {
+    const measure = measures[index]
+    if (measure === undefined) break
+    if (measure.repeatStart === true && index > start) {
+      start = index
+      pass = 1
+    }
+    if (measure.volta !== undefined && !measure.volta.includes(pass)) {
+      index += 1
+      continue
+    }
+    order.push(index)
+    if (measure.repeatEnd === true && pass < passesThrough(measures, start)) {
+      pass += 1
+      index = start
+      continue
+    }
+    if (measure.repeatEnd === true) {
+      start = index + 1
+      pass = 1
+    }
+    index += 1
+  }
+  return order
+}
+
+/** How many times a repeat starting at `start` is played: 2, or more when it has a third ending, … */
+const passesThrough = (measures: Measure[], start: number): number => {
+  const next = measures.findIndex((measure, index) => index > start && measure.repeatStart === true)
+  const section = measures.slice(start, next === -1 ? measures.length : next)
+  return Math.max(2, ...section.flatMap((measure) => measure.volta ?? []))
 }

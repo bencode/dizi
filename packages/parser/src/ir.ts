@@ -78,6 +78,10 @@ export type Measure = {
   duration: number
   time: Time
   barline: Barline
+  repeatStart?: true
+  repeatEnd?: true
+  /** The passes through a repeat this measure is played on: an ending (1., 2.). */
+  volta?: number[]
 }
 
 export type PartMeasure = { events: Event[]; beams: Beam[] }

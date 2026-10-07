@@ -30,11 +30,14 @@ export type Token =
   | RestToken
   | { kind: 'dash'; position: Position }
   | { kind: 'breath'; position: Position; circular: boolean }
-  | { kind: 'barline'; position: Position; style: 'single' | 'double' | 'final' | 'repeat' }
+  | { kind: 'barline'; position: Position; style: BarStyle }
   | { kind: 'directive'; position: Position; name: string; value: string }
   | { kind: 'slurOpen'; position: Position }
   | { kind: 'slurClose'; position: Position }
   | { kind: 'newline'; position: Position }
+
+/** `\|:` opens a repeat, `:\|` closes one. */
+export type BarStyle = 'single' | 'double' | 'final' | 'repeatStart' | 'repeatEnd'
 
 export type Tokens = { tokens: Token[]; diagnostics: Diagnostic[] }
 
@@ -46,12 +49,13 @@ type Rule = { pattern: RegExp; token: (match: RegExpExecArray, position: Positio
 const noteBoundary = /^(?:[\s|){:]|$)/
 
 const rules: Rule[] = [
+  { pattern: /^:\|\|?/, token: (_, position) => ({ kind: 'barline', position, style: 'repeatEnd' }) },
+  { pattern: /^\|\|?:/, token: (_, position) => ({ kind: 'barline', position, style: 'repeatStart' }) },
   { pattern: /^\|\]/, token: (_, position) => ({ kind: 'barline', position, style: 'final' }) },
   { pattern: /^\|\|/, token: (_, position) => ({ kind: 'barline', position, style: 'double' }) },
-  { pattern: /^(?:\|:|:\|)/, token: (_, position) => ({ kind: 'barline', position, style: 'repeat' }) },
   { pattern: /^\|/, token: (_, position) => ({ kind: 'barline', position, style: 'single' }) },
   {
-    pattern: /^\[\s*(\S+)\s*([^\]]*?)\s*\]/,
+    pattern: /^\[\s*([^\s\]]+)\s*([^\]]*?)\s*\]/,
     token: (match, position) => ({ kind: 'directive', position, name: match[1] ?? '', value: match[2] ?? '' }),
   },
   {

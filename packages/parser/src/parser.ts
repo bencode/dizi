@@ -1,7 +1,7 @@
-import { error, warning, type Diagnostic, type Position } from './diagnostic.ts'
+import { error, type Diagnostic, type Position } from './diagnostic.ts'
 import { parseKey, parsePitch, parseTempo, parseTime, pitch, type Tempo } from './header.ts'
 import type { Barline, Grace, Key, Pitch, Technique, Time } from './ir.ts'
-import type { NoteToken, RestToken, TechniqueMark, Token } from './lexer.ts'
+import type { BarStyle, NoteToken, RestToken, TechniqueMark, Token } from './lexer.ts'
 
 export type WrittenNote = {
   kind: 'note'
@@ -26,12 +26,15 @@ export type WrittenRest = {
 
 export type Written = WrittenNote | WrittenRest | { kind: 'breath'; circular: boolean }
 
-export type Changes = { time?: Time; key?: Key; tempo?: Tempo; section?: string }
+/** Changes written at a measure's start; `volta` puts it in a repeat's ending (1., 2., …). */
+export type Changes = { time?: Time; key?: Key; tempo?: Tempo; section?: string; volta?: number[] }
 
 export type WrittenMeasure = {
   events: Written[]
   changes: Changes
   barline: Barline
+  repeatStart: boolean
+  repeatEnd: boolean
   lineBreakAfter: boolean
   /** Where the closing bar line is, for diagnostics about the measure. */
   position: Position
@@ -43,6 +46,8 @@ type State = {
   measures: WrittenMeasure[]
   events: Written[]
   changes: Changes
+  /** A `|:` was written; the next measure opens a repeat. */
+  repeatNext: boolean
   slur: { open: Position | null; startNext: boolean }
   diagnostics: Diagnostic[]
 }
@@ -53,6 +58,7 @@ export const parseBody = (tokens: Token[]): Body => {
     measures: [],
     events: [],
     changes: {},
+    repeatNext: false,
     slur: { open: null, startNext: false },
     diagnostics: [],
   })
@@ -137,27 +143,32 @@ const lengthen = (state: State, position: Position): State => {
   return { ...state, events: [...state.events.slice(0, -1), longer] }
 }
 
-const closeMeasure = (state: State, style: 'single' | 'double' | 'final' | 'repeat', position: Position): State => {
-  const noted =
-    style === 'repeat'
-      ? report(state, warning(position, 'repeats are not supported yet; the music is played once'))
-      : state
-  if (!hasSound(noted.events)) {
-    return style === 'repeat' ? noted : report(noted, error(position, 'a measure needs at least one note or rest'))
+const closeMeasure = (state: State, style: BarStyle, position: Position): State => {
+  if (style === 'repeatStart') {
+    // `|:` either replaces the bar line before a measure or starts the score.
+    const closed = hasSound(state.events) ? closeMeasure(state, 'single', position) : state
+    return { ...closed, repeatNext: true }
   }
+  if (!hasSound(state.events)) return report(state, error(position, 'a measure needs at least one note or rest'))
   const measure: WrittenMeasure = {
-    events: noted.events,
-    changes: noted.changes,
-    barline: style === 'repeat' ? 'single' : style,
+    events: state.events,
+    changes: state.changes,
+    barline: style === 'repeatEnd' ? 'single' : style,
+    repeatStart: state.repeatNext,
+    repeatEnd: style === 'repeatEnd',
     lineBreakAfter: false,
     position,
   }
-  return { ...noted, measures: [...noted.measures, measure], events: [], changes: {} }
+  return { ...state, measures: [...state.measures, measure], events: [], changes: {}, repeatNext: false }
 }
 
 const change = (state: State, name: string, value: string, position: Position): State => {
-  if (/^\d+\.$/.test(name)) return report(state, warning(position, 'endings are not supported yet; they are ignored'))
   if (hasSound(state.events)) return report(state, error(position, `[${name} …] must start a measure`))
+  if (/^(\d+\.)+$/.test(name)) {
+    return value === ''
+      ? { ...state, changes: { ...state.changes, volta: name.split('.').filter(Boolean).map(Number) } }
+      : report(state, error(position, `invalid ending [${name} ${value}]; expected [1.] or [1.2.]`))
+  }
   const parsers: Record<string, (text: string) => Changes | null> = {
     time: (text) => mapNull(parseTime(text), (time) => ({ time })),
     key: (text) => mapNull(parseKey(text), (key) => ({ key })),

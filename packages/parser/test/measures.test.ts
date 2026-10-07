@@ -24,10 +24,4 @@ describe('measures', () => {
   it('records where the source breaks its lines', () => {
     expect(compiled('1 2 | 3 4 |\n5 6 | 7 1 |]').layoutHints).toEqual({ lineBreaksAfter: [1] })
   })
-
-  it('warns about repeats and plays them once', () => {
-    const result = compiled('|: 1 2 | 3 4 :|')
-
-    expect(result.playOrder).toEqual([0, 1])
-  })
 })

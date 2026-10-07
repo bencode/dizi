@@ -130,3 +130,51 @@ private func pickup() throws -> Score {
         ])
     #expect(run.beat(at: 2.5, in: timeline).map { [$0.index, $0.count] } == [1, 2])
 }
+
+/// `|: 1 - | [1.] 2 - :| [2.] 3 - ||` in 2/4: a repeat with two endings.
+func repeatedScore() throws -> Score {
+    func measure(_ index: Int, _ extra: String) -> String {
+        """
+        {"index": \(index), "start": \(index * 960), "duration": 960, "time": {"beats": 2, "unit": 4}, \
+        "barline": "\(index == 2 ? "double" : "single")"\(extra)}
+        """
+    }
+    func half(_ id: String, _ start: Int, _ degree: Int) -> String {
+        """
+        {"events": [{"kind": "note", "id": "\(id)", "start": \(start), "duration": 960, "value": 2, "dots": 0, \
+        "pitch": {"degree": \(degree), "octave": 0, "semitones": 0}}], "beams": []}
+        """
+    }
+    let json = """
+        {"irVersion": 1, "meta": {}, "header": {"key": {"tonic": "D"}}, "ticksPerQuarter": 480,
+         "measures": [\(measure(0, ", \"repeatStart\": true")), \(measure(1, ", \"repeatEnd\": true, \"volta\": [1]")),
+                      \(measure(2, ", \"volta\": [2]"))],
+         "playOrder": [0, 1, 0, 2],
+         "parts": [{"id": "solo", "role": "solo", "measures": [
+            \(half("a", 0, 1)), \(half("b", 960, 2)), \(half("c", 1920, 3))]}],
+         "spans": [], "marks": []}
+        """
+    return try Score.decode(from: Data(json.utf8))
+}
+
+@Test func followsTheRepeatAndItsEndings() throws {
+    let timeline = Timeline(score: try repeatedScore())
+
+    #expect(timeline.entries.map(\.id) == ["a", "b", "a", "c"])
+    #expect(timeline.entries.map(\.start) == [0, 960, 1920, 2880])
+}
+
+@Test func marksRepeatsAndEndingsOnTheScore() throws {
+    let items = ScoreLayout(score: try repeatedScore(), width: 2000).lines.flatMap(\.items)
+    let dots = items.filter { item in
+        if case .repeatDots = item { return true }
+        return false
+    }
+    let endings = items.compactMap { item -> String? in
+        guard case .ending(let label, _) = item else { return nil }
+        return label
+    }
+
+    #expect(dots.count == 2)
+    #expect(endings == ["1.", "2."])
+}

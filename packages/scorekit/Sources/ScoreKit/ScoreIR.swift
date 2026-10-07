@@ -49,6 +49,10 @@ public struct Measure: Decodable, Sendable {
     public let duration: Int
     public let time: TimeSignature
     public let barline: Barline
+    public let repeatStart: Bool?
+    public let repeatEnd: Bool?
+    /// The passes through a repeat this measure is played on (an ending: 1., 2.); nil outside endings.
+    public let volta: [Int]?
 }
 
 public enum TimeSignature: Decodable, Sendable, Equatable {

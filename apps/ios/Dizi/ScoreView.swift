@@ -137,6 +137,16 @@ struct ScoreView: View {
             barlineStrokes(style).map { offset, width in
                 .shape(Path(CGRect(x: centerX + offset, y: top, width: width, height: bottom - top)), .plain)
             }
+        case .repeatDots(let centerX, let top, let bottom):
+            [top, bottom].map { dotY in
+                .shape(
+                    Path(
+                        ellipseIn: CGRect(x: centerX, y: dotY, width: 0, height: 0).insetBy(
+                            dx: -dotRadius, dy: -dotRadius)),
+                    .plain)
+            }
+        case .ending(let label, let origin):
+            [.label(label, origin: origin)]
         }
     }
 
@@ -158,6 +168,9 @@ struct ScoreView: View {
             context.fill(path, with: .color(tone.color))
         case .digit(let degree, let center, let tone):
             context.draw(Text(verbatim: "\(degree)").font(digitFont).foregroundStyle(tone.color), at: center)
+        case .label(let text, let origin):
+            context.draw(
+                Text(verbatim: text).font(.system(size: metrics.fontSize * 0.55)), at: origin, anchor: .bottomLeading)
         }
     }
 }
@@ -166,6 +179,8 @@ struct ScoreView: View {
 private enum Ink {
     case shape(Path, Tone)
     case digit(Int, center: CGPoint, Tone)
+    /// Small text such as an ending's number, anchored at its bottom-left.
+    case label(String, origin: CGPoint)
 }
 
 /// Plain notation, the accent for the playhead, a light wash behind the current note.

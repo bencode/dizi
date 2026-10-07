@@ -53,6 +53,10 @@ public struct ScoreLayout: Sendable {
         /// 减时线 of one level, under one note or a beamed group.
         case underline(level: Int, left: CGFloat, right: CGFloat, lineY: CGFloat)
         case barline(Barline, centerX: CGFloat, top: CGFloat, bottom: CGFloat)
+        /// The two dots of a repeat sign, beside a bar line.
+        case repeatDots(centerX: CGFloat, top: CGFloat, bottom: CGFloat)
+        /// An ending's number (`1.`, `1.2.`) over its first measure, at its text's leading baseline point.
+        case ending(label: String, origin: CGPoint)
     }
 }
 
@@ -153,7 +157,25 @@ private func measureItems(_ index: Int, left: CGFloat, _ frame: LineFrame, _ con
         top: baseline - metrics.lineHeight * 0.3, bottom: baseline + metrics.lineHeight * 0.3)
     return placed.flatMap(\.items)
         + underlines(placed, beams: context.part.measures[index].beams, baseline: baseline, metrics: metrics)
-        + [barline]
+        + [barline] + repeats(index, span: left...barX, frame, context)
+}
+
+/// Repeat dots inside the measure's bar lines, and the ending's number where an ending begins.
+private func repeats(_ index: Int, span: ClosedRange<CGFloat>, _ frame: LineFrame, _ context: LineContext) -> [Item] {
+    let (metrics, left, barX, baseline) = (context.metrics, span.lowerBound, span.upperBound, frame.baseline)
+    let measure = context.score.measures[index]
+    let dots = { (centerX: CGFloat) in
+        Item.repeatDots(centerX: centerX, top: baseline - metrics.dotSpacing, bottom: baseline + metrics.dotSpacing)
+    }
+    let previousVolta = index > 0 ? context.score.measures[index - 1].volta : nil
+    let ending = measure.volta.flatMap { volta -> Item? in
+        guard volta != previousVolta else { return nil }
+        let label = volta.map { "\($0)." }.joined()
+        return .ending(label: label, origin: CGPoint(x: left, y: baseline - metrics.lineHeight * 0.38))
+    }
+    return (measure.repeatStart == true ? [dots(left + metrics.dotGap)] : [])
+        + (measure.repeatEnd == true ? [dots(barX - metrics.barGap * 0.4)] : [])
+        + (ending.map { [$0] } ?? [])
 }
 
 extension Mark {
@@ -194,7 +216,7 @@ extension ScoreLayout.Item {
         switch self {
         case .note(let id, let start, _, let center), .rest(let id, let start, let center):
             Anchor(id: id, tick: start, position: center.x)
-        case .octaveDot, .augmentationDot, .dash, .underline, .barline: nil
+        case .octaveDot, .augmentationDot, .dash, .underline, .barline, .repeatDots, .ending: nil
         }
     }
 
@@ -202,7 +224,7 @@ extension ScoreLayout.Item {
     public var head: (id: String, center: CGPoint)? {
         switch self {
         case .note(let id, _, _, let center), .rest(let id, _, let center): (id, center)
-        case .octaveDot, .augmentationDot, .dash, .underline, .barline: nil
+        case .octaveDot, .augmentationDot, .dash, .underline, .barline, .repeatDots, .ending: nil
         }
     }
 }
