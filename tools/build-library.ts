@@ -4,10 +4,10 @@
 //
 // A library directory holds catalog.json and one <id>.jianpu per piece:
 //   { "pieces": [ { "id": "laoliuban", "title": "老六板", "category": "piece", "level": 2, "lesson": 28 } ] }
-// Output: apps/ios/Dizi/Library/catalog.json and Library/scores/<id>.json.
+// Output: apps/ios/Dizi/Library/, laid out like the published library (docs/library.md).
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { appEntry, fromExamples, fromLibrary } from './library.ts'
+import { fromExamples, fromLibrary, listing } from './library.ts'
 
 const root = join(import.meta.dirname, '..')
 const output = join(root, 'apps/ios/Dizi/Library')
@@ -24,9 +24,7 @@ if (errors.length > 0) {
 }
 rmSync(output, { recursive: true, force: true })
 mkdirSync(join(output, 'scores'), { recursive: true })
-for (const { entry, score } of built) {
-  writeFileSync(join(output, 'scores', `${entry.id}.json`), `${JSON.stringify(score)}\n`)
-}
-const catalog = built.map(appEntry)
-writeFileSync(join(output, 'catalog.json'), `${JSON.stringify({ pieces: catalog }, null, 2)}\n`)
+const { scores, catalog } = listing(built, Math.floor(Date.now() / 1000))
+for (const score of scores) writeFileSync(join(output, score.path), score.body)
+writeFileSync(join(output, 'catalog.json'), catalog)
 console.log(`library: ${String(built.length)} pieces from ${directory ?? 'docs/examples'}`)

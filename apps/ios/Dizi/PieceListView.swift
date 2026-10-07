@@ -1,32 +1,26 @@
-import OSLog
+import ScoreKit
 import SwiftUI
 
-private let logger = Logger(subsystem: "io.upivot.dizi", category: "library")
-
 struct PieceListView: View {
-    @State private var catalog: Result<Catalog, any Error>?
+    @Environment(LibraryStore.self) private var library
 
     var body: some View {
         content
             .navigationTitle("曲目")
-            .navigationDestination(for: Piece.self) { piece in
+            .navigationDestination(for: LibraryPiece.self) { piece in
                 PieceDetailView(piece: piece)
             }
             .task {
-                do {
-                    catalog = .success(try Catalog.bundled())
-                } catch {
-                    logger.error("Cannot read the library: \(error, privacy: .public)")
-                    catalog = .failure(error)
-                }
+                library.load()
+                await library.refresh()
             }
     }
 
     @ViewBuilder private var content: some View {
-        switch catalog {
+        switch library.catalog {
         case .success(let catalog):
             List {
-                ForEach(Category.allCases, id: \.self) { category in
+                ForEach(PieceCategory.allCases, id: \.self) { category in
                     let pieces = catalog.pieces.filter { $0.category == category }
                     if !pieces.isEmpty {
                         Section(category.title) {
@@ -46,7 +40,7 @@ struct PieceListView: View {
 }
 
 private struct PieceRow: View {
-    let piece: Piece
+    let piece: LibraryPiece
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -63,7 +57,7 @@ private struct PieceRow: View {
     }
 }
 
-extension Category {
+extension PieceCategory {
     var title: LocalizedStringKey {
         switch self {
         case .tones: "长音与音阶"

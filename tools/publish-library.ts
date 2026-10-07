@@ -2,10 +2,9 @@
 //
 //   npm run publish-library -- --dry-run     what would be uploaded; no network
 //   npm run publish-library                  upload (OSS_* settings from .env)
-import { createHash } from 'node:crypto'
 import { join } from 'node:path'
 import OSS from 'ali-oss'
-import { appEntry, fromLibrary, type Built } from './library.ts'
+import { fromLibrary, listing, type Built } from './library.ts'
 
 /** The bucket's public address (custom domain bound to upivot-static). */
 const publicBase = 'https://g.upivot.cn'
@@ -13,26 +12,16 @@ const settings = ['OSS_REGION', 'OSS_BUCKET', 'OSS_ACCESS_KEY_ID', 'OSS_ACCESS_K
 
 type Upload = { key: string; body: string; cacheControl: string }
 
-const json = (value: unknown): string => `${JSON.stringify(value)}\n`
-const hashName = (body: string): string => createHash('sha256').update(body).digest('hex').slice(0, 16)
-
-/** What to upload: each piece's score, named by its content hash, and the catalog that lists them. */
+/** What to upload: the library's files under the prefix, scores cached for good and the catalog briefly. */
 const uploads = (built: Built[], prefix: string): { scores: Upload[]; catalog: Upload } => {
-  const pieces = built.map((piece) => {
-    const body = json(piece.score)
-    return { piece, score: `scores/${hashName(body)}.json`, body }
-  })
+  const { scores, catalog } = listing(built, Math.floor(Date.now() / 1000))
   return {
-    scores: pieces.map(({ score, body }) => ({
-      key: `${prefix}/${score}`,
+    scores: scores.map(({ path, body }) => ({
+      key: `${prefix}/${path}`,
       body,
       cacheControl: 'public, max-age=31536000, immutable',
     })),
-    catalog: {
-      key: `${prefix}/catalog.json`,
-      body: json({ irVersion: 1, pieces: pieces.map(({ piece, score }) => ({ ...appEntry(piece), score })) }),
-      cacheControl: 'public, max-age=300',
-    },
+    catalog: { key: `${prefix}/catalog.json`, body: catalog, cacheControl: 'public, max-age=300' },
   }
 }
 

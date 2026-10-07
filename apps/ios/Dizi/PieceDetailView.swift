@@ -5,7 +5,8 @@ import SwiftUI
 private let logger = Logger(subsystem: "io.upivot.dizi", category: "score")
 
 struct PieceDetailView: View {
-    let piece: Piece
+    let piece: LibraryPiece
+    @Environment(LibraryStore.self) private var library
     @State private var loaded: Result<Player, any Error>?
     @Environment(\.scenePhase) private var scenePhase
 
@@ -13,7 +14,7 @@ struct PieceDetailView: View {
         content
             .navigationTitle(piece.title)
             .navigationBarTitleDisplayMode(.inline)
-            .task { loaded = loadScore(piece).map { Player(pieceID: piece.id, score: $0) } }
+            .task { loaded = loadScore(piece, from: library).map { Player(pieceID: piece.id, score: $0) } }
             .onChange(of: scenePhase) { _, phase in
                 // Leaving the app (or a phone call) stops the audio; pause so the page is not left running.
                 if phase != .active, case .success(let player) = loaded {
@@ -42,9 +43,9 @@ struct PieceDetailView: View {
     }
 }
 
-private func loadScore(_ piece: Piece) -> Result<Score, any Error> {
+@MainActor private func loadScore(_ piece: LibraryPiece, from library: LibraryStore) -> Result<Score, any Error> {
     do {
-        return .success(try piece.score())
+        return .success(try library.score(for: piece))
     } catch {
         logger.error("Cannot open score \(piece.id, privacy: .public): \(error, privacy: .public)")
         return .failure(error)

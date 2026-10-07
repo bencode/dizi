@@ -1,4 +1,5 @@
 // The score library: catalog.json and the pieces it lists, compiled. Shared by build-library and publish-library.
+import { createHash } from 'node:crypto'
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { compile, type Diagnostic, type Score } from '../packages/parser/src/index.ts'
@@ -102,13 +103,30 @@ const timeText = (score: Score): string => {
   return time === undefined || time === 'free' ? '散板' : `${String(time.beats)}/${String(time.unit)}`
 }
 
-/** A piece as both catalogs list it (the app's and the published one): the entry and how its score reads. */
-export const appEntry = ({ entry, score }: Built) => ({
-  id: entry.id,
-  title: entry.title,
-  category: entry.category,
-  level: entry.level,
-  ...(entry.lesson === undefined ? {} : { lesson: entry.lesson }),
-  key: keyText(score),
-  time: timeText(score),
-})
+const json = (value: unknown): string => `${JSON.stringify(value)}\n`
+const hashName = (body: string): string => createHash('sha256').update(body).digest('hex').slice(0, 16)
+
+/**
+ * The library as files (docs/library.md): each score named by its content hash, and the catalog that lists them.
+ * The app's bundled snapshot and the published library share this layout.
+ */
+export const listing = (
+  built: Built[],
+  updated: number,
+): { scores: { path: string; body: string }[]; catalog: string } => {
+  const scores = built.map(({ score }) => {
+    const body = json(score)
+    return { path: `scores/${hashName(body)}.json`, body }
+  })
+  const pieces = built.map(({ entry, score }, index) => ({
+    id: entry.id,
+    title: entry.title,
+    category: entry.category,
+    level: entry.level,
+    ...(entry.lesson === undefined ? {} : { lesson: entry.lesson }),
+    key: keyText(score),
+    time: timeText(score),
+    score: scores[index]?.path ?? '',
+  }))
+  return { scores, catalog: json({ irVersion: 1, updated, pieces }) }
+}

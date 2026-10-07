@@ -65,7 +65,7 @@ Piece list ─tap─▶ score page (jianpu) ─▶ set the tempo / (optional) ta
 | 4a+ | Repeats and endings | done |
 | 4b | Library: course pieces as data in `priv/library`, compiled into the app; catalog-driven piece list | done |
 | 4c | Publish: compile the library, upload the pieces marked for publishing to OSS (hashed names); see [library.md](library.md) | done |
-| 4d | App: download and cache the library, with a bundled snapshot | |
+| 4d | App: download and cache the library, with a bundled snapshot | done |
 
 Interface language: Chinese first; strings kept in a String Catalog for later languages.
 

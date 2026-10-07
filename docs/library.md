@@ -13,6 +13,7 @@ upivot-dizi/library/scores/<hash>.json         a compiled score (IR); <hash> = f
 ```ts
 type Catalog = {
   irVersion: 1 // the IR version of every score listed; an app that cannot read it ignores the catalog
+  updated: number // Unix seconds when the catalog was built or published
   pieces: {
     id: string
     title: string
@@ -28,6 +29,19 @@ type Catalog = {
 
 - A changed score gets a new name, so a cached copy is never stale. Old score files stay, so an app holding an older catalog keeps working.
 - Scores are uploaded before the catalog, so the catalog never lists a missing file. A score already on OSS is not uploaded again.
+
+- The app bundles a snapshot in the same layout (`npm run library` writes it to `apps/ios/Dizi/Library/`), so a score already in the bundle is never downloaded.
+
+## In the app
+
+| When | What happens |
+| --- | --- |
+| Launch | The list shows the newest (by `updated`) of the bundled and the cached catalog, without waiting for the network |
+| Then, once per launch | Fetch `catalog.json`; if it is newer than the one shown, download the scores that are neither cached nor bundled, write the catalog, switch the list to it, and delete cached scores it no longer uses |
+| Any failure (offline, a bad file) | Nothing is replaced; the failure is logged; downloaded scores are kept for next time |
+| Opening a piece | The score is read from the cache, else from the bundle |
+
+The cache is `Application Support/Library/` (excluded from backup), not `Caches/`, so the library stays available offline. A fresh development build is newer than the last publish, so locally edited scores show until a newer catalog is published.
 
 ## What is published
 
