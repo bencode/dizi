@@ -32,7 +32,7 @@ type Catalog = {
 ## What is published
 
 - A piece is uploaded only when its entry in `priv/library/catalog.json` has `"publish": true`. Without it, the piece stays private: it is bundled in development builds but never uploaded.
-- Mark a piece only when it may be distributed publicly: traditional and folk melodies, works whose authors died more than 50 years ago, our own études. Course arrangements and études stay private until permission is given.
+- The owner decides what is marked. Traditional and folk melodies, works whose authors died more than 50 years ago, and common technique études are published; anything with a known rights holder stays private until permission is given.
 
 ## Access
 
