@@ -18,11 +18,13 @@ targets:
     platform: iOS
     sources:
       - path: Dizi
-        excludes: ["Samples/**"]
+        excludes: ["Samples/**", "Library/**"]
       - path: Dizi/Samples
         type: folder
         buildPhase: resources
-      - path: ../../docs/examples/molihua.ir.json
+      # Built by `npm run library` (not committed): the catalog and the compiled scores.
+      - path: Dizi/Library
+        type: folder
         buildPhase: resources
     dependencies:
       - package: ScoreKit

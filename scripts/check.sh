@@ -14,6 +14,9 @@ xcrun swift-format lint --strict --parallel "${swift_files[@]}"
 echo "==> Lint"
 swiftlint lint --quiet
 
+echo "==> Library (the app's bundled scores)"
+npm run --silent library
+
 echo "==> Project"
 project_hash() { find apps/ios/Dizi.xcodeproj -type f -not -path '*/xcuserdata/*' | sort | xargs shasum | shasum; }
 before=$(project_hash)

@@ -6,9 +6,10 @@ final class NavigationTests: XCTestCase {
         let app = XCUIApplication()
         app.launch()
 
-        app.buttons["茉莉花"].tap()
+        let firstPiece = app.collectionViews.buttons.firstMatch
+        XCTAssertTrue(firstPiece.waitForExistence(timeout: 5))
+        firstPiece.tap()
 
-        XCTAssertTrue(app.navigationBars["茉莉花"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.descendants(matching: .any)["score"].waitForExistence(timeout: 5))
         // Only the stopped page: while 走谱 runs the page redraws every frame, so the app never goes idle
         // for XCUITest. The transport logic is covered by ScoreKit's unit tests.

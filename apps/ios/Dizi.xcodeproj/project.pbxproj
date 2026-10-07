@@ -12,13 +12,14 @@
 		19A7AB3A6A9B33437E1CA0F7 /* ScoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E825365B13D701E585670E85 /* ScoreView.swift */; };
 		1C82DAB466F726D3BC86ACBC /* PieceListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D9FBF8D0C34328E8A93612 /* PieceListView.swift */; };
 		28DC3C1319B643481CE61A0B /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2F03512C3298090F9FCB53 /* Player.swift */; };
+		31FE4B35E75F4F98B7846937 /* Library in Resources */ = {isa = PBXBuildFile; fileRef = 950D485C1F8F347121E6746A /* Library */; };
+		3DA9A96BDE8B2FA91916A4DA /* Catalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 008A528167C057DB5BDB317C /* Catalog.swift */; };
 		3E699F796C095BA3FD05AF50 /* Voices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DDF2829D5D3185F122237C4 /* Voices.swift */; };
 		432E2FAF7F8AC03D762AFCA7 /* TransportBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */; };
 		694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7DDEBD62C1197359510C59D /* DiziApp.swift */; };
 		C50C666DD7C22E635F515C10 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */; };
 		D891F5DB445004C54E9B4F75 /* ScoreKit in Frameworks */ = {isa = PBXBuildFile; productRef = 45709811699F8732788DB871 /* ScoreKit */; };
 		E188A2E7A8091A2A88D0CAE9 /* Samples in Resources */ = {isa = PBXBuildFile; fileRef = 33A4F41FB44B5B2F0B205D89 /* Samples */; };
-		E20B1CD218B639B1DF9676F8 /* molihua.ir.json in Resources */ = {isa = PBXBuildFile; fileRef = 60C030429385FF1F64E8EE08 /* molihua.ir.json */; };
 		E2AD70163AE8542ADACCE077 /* NavigationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216C0414C7628D24C53FCDA3 /* NavigationTests.swift */; };
 		E4E731720DFB69589538B60F /* PieceDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1657F2512FB10BB5DB9A727B /* PieceDetailView.swift */; };
 /* End PBXBuildFile section */
@@ -34,16 +35,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		008A528167C057DB5BDB317C /* Catalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Catalog.swift; sourceTree = "<group>"; };
 		0DDF2829D5D3185F122237C4 /* Voices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Voices.swift; sourceTree = "<group>"; };
 		1657F2512FB10BB5DB9A727B /* PieceDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceDetailView.swift; sourceTree = "<group>"; };
 		1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportBar.swift; sourceTree = "<group>"; };
 		216C0414C7628D24C53FCDA3 /* NavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationTests.swift; sourceTree = "<group>"; };
 		2C2F03512C3298090F9FCB53 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		33A4F41FB44B5B2F0B205D89 /* Samples */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Samples; path = Dizi/Samples; sourceTree = SOURCE_ROOT; };
-		60C030429385FF1F64E8EE08 /* molihua.ir.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = molihua.ir.json; sourceTree = "<group>"; };
 		86587596978C7D7A172CA03E /* DiziUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DiziUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		89D7C1647EEC53579F92423C /* Dizi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Dizi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		950D485C1F8F347121E6746A /* Library */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Library; path = Dizi/Library; sourceTree = SOURCE_ROOT; };
 		A5D9FBF8D0C34328E8A93612 /* PieceListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceListView.swift; sourceTree = "<group>"; };
 		AB92B401D832BB364EDD2858 /* RunAudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunAudio.swift; sourceTree = "<group>"; };
 		E825365B13D701E585670E85 /* ScoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreView.swift; sourceTree = "<group>"; };
@@ -73,22 +75,13 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		46AC104C3F260A254876FAB9 /* examples */ = {
-			isa = PBXGroup;
-			children = (
-				60C030429385FF1F64E8EE08 /* molihua.ir.json */,
-			);
-			name = examples;
-			path = ../../docs/examples;
-			sourceTree = "<group>";
-		};
 		608B1C271A6B86974C7E03B0 = {
 			isa = PBXGroup;
 			children = (
+				950D485C1F8F347121E6746A /* Library */,
 				33A4F41FB44B5B2F0B205D89 /* Samples */,
 				91B23B00863E128D038FF620 /* Dizi */,
 				9A08F97B0119846354B5A61D /* DiziUITests */,
-				46AC104C3F260A254876FAB9 /* examples */,
 				C6CF4657377A14ED458DAD94 /* Packages */,
 				1A83B36BBECD2864FF2A8DC1 /* Products */,
 			);
@@ -98,6 +91,7 @@
 			isa = PBXGroup;
 			children = (
 				940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */,
+				008A528167C057DB5BDB317C /* Catalog.swift */,
 				F7DDEBD62C1197359510C59D /* DiziApp.swift */,
 				F2AF968099F1CC1C2518E6DA /* Localizable.xcstrings */,
 				1657F2512FB10BB5DB9A727B /* PieceDetailView.swift */,
@@ -214,9 +208,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				C50C666DD7C22E635F515C10 /* Assets.xcassets in Resources */,
+				31FE4B35E75F4F98B7846937 /* Library in Resources */,
 				10F94D349285BC70691F27B3 /* Localizable.xcstrings in Resources */,
 				E188A2E7A8091A2A88D0CAE9 /* Samples in Resources */,
-				E20B1CD218B639B1DF9676F8 /* molihua.ir.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -227,6 +221,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3DA9A96BDE8B2FA91916A4DA /* Catalog.swift in Sources */,
 				694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */,
 				E4E731720DFB69589538B60F /* PieceDetailView.swift in Sources */,
 				1C82DAB466F726D3BC86ACBC /* PieceListView.swift in Sources */,

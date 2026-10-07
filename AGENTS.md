@@ -13,6 +13,7 @@ Run `scripts/check.sh` after every change. Work is done only when it prints `All
 | Parser | `npm run --workspace packages/parser check`: TypeScript strict, ESLint (strict type-checked), Prettier, Vitest | type errors, lint or format issues, failing tests |
 | Score examples | the parser recompiles `library/molihua.jianpu` | `docs/examples/molihua.ir.json` differs from the compiled output |
 | ScoreKit tests | `swift test --package-path packages/scorekit` on the Mac | failing unit tests |
+| Library | `npm run library`: compiles `priv/library` (or, without it, `docs/examples`) into `apps/ios/Dizi/Library/` | a score with errors |
 | Project | XcodeGen | `apps/ios/Dizi.xcodeproj` out of date with `apps/ios/project.yml` |
 | Build and test | `xcodebuild test` on the iOS simulator (`SIMULATOR`, default `iPhone 17e`) | compiler warnings (treated as errors), failing unit or UI tests |
 
@@ -41,6 +42,11 @@ Programs are data flowing through transformations; effects stay at the edge. Sou
 - iOS 26, iPhone only, portrait, Swift 6 with strict concurrency.
 - UI text lives in `apps/ios/Dizi/Localizable.xcstrings`, Chinese first. Code, comments, and commits are English; dizi terms are pinyin in code, with the Chinese term in a comment.
 - Tests: Swift Testing for logic; XCUITest (`apps/ios/DiziUITests`) for screen-to-screen flows. Write only tests that catch a real regression.
+
+## Scores are data
+
+- The score library is data, not code: it lives in `priv/library/` (`catalog.json` + `<id>.jianpu`; not in git, partly copyrighted) and will be published to OSS. The repository keeps only test and spec fixtures (`docs/examples/`).
+- `npm run library` compiles it into `apps/ios/Dizi/Library/` (gitignored), which the app bundles; run it after cloning and after editing scores.
 
 ## Assets
 

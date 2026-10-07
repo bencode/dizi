@@ -62,7 +62,8 @@ Piece list ─tap─▶ score page (jianpu) ─▶ set the tempo / (optional) ta
 | 2 | 走谱: playhead sweeping continuously, count-in, click, page following, tempo, start from any note | done |
 | 3 | Demo melody from CC0 dizi samples, in sync with the clicks | done |
 | 4a | TypeScript parser (`packages/parser`): score text → IR; the score format published | done |
-| 4b | Library: ~10 public-domain pieces in `library/` | next |
+| 4a+ | Repeats and endings | done |
+| 4b | Library: course pieces as data in `priv/library`, compiled into the app; catalog-driven piece list | in progress |
 | 4c | Publish: compile the library, upload to OSS (private bucket, public-read objects, hashed names) | |
 | 4d | App: download and cache the library, with a bundled snapshot | |
 

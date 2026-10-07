@@ -5,7 +5,7 @@ import SwiftUI
 private let logger = Logger(subsystem: "io.upivot.dizi", category: "score")
 
 struct PieceDetailView: View {
-    let piece: PlaceholderPiece
+    let piece: Piece
     @State private var loaded: Result<Player, any Error>?
     @Environment(\.scenePhase) private var scenePhase
 
@@ -13,7 +13,7 @@ struct PieceDetailView: View {
         content
             .navigationTitle(piece.title)
             .navigationBarTitleDisplayMode(.inline)
-            .task { loaded = loadScore(id: piece.id).map { $0.map { Player(pieceID: piece.id, score: $0) } } }
+            .task { loaded = loadScore(piece).map { Player(pieceID: piece.id, score: $0) } }
             .onChange(of: scenePhase) { _, phase in
                 // Leaving the app (or a phone call) stops the audio; pause so the page is not left running.
                 if phase != .active, case .success(let player) = loaded {
@@ -42,13 +42,11 @@ struct PieceDetailView: View {
     }
 }
 
-/// Nil when the piece has no bundled score yet (placeholders); a failure when the score cannot be read.
-private func loadScore(id: String) -> Result<Score, any Error>? {
-    guard let url = Bundle.main.url(forResource: "\(id).ir", withExtension: "json") else { return nil }
+private func loadScore(_ piece: Piece) -> Result<Score, any Error> {
     do {
-        return .success(try Score.decode(from: Data(contentsOf: url)))
+        return .success(try piece.score())
     } catch {
-        logger.error("Cannot open score \(id, privacy: .public): \(error, privacy: .public)")
+        logger.error("Cannot open score \(piece.id, privacy: .public): \(error, privacy: .public)")
         return .failure(error)
     }
 }

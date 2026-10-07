@@ -13,6 +13,7 @@ brew install xcodegen swiftlint
 ```
 
 ```sh
+npm run library     # compile the scores the app bundles (a fresh clone uses docs/examples)
 cd apps/ios
 xcodegen generate   # after changing project.yml
 open Dizi.xcodeproj

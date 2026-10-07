@@ -1,8 +1,12 @@
 {
   "name": "dizi",
   "private": true,
+  "type": "module",
   "description": "Workspace root for the TypeScript packages; Swift packages and the iOS app have their own tooling.",
   "workspaces": [
     "packages/parser"
-  ]
+  ],
+  "scripts": {
+    "library": "node tools/build-library.ts"
+  }
 }
