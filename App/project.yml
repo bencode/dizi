@@ -17,7 +17,11 @@ targets:
     type: application
     platform: iOS
     sources:
-      - Dizi
+      - path: Dizi
+        excludes: ["Samples/**"]
+      - path: Dizi/Samples
+        type: folder
+        buildPhase: resources
       - path: ../docs/examples/molihua.ir.json
         buildPhase: resources
     dependencies:
