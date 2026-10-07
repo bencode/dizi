@@ -14,6 +14,12 @@ describe('header', () => {
     expect(result.score?.marks[0]).toEqual({ kind: 'tempo', at: 0, beat: 720, bpm: 60 })
   })
 
+  it('ignores a comment after a value', () => {
+    expect(compile('key: 1=D  // 按 D 调笛\ntime: 2/4\ntempo: 60\n\n1 2 |]\n').score?.header.key).toEqual({
+      tonic: 'D',
+    })
+  })
+
   it('reports missing and invalid fields, and warns about unknown ones', () => {
     const result = compile('key: 1=H\ntime: 2/4\ncolor: red\n\n1 2 |]\n')
 

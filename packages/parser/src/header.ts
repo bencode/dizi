@@ -18,7 +18,7 @@ export type HeaderResult = { header: Header | null; bodyStart: number; diagnosti
 
 type Field = { name: string; value: string; line: Line; valueColumn: number }
 
-const fieldPattern = /^(\s*)([a-z]+)(\s*:\s*)(.*?)\s*$/
+const fieldPattern = /^(\s*)([a-z]+)(\s*:\s*)(.*?)\s*(?:\/\/.*)?$/
 const knownFields = new Set(['title', 'composer', 'key', 'time', 'tempo', 'fingering'])
 const isBlankOrComment = (line: Line): boolean => /^\s*(\/\/.*)?$/.test(line.text)
 
