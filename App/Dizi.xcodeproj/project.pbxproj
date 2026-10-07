@@ -7,11 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		012CC5E161A08809FF4437FF /* RunAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB92B401D832BB364EDD2858 /* RunAudio.swift */; };
 		10F94D349285BC70691F27B3 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = F2AF968099F1CC1C2518E6DA /* Localizable.xcstrings */; };
 		19A7AB3A6A9B33437E1CA0F7 /* ScoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E825365B13D701E585670E85 /* ScoreView.swift */; };
 		1C82DAB466F726D3BC86ACBC /* PieceListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D9FBF8D0C34328E8A93612 /* PieceListView.swift */; };
-		1C9062B8ED35E1B68B1D6443 /* ClickTrack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2754544AAF40E1CDC9BDEB9A /* ClickTrack.swift */; };
 		28DC3C1319B643481CE61A0B /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2F03512C3298090F9FCB53 /* Player.swift */; };
+		3E699F796C095BA3FD05AF50 /* Voices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DDF2829D5D3185F122237C4 /* Voices.swift */; };
 		432E2FAF7F8AC03D762AFCA7 /* TransportBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */; };
 		694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7DDEBD62C1197359510C59D /* DiziApp.swift */; };
 		C50C666DD7C22E635F515C10 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */; };
@@ -33,10 +34,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0DDF2829D5D3185F122237C4 /* Voices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Voices.swift; sourceTree = "<group>"; };
 		1657F2512FB10BB5DB9A727B /* PieceDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceDetailView.swift; sourceTree = "<group>"; };
 		1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportBar.swift; sourceTree = "<group>"; };
 		216C0414C7628D24C53FCDA3 /* NavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationTests.swift; sourceTree = "<group>"; };
-		2754544AAF40E1CDC9BDEB9A /* ClickTrack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClickTrack.swift; sourceTree = "<group>"; };
 		2C2F03512C3298090F9FCB53 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		33A4F41FB44B5B2F0B205D89 /* Samples */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Samples; path = Dizi/Samples; sourceTree = SOURCE_ROOT; };
 		60C030429385FF1F64E8EE08 /* molihua.ir.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = molihua.ir.json; sourceTree = "<group>"; };
@@ -44,6 +45,7 @@
 		89D7C1647EEC53579F92423C /* Dizi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Dizi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A5D9FBF8D0C34328E8A93612 /* PieceListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceListView.swift; sourceTree = "<group>"; };
+		AB92B401D832BB364EDD2858 /* RunAudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunAudio.swift; sourceTree = "<group>"; };
 		B4E1E564EDDFF024A6BE2EA9 /* ScoreKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ScoreKit; path = ../Packages/ScoreKit; sourceTree = SOURCE_ROOT; };
 		E825365B13D701E585670E85 /* ScoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreView.swift; sourceTree = "<group>"; };
 		F2AF968099F1CC1C2518E6DA /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -96,14 +98,15 @@
 			isa = PBXGroup;
 			children = (
 				940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */,
-				2754544AAF40E1CDC9BDEB9A /* ClickTrack.swift */,
 				F7DDEBD62C1197359510C59D /* DiziApp.swift */,
 				F2AF968099F1CC1C2518E6DA /* Localizable.xcstrings */,
 				1657F2512FB10BB5DB9A727B /* PieceDetailView.swift */,
 				A5D9FBF8D0C34328E8A93612 /* PieceListView.swift */,
 				2C2F03512C3298090F9FCB53 /* Player.swift */,
+				AB92B401D832BB364EDD2858 /* RunAudio.swift */,
 				E825365B13D701E585670E85 /* ScoreView.swift */,
 				1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */,
+				0DDF2829D5D3185F122237C4 /* Voices.swift */,
 			);
 			path = Dizi;
 			sourceTree = "<group>";
@@ -224,13 +227,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1C9062B8ED35E1B68B1D6443 /* ClickTrack.swift in Sources */,
 				694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */,
 				E4E731720DFB69589538B60F /* PieceDetailView.swift in Sources */,
 				1C82DAB466F726D3BC86ACBC /* PieceListView.swift in Sources */,
 				28DC3C1319B643481CE61A0B /* Player.swift in Sources */,
+				012CC5E161A08809FF4437FF /* RunAudio.swift in Sources */,
 				19A7AB3A6A9B33437E1CA0F7 /* ScoreView.swift in Sources */,
 				432E2FAF7F8AC03D762AFCA7 /* TransportBar.swift in Sources */,
+				3E699F796C095BA3FD05AF50 /* Voices.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -17,10 +17,13 @@ final class Player {
         didSet { UserDefaults.standard.set(bpm, forKey: tempoKey) }
     }
     var clickOn = true
+    /// 示范: the app plays the melody too.
+    var demoOn = false
 
     private let beat: Int
     private let tempoKey: String
-    private let clickTrack: ClickTrack?
+    private let audio: RunAudio?
+    private let voices: [Voice]
     private var finishTask: Task<Void, Never>?
 
     init(pieceID: String, score: Score) {
@@ -31,12 +34,20 @@ final class Player {
         tempoKey = "tempo.\(pieceID)"
         let saved = UserDefaults.standard.integer(forKey: tempoKey)
         bpm = saved > 0 ? saved : written.flatMap(defaultBPM) ?? 72
-        clickTrack = {
+        audio = {
             do {
-                return try ClickTrack()
+                return try RunAudio()
             } catch {
                 logger.error("Audio unavailable: \(error, privacy: .public)")
                 return nil
+            }
+        }()
+        voices = {
+            do {
+                return try bundledVoices()
+            } catch {
+                logger.error("Demo voice unavailable: \(error, privacy: .public)")
+                return []
             }
         }()
     }
@@ -44,7 +55,10 @@ final class Player {
     static let tempoRange = 30...240
 
     /// False for a score without notes, or when the audio could not start up.
-    var canPlay: Bool { !timeline.entries.isEmpty && clickTrack != nil }
+    var canPlay: Bool { !timeline.entries.isEmpty && audio != nil }
+
+    /// False when the demo voice could not be loaded.
+    var canDemo: Bool { !voices.isEmpty }
 
     var isRunning: Bool {
         if case .running = transport { return true }
@@ -53,12 +67,12 @@ final class Player {
 
     /// Where the run is now, read from the audio clock.
     var position: Run.Position? {
-        guard let run, let time = clickTrack?.time else { return nil }
+        guard let run, let time = audio?.time else { return nil }
         return run.position(at: time, in: timeline)
     }
 
     var beatInBar: (index: Int, count: Int)? {
-        guard let run, let time = clickTrack?.time else { return nil }
+        guard let run, let time = audio?.time else { return nil }
         return run.beat(at: time, in: timeline)
     }
 
@@ -103,12 +117,16 @@ final class Player {
     }
 
     private func play() {
-        guard canPlay, let clickTrack else { return }
+        guard canPlay, let audio else { return }
         transport = transport.next(.play)
         guard case .running(let from, _) = transport else { return }
         let run = Run(from: from, tempo: Tempo(bpm: Double(bpm), beat: beat))
         do {
-            try clickTrack.start(run.clicks(timeline), audible: clickOn)
+            let melody =
+                demoOn && canDemo
+                ? melodySamples(run.melody(timeline, score: score), voices: voices, sampleRate: RunAudio.sampleRate)
+                : nil
+            try audio.start(run.clicks(timeline), clicksAudible: clickOn, melody: melody)
         } catch {
             logger.error("Cannot start the clicks: \(error, privacy: .public)")
             transport = transport.next(.stop)
@@ -136,7 +154,7 @@ final class Player {
     private func halt() {
         finishTask?.cancel()
         finishTask = nil
-        clickTrack?.stop()
+        audio?.stop()
         run = nil
     }
 }

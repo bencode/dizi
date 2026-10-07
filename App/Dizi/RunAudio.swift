@@ -1,54 +1,68 @@
 import AVFoundation
 import ScoreKit
 
-/// The audio edge of 走谱: plays a run's clicks sample-accurately and reports the time since the run began,
-/// which is the clock the cursor follows.
+/// The audio edge of 走谱: plays a run's clicks and, optionally, its demo melody, both sample-accurately from
+/// one start time, and reports the time since the run began, which is the clock the cursor follows.
 @MainActor
-final class ClickTrack {
+final class RunAudio {
+    static let sampleRate = 44_100.0
+
     private let engine = AVAudioEngine()
-    private let player = AVAudioPlayerNode()
+    private let clickNode = AVAudioPlayerNode()
+    private let melodyNode = AVAudioPlayerNode()
     private let format: AVAudioFormat
     private let accentBuffer: AVAudioPCMBuffer
     private let beatBuffer: AVAudioPCMBuffer
 
     init() throws {
-        guard let format = AVAudioFormat(standardFormatWithSampleRate: 44_100, channels: 1),
+        guard let format = AVAudioFormat(standardFormatWithSampleRate: Self.sampleRate, channels: 1),
             let accent = buffer(clickSamples(frequency: 1_760, sampleRate: format.sampleRate), format: format),
             let beat = buffer(clickSamples(frequency: 1_175, sampleRate: format.sampleRate), format: format)
-        else { throw ClickTrackError.noAudioFormat }
+        else { throw RunAudioError.noAudioFormat }
         self.format = format
         accentBuffer = accent
         beatBuffer = beat
-        engine.attach(player)
-        engine.connect(player, to: engine.mainMixerNode, format: format)
+        for node in [clickNode, melodyNode] {
+            engine.attach(node)
+            engine.connect(node, to: engine.mainMixerNode, format: format)
+        }
     }
 
-    /// Starts a run; time 0 is the first click. Silent clicks still drive the clock.
-    func start(_ clicks: [Click], audible: Bool) throws {
+    /// Starts a run; time 0 is the first click. Silent clicks still drive the clock. The melody, rendered at
+    /// `sampleRate` from time 0, starts on the same sample.
+    func start(_ clicks: [Click], clicksAudible: Bool, melody: [Float]?) throws {
         try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
         try AVAudioSession.sharedInstance().setActive(true)
         if !engine.isRunning {
             try engine.start()
         }
-        player.stop()
-        player.volume = audible ? 1 : 0
+        clickNode.stop()
+        melodyNode.stop()
+        clickNode.volume = clicksAudible ? 1 : 0
         for click in clicks {
             let when = AVAudioTime(
                 sampleTime: AVAudioFramePosition(click.time * format.sampleRate), atRate: format.sampleRate)
-            player.scheduleBuffer(click.accent ? accentBuffer : beatBuffer, at: when)
+            clickNode.scheduleBuffer(click.accent ? accentBuffer : beatBuffer, at: when)
         }
-        player.play()
+        if let melody, let melodyBuffer = buffer(melody, format: format) {
+            melodyNode.scheduleBuffer(melodyBuffer, at: AVAudioTime(sampleTime: 0, atRate: format.sampleRate))
+        }
+        // Both nodes start on one host time a moment ahead, so they cannot drift apart.
+        let startTime = AVAudioTime(hostTime: mach_absolute_time() + AVAudioTime.hostTime(forSeconds: 0.05))
+        clickNode.play(at: startTime)
+        melodyNode.play(at: startTime)
     }
 
     func stop() {
-        player.stop()
+        clickNode.stop()
+        melodyNode.stop()
         engine.pause()
     }
 
     /// Seconds since time 0 of the current run; nil when nothing is playing yet.
     var time: Double? {
-        guard let nodeTime = player.lastRenderTime, nodeTime.isHostTimeValid,
-            let playerTime = player.playerTime(forNodeTime: nodeTime)
+        guard let nodeTime = clickNode.lastRenderTime, nodeTime.isHostTimeValid,
+            let playerTime = clickNode.playerTime(forNodeTime: nodeTime)
         else { return nil }
         // The render time moves once per audio buffer; add the time since that render so every frame advances.
         let sinceRender =
@@ -57,7 +71,7 @@ final class ClickTrack {
     }
 }
 
-enum ClickTrackError: Error {
+enum RunAudioError: Error {
     case noAudioFormat
 }
 
@@ -71,7 +85,8 @@ private func clickSamples(frequency: Double, sampleRate: Double) -> [Float] {
 }
 
 private func buffer(_ samples: [Float], format: AVAudioFormat) -> AVAudioPCMBuffer? {
-    guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(samples.count)),
+    guard !samples.isEmpty,
+        let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(samples.count)),
         let channel = buffer.floatChannelData?[0]
     else { return nil }
     buffer.frameLength = AVAudioFrameCount(samples.count)

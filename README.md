@@ -27,3 +27,7 @@ scripts/check.sh
 ```
 
 See [AGENTS.md](AGENTS.md) for what each check enforces.
+
+## Credits
+
+The demo melody uses dizi recordings by [Hypnotriod](https://freesound.org/people/Hypnotriod/packs/21613/) (CC0), with thanks.

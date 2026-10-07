@@ -13,6 +13,9 @@ struct TransportBar: View {
                 }
                 Spacer()
                 tempo
+                Toggle("示范", isOn: $player.demoOn)
+                    .toggleStyle(.button)
+                    .disabled(!player.canDemo)
                 Toggle("节拍", isOn: $player.clickOn)
                     .toggleStyle(.button)
             }
