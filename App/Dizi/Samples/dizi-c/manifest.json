@@ -1,0 +1,111 @@
+{
+  "source": "https://freesound.org/people/Hypnotriod/packs/21613/",
+  "license": "CC0-1.0",
+  "voices": [
+    {
+      "midi": 67,
+      "tuneCents": 5.4,
+      "loopStart": 52920,
+      "loopEnd": 132096,
+      "sampleRate": 44100
+    },
+    {
+      "midi": 69,
+      "tuneCents": 5.0,
+      "loopStart": 52920,
+      "loopEnd": 132076,
+      "sampleRate": 44100
+    },
+    {
+      "midi": 71,
+      "tuneCents": 1.7,
+      "loopStart": 52920,
+      "loopEnd": 132730,
+      "sampleRate": 44100
+    },
+    {
+      "midi": 72,
+      "tuneCents": 1.3,
+      "loopStart": 52920,
+      "loopEnd": 132722,
+      "sampleRate": 44100
+    },
+    {
+      "midi": 74,
+      "tuneCents": 4.4,
+      "loopStart": 52920,
+      "loopEnd": 132184,
+      "sampleRate": 44100
+    },
+    {
+      "midi": 76,
+      "tuneCents": 12.4,
+      "loopStart": 52920,
+      "loopEnd": 131868,
+      "sampleRate": 44100
+    },
+    {
+      "midi": 78,
+      "tuneCents": 7.6,
+      "loopStart": 52920,
+      "loopEnd": 132633,
+      "sampleRate": 44100
+    },
+    {
+      "midi": 79,
+      "tuneCents": 4.8,
+      "loopStart": 52920,
+      "loopEnd": 132533,
+      "sampleRate": 44100
+    },
+    {
+      "midi": 81,
+      "tuneCents": 5.3,
+      "loopStart": 52920,
+      "loopEnd": 132528,
+      "sampleRate": 44100
+    },
+    {
+      "midi": 83,
+      "tuneCents": 6.0,
+      "loopStart": 52920,
+      "loopEnd": 132573,
+      "sampleRate": 44100
+    },
+    {
+      "midi": 84,
+      "tuneCents": 11.8,
+      "loopStart": 52920,
+      "loopEnd": 132559,
+      "sampleRate": 44100
+    },
+    {
+      "midi": 86,
+      "tuneCents": 5.9,
+      "loopStart": 52920,
+      "loopEnd": 132641,
+      "sampleRate": 44100
+    },
+    {
+      "midi": 88,
+      "tuneCents": 23.1,
+      "loopStart": 52920,
+      "loopEnd": 131914,
+      "sampleRate": 44100
+    },
+    {
+      "midi": 90,
+      "tuneCents": 1.4,
+      "loopStart": 52920,
+      "loopEnd": 132420,
+      "sampleRate": 44100
+    },
+    {
+      "midi": 91,
+      "tuneCents": 11.2,
+      "loopStart": 52920,
+      "loopEnd": 132083,
+      "sampleRate": 44100
+    }
+  ]
+}
