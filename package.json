@@ -8,6 +8,11 @@
   ],
   "scripts": {
     "library": "node tools/build-library.ts",
-    "check:tools": "tsc -p tools && eslint tools && prettier --config packages/parser/.prettierrc.json --check 'tools/*.ts'"
+    "check:tools": "tsc -p tools && eslint tools && prettier --config packages/parser/.prettierrc.json --check 'tools/*.ts'",
+    "publish-library": "node --env-file=.env tools/publish-library.ts"
+  },
+  "devDependencies": {
+    "@types/ali-oss": "^6.23.3",
+    "ali-oss": "^6.23.0"
   }
 }

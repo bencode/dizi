@@ -63,8 +63,8 @@ Piece list ─tap─▶ score page (jianpu) ─▶ set the tempo / (optional) ta
 | 3 | Demo melody from CC0 dizi samples, in sync with the clicks | done |
 | 4a | TypeScript parser (`packages/parser`): score text → IR; the score format published | done |
 | 4a+ | Repeats and endings | done |
-| 4b | Library: course pieces as data in `priv/library`, compiled into the app; catalog-driven piece list | in progress |
-| 4c | Publish: compile the library, upload to OSS (private bucket, public-read objects, hashed names) | |
+| 4b | Library: course pieces as data in `priv/library`, compiled into the app; catalog-driven piece list | done |
+| 4c | Publish: compile the library, upload the pieces marked for publishing to OSS (hashed names); see [library.md](library.md) | in progress |
 | 4d | App: download and cache the library, with a bundled snapshot | |
 
 Interface language: Chinese first; strings kept in a String Catalog for later languages.
@@ -94,16 +94,16 @@ Interface language: Chinese first; strings kept in a String Catalog for later la
 - **Served as static files** from phase 1, so content updates without a release:
 
   ```text
-  priv/library/ (private) ─publish script─▶ Aliyun OSS (Hong Kong) + CDN
+  priv/library/ (private) ─publish script─▶ Aliyun OSS (Hangzhou), g.upivot.cn
                                             ├── catalog.json        pieces, versions, score format version
-                                            └── scores/<id>.jianpu
+                                            └── scores/<hash>.json  compiled IR
   App: fetch catalog.json ─▶ download new or changed scores ─▶ cache for offline use
   ```
 
 - **A snapshot is bundled** in the app, so it works on first launch without a network.
 - **Format version** in the catalog: an older app skips pieces whose format it cannot read.
-- **Hong Kong** first: fast enough from the mainland and needs no ICP filing; move to the mainland later if needed.
-- **Copyright**: record each score's source and status. Traditional and folk pieces are mostly free to use; many études and arrangements are not, and need permission before public distribution.
+- **Hangzhou** (`oss-cn-hangzhou`), served from `g.upivot.cn`.
+- **Copyright**: record each score's source and status. Traditional and folk pieces are mostly free to use; many études and arrangements are not, and need permission before public distribution. Only pieces marked `"publish": true` are uploaded.
 
 ## Platform
 

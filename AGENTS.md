@@ -47,6 +47,7 @@ Programs are data flowing through transformations; effects stay at the edge. Sou
 
 - The score library is data, not code: it lives in `priv/library/` (`catalog.json` + `<id>.jianpu`; not in git, partly copyrighted) and will be published to OSS. The repository keeps only test and spec fixtures (`docs/examples/`).
 - `npm run library` compiles it into `apps/ios/Dizi/Library/` (gitignored), which the app bundles; run it after cloning and after editing scores.
+- `npm run publish-library` uploads the pieces marked `"publish": true` to OSS ([layout](docs/library.md)); keys come from the root `.env` and are never printed or committed. Run `npm run publish-library -- --dry-run` first and upload only after the owner has approved the listed pieces.
 
 ## Assets
 
