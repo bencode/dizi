@@ -46,8 +46,8 @@
 		940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A5D9FBF8D0C34328E8A93612 /* PieceListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceListView.swift; sourceTree = "<group>"; };
 		AB92B401D832BB364EDD2858 /* RunAudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunAudio.swift; sourceTree = "<group>"; };
-		B4E1E564EDDFF024A6BE2EA9 /* ScoreKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ScoreKit; path = ../Packages/ScoreKit; sourceTree = SOURCE_ROOT; };
 		E825365B13D701E585670E85 /* ScoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreView.swift; sourceTree = "<group>"; };
+		EB1C17AA2689870EAD830B9C /* scorekit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scorekit; path = ../../packages/scorekit; sourceTree = SOURCE_ROOT; };
 		F2AF968099F1CC1C2518E6DA /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		F7DDEBD62C1197359510C59D /* DiziApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiziApp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -79,7 +79,7 @@
 				60C030429385FF1F64E8EE08 /* molihua.ir.json */,
 			);
 			name = examples;
-			path = ../docs/examples;
+			path = ../../docs/examples;
 			sourceTree = "<group>";
 		};
 		608B1C271A6B86974C7E03B0 = {
@@ -122,7 +122,7 @@
 		C6CF4657377A14ED458DAD94 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				B4E1E564EDDFF024A6BE2EA9 /* ScoreKit */,
+				EB1C17AA2689870EAD830B9C /* scorekit */,
 			);
 			name = Packages;
 			sourceTree = "<group>";
@@ -195,7 +195,7 @@
 			mainGroup = 608B1C271A6B86974C7E03B0;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				AF19EB67D6206A6EA3E29960 /* XCLocalSwiftPackageReference "../Packages/ScoreKit" */,
+				3CC4F2FA400AB5B7A96465F5 /* XCLocalSwiftPackageReference "../../packages/scorekit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1A83B36BBECD2864FF2A8DC1 /* Products */;
@@ -497,9 +497,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		AF19EB67D6206A6EA3E29960 /* XCLocalSwiftPackageReference "../Packages/ScoreKit" */ = {
+		3CC4F2FA400AB5B7A96465F5 /* XCLocalSwiftPackageReference "../../packages/scorekit" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = ../Packages/ScoreKit;
+			relativePath = ../../packages/scorekit;
 		};
 /* End XCLocalSwiftPackageReference section */
 

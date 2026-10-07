@@ -13,12 +13,12 @@ brew install xcodegen swiftlint
 ```
 
 ```sh
-cd App
+cd apps/ios
 xcodegen generate   # after changing project.yml
 open Dizi.xcodeproj
 ```
 
-`App/project.yml` defines the project; the generated `Dizi.xcodeproj` is committed so it opens without XcodeGen.
+`apps/ios/project.yml` defines the project; the generated `Dizi.xcodeproj` is committed so it opens without XcodeGen.
 
 Before committing, run every check (format, lint, project sync, build, tests):
 

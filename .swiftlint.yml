@@ -1,9 +1,9 @@
 # Length limits follow the project's rule of thumb: warnings ask for a second look, errors stop the check.
 included:
-  - App
-  - Packages
+  - apps/ios
+  - packages/scorekit
 excluded:
-  - App/Dizi.xcodeproj
+  - apps/ios/Dizi.xcodeproj
   - "**/.build"
 
 opt_in_rules:

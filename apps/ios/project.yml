@@ -11,7 +11,7 @@ settings:
     GCC_TREAT_WARNINGS_AS_ERRORS: YES
 packages:
   ScoreKit:
-    path: ../Packages/ScoreKit
+    path: ../../packages/scorekit
 targets:
   Dizi:
     type: application
@@ -22,7 +22,7 @@ targets:
       - path: Dizi/Samples
         type: folder
         buildPhase: resources
-      - path: ../docs/examples/molihua.ir.json
+      - path: ../../docs/examples/molihua.ir.json
         buildPhase: resources
     dependencies:
       - package: ScoreKit
