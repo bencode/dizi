@@ -18,11 +18,11 @@ public struct Voice: Sendable {
     }
 }
 
-/// How long a note fades after its written end.
+/// How long a note fades after its written end; a legato note fades in over the same time, so the two crossfade.
 let releaseSeconds = 0.04
 
 /// The melody as one mono signal at `sampleRate`: each note from the nearest voice, retuned to pitch,
-/// sustained by looping, faded out at its end; overlapping tails mix.
+/// sustained by looping, faded out at its end; overlapping tails mix. A legato note skips the voice's attack.
 public func melodySamples(_ notes: [MelodyNote], voices: [Voice], sampleRate: Double) -> [Float] {
     let length = notes.map { Int(((($0.time + $0.duration + releaseSeconds) * sampleRate)).rounded(.up)) }.max() ?? 0
     var mix = [Float](repeating: 0, count: length)
@@ -32,7 +32,8 @@ public func melodySamples(_ notes: [MelodyNote], voices: [Voice], sampleRate: Do
         let sound = sustained(
             voice, step: playbackStep(voice, midi: note.midi, sampleRate: sampleRate),
             count: Int((note.duration + releaseSeconds) * sampleRate),
-            fadeFrom: Int(note.duration * sampleRate))
+            fadeFrom: Int(note.duration * sampleRate),
+            fadeIn: note.legato ? Int(releaseSeconds * sampleRate) : 0)
         for (offset, value) in sound.enumerated() where start + offset < length {
             mix[start + offset] += value * 0.8
         }
@@ -47,11 +48,14 @@ func playbackStep(_ voice: Voice, midi: Int, sampleRate: Double) -> Double {
 }
 
 /// `count` samples of a voice read at `step`, looping its sustain, fading linearly to silence from `fadeFrom`.
-private func sustained(_ voice: Voice, step: Double, count: Int, fadeFrom: Int) -> [Float] {
+/// With a `fadeIn`, reading starts in the sustain (no attack) and rises from silence over that many samples.
+private func sustained(_ voice: Voice, step: Double, count: Int, fadeFrom: Int, fadeIn: Int) -> [Float] {
     let fadeLength = Double(max(count - fadeFrom, 1))
+    let start = fadeIn > 0 ? Double(voice.loop.lowerBound) : 0
     return (0..<count).map { index in
-        let gain = index < fadeFrom ? 1 : Float(1 - Double(index - fadeFrom) / fadeLength)
-        return gain * interpolated(voice, at: looped(Double(index) * step, voice.loop))
+        let fadeOut = index < fadeFrom ? 1 : Float(1 - Double(index - fadeFrom) / fadeLength)
+        let rise = index < fadeIn ? Float(index) / Float(fadeIn) : 1
+        return fadeOut * rise * interpolated(voice, at: looped(start + Double(index) * step, voice.loop))
     }
 }
 

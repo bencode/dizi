@@ -145,7 +145,24 @@ struct ScoreView: View {
                 )
             }
         case .ending(let label, let origin):
-            [.label(label, origin: origin)]
+            [.label(label, point: origin, anchor: .bottomLeading)]
+        case .arc(let left, let right, let endY):
+            [.shape(arcPath(left: left, right: right, endY: endY), .plain)]
+        case .breath(let center):
+            [.label("V", point: center, anchor: .center)]
+        }
+    }
+
+    /// A slur or tie as engraved: a crescent, thick in the middle and thin at its ends; it rises with its width.
+    private func arcPath(left: CGFloat, right: CGFloat, endY: CGFloat) -> Path {
+        let rise = min(max((right - left) * 0.12, metrics.fontSize * 0.15), metrics.fontSize * 0.4)
+        let middle = (left + right) / 2
+        return Path { path in
+            path.move(to: CGPoint(x: left, y: endY))
+            path.addQuadCurve(to: CGPoint(x: right, y: endY), control: CGPoint(x: middle, y: endY - rise * 2))
+            path.addQuadCurve(
+                to: CGPoint(x: left, y: endY), control: CGPoint(x: middle, y: endY - rise * 2 + stroke * 2.4))
+            path.closeSubpath()
         }
     }
 
@@ -167,9 +184,8 @@ struct ScoreView: View {
             context.fill(path, with: .color(tone.color))
         case .digit(let degree, let center, let tone):
             context.draw(Text(verbatim: "\(degree)").font(digitFont).foregroundStyle(tone.color), at: center)
-        case .label(let text, let origin):
-            context.draw(
-                Text(verbatim: text).font(.system(size: metrics.fontSize * 0.55)), at: origin, anchor: .bottomLeading)
+        case .label(let text, let point, let anchor):
+            context.draw(Text(verbatim: text).font(.system(size: metrics.fontSize * 0.55)), at: point, anchor: anchor)
         }
     }
 }
@@ -178,8 +194,8 @@ struct ScoreView: View {
 private enum Ink {
     case shape(Path, Tone)
     case digit(Int, center: CGPoint, Tone)
-    /// Small text such as an ending's number, anchored at its bottom-left.
-    case label(String, origin: CGPoint)
+    /// Small text such as an ending's number or a breath mark, placed by its `anchor` at `point`.
+    case label(String, point: CGPoint, anchor: UnitPoint)
 }
 
 /// Plain notation, the accent for the playhead, a light wash behind the current note.

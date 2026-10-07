@@ -18,7 +18,8 @@ private let tone = Voice(
 }
 
 @Test func placesEachNoteAtItsTimeAndSustainsItByLooping() {
-    let mix = melodySamples([MelodyNote(time: 0.25, duration: 0.5, midi: 69)], voices: [tone], sampleRate: rate)
+    let mix = melodySamples(
+        [MelodyNote(time: 0.25, duration: 0.5, midi: 69, legato: false)], voices: [tone], sampleRate: rate)
     let energy = { (range: Range<Int>) in mix[range].map { $0 * $0 }.reduce(0, +) }
 
     #expect(mix.count == Int(((0.25 + 0.5 + releaseSeconds) * rate).rounded(.up)))

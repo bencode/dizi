@@ -57,6 +57,11 @@ public struct ScoreLayout: Sendable {
         case repeatDots(centerX: CGFloat, top: CGFloat, bottom: CGFloat)
         /// An ending's number (`1.`, `1.2.`) over its first measure, at its text's leading baseline point.
         case ending(label: String, origin: CGPoint)
+        /// A slur or tie above the notes, from `left` to `right` with its ends at `endY`; the piece of one that
+        /// continues from the line before or onto the next line runs to that edge.
+        case arc(left: CGFloat, right: CGFloat, endY: CGFloat)
+        /// 换气 V, centered at `center`.
+        case breath(center: CGPoint)
     }
 }
 
@@ -82,7 +87,8 @@ extension ScoreLayout {
             let scale = isLast || natural == 0 ? 1 : max(1, (width - gaps) / natural)
             return line(measures, row: row, scale: scale, context)
         }
-        self.init(lines: lines, height: metrics.lineHeight * CGFloat(lines.count))
+        self.init(
+            lines: phrased(lines, score: score, metrics: metrics), height: metrics.lineHeight * CGFloat(lines.count))
     }
 }
 
@@ -216,7 +222,7 @@ extension ScoreLayout.Item {
         switch self {
         case .note(let id, let start, _, let center), .rest(let id, let start, let center):
             Anchor(id: id, tick: start, position: center.x)
-        case .octaveDot, .augmentationDot, .dash, .underline, .barline, .repeatDots, .ending: nil
+        case .octaveDot, .augmentationDot, .dash, .underline, .barline, .repeatDots, .ending, .arc, .breath: nil
         }
     }
 
@@ -224,7 +230,7 @@ extension ScoreLayout.Item {
     public var head: (id: String, center: CGPoint)? {
         switch self {
         case .note(let id, _, _, let center), .rest(let id, _, let center): (id, center)
-        case .octaveDot, .augmentationDot, .dash, .underline, .barline, .repeatDots, .ending: nil
+        case .octaveDot, .augmentationDot, .dash, .underline, .barline, .repeatDots, .ending, .arc, .breath: nil
         }
     }
 }

@@ -62,6 +62,12 @@ Every element the layout places carries its note id and start tick, so each laye
 
 Then interaction: playhead, playback, beat.
 
+## Slurs, ties, breath
+
+- A slur or tie is an arc above its notes, from the first digit to the last, lifted clear of the digits and high-octave dots under it. Across a line break it is split: to the right edge on the first line, edge to edge on lines it spans, from the left edge on the last.
+- A breath mark `V` sits above the line, halfway between the note it follows and the next note (or at the line's end).
+- The demo plays a tie as one note, and the notes of a slur after its first without a new attack (they crossfade from the note before), the way a slur is played on the dizi: only its first note is tongued.
+
 ## Layout
 
 ```text

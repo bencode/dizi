@@ -11,6 +11,8 @@ public struct Score: Decodable, Sendable {
     /// Measure indices in playing order, repeats unrolled.
     public let playOrder: [Int]
     public let parts: [Part]
+    /// Slurs and ties.
+    public let spans: [Span]
     public let marks: [Mark]
     public let layoutHints: LayoutHints?
 
@@ -212,9 +214,29 @@ public struct Pitch: Decodable, Sendable {
     }
 }
 
+/// A slur (连线: one breath, only the first note tongued) or a tie (延音线: two notes held as one), between notes.
+public struct Span: Decodable, Sendable, Equatable {
+    public enum Kind: String, Decodable, Sendable {
+        case slur
+        case tie
+    }
+
+    public let type: Kind
+    /// The first and last note's ids.
+    public let first: String
+    public let last: String
+
+    private enum CodingKeys: String, CodingKey {
+        case type
+        case first = "from"
+        case last = "to"
+    }
+}
+
 public enum Mark: Decodable, Sendable {
     case tempo(TempoMark)
     case section(SectionMark)
+    case breath(BreathMark)
     /// A mark the app does not use yet.
     case other
 
@@ -228,6 +250,7 @@ public enum Mark: Decodable, Sendable {
             switch kind {
             case "tempo": .tempo(try TempoMark(from: decoder))
             case "section": .section(try SectionMark(from: decoder))
+            case "breath": .breath(try BreathMark(from: decoder))
             default: .other
             }
     }
@@ -261,6 +284,23 @@ public struct SectionMark: Decodable, Sendable {
     private enum CodingKeys: String, CodingKey {
         case tick = "at"
         case label
+    }
+}
+
+/// 换气 V (or 循环换气), before the note at `tick`.
+public struct BreathMark: Decodable, Sendable {
+    public let tick: Int
+    public let circular: Bool
+
+    private enum CodingKeys: String, CodingKey {
+        case tick = "at"
+        case style
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        tick = try container.decode(Int.self, forKey: .tick)
+        circular = try container.decode(String.self, forKey: .style) == "circular"
     }
 }
 
