@@ -28,3 +28,16 @@ private let tone = Voice(
     #expect(energy(650..<750) > 1)  // past the voice's 0.2 s: the loop keeps it sounding
     #expect(abs(mix[mix.count - 1]) < 0.05)  // faded out
 }
+
+@Test func startsATonguedNoteSoftlyInsteadOfWithAKnock() {
+    // A voice at a constant level, so the output is the note's gain.
+    let flat = Voice(
+        samples: Array(repeating: 1, count: 200), sampleRate: rate, midi: 69, tuneCents: 0, loop: 100..<200)
+    let mix = melodySamples(
+        [MelodyNote(time: 0, duration: 0.5, midi: 69, legato: false)], voices: [flat], sampleRate: rate)
+    let rise = Int(attackRiseSeconds * rate)
+
+    #expect(mix[0] == 0)
+    #expect(abs(mix[rise / 2] - 0.4) < 0.01)  // halfway up the rise
+    #expect(abs(mix[rise * 3] - 0.8) < 0.01)  // full level
+}
