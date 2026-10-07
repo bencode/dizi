@@ -10,6 +10,8 @@ Run `scripts/check.sh` after every change. Work is done only when it prints `All
 | --- | --- | --- |
 | Format | `swift-format` (bundled with Xcode), config `.swift-format` | any formatting difference; fix with `xcrun swift-format format --in-place <files>` |
 | Lint | SwiftLint, config `.swiftlint.yml` | errors; warnings (e.g. a function over 40 lines, a file over 200) call for a second look, not a mechanical split |
+| Parser | `npm run --workspace packages/parser check`: TypeScript strict, ESLint (strict type-checked), Prettier, Vitest | type errors, lint or format issues, failing tests |
+| Score examples | the parser recompiles `library/molihua.jianpu` | `docs/examples/molihua.ir.json` differs from the compiled output |
 | ScoreKit tests | `swift test --package-path packages/scorekit` on the Mac | failing unit tests |
 | Project | XcodeGen | `apps/ios/Dizi.xcodeproj` out of date with `apps/ios/project.yml` |
 | Build and test | `xcodebuild test` on the iOS simulator (`SIMULATOR`, default `iPhone 17e`) | compiler warnings (treated as errors), failing unit or UI tests |
@@ -31,6 +33,9 @@ Programs are data flowing through transformations; effects stay at the edge. Sou
 
 ## Project facts
 
+- Layout: `apps/` holds runnable products (`apps/ios`; later server, web, android); `packages/` holds shared libraries in any language (`packages/scorekit` Swift, `packages/parser` TypeScript); `library/` holds score sources; `tools/` one-off scripts. TypeScript packages are npm workspaces listed explicitly in the root `package.json`.
+- `packages/parser` compiles score text ([format](docs/score-format.md)) into the [IR](docs/score-ir.md); Node 24 runs its `.ts` files directly, no build step. `node packages/parser/src/cli.ts <file>` prints the IR or the diagnostics.
+
 - `apps/ios/project.yml` defines the Xcode project; never edit `apps/ios/Dizi.xcodeproj` by hand. Run `xcodegen generate` in `apps/ios/` after changing the spec, and commit both.
 - `packages/scorekit` holds the logic that needs no UI: the [score IR](docs/score-ir.md) model and the score layout. Test it with Swift Testing on the Mac; it is fast and needs no simulator. The app draws what ScoreKit computes.
 - iOS 26, iPhone only, portrait, Swift 6 with strict concurrency.
@@ -45,4 +50,5 @@ Programs are data flowing through transformations; effects stay at the edge. Sou
 
 ```sh
 brew install xcodegen swiftlint
+npm install   # at the repository root: the parser's dependencies (Node 24)
 ```

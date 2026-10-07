@@ -58,10 +58,13 @@ Piece list ─tap─▶ score page (jianpu) ─▶ set the tempo / (optional) ta
 | # | Iteration | State |
 | --- | --- | --- |
 | 0 | App skeleton: project, piece list, empty score page; checks (format, lint, UI test) | done |
-| 1 | Score page with static notation, drawn from a hand-written IR ([茉莉花](examples/molihua.ir.json)), in steps | next |
-| 2 | Playback: playhead, count-in, click, page turning, tempo, start from any note | |
-| 3 | Demo melody | |
-| 4 | TypeScript parser; library: pieces, publish script, OSS, download and cache | |
+| 1 | Score page with static notation drawn from IR: digits, octave dots, 减时线, dots, bar lines, full-width lines | done |
+| 2 | 走谱: playhead sweeping continuously, count-in, click, page following, tempo, start from any note | done |
+| 3 | Demo melody from CC0 dizi samples, in sync with the clicks | done |
+| 4a | TypeScript parser (`packages/parser`): score text → IR; the score format published | done |
+| 4b | Library: ~10 public-domain pieces in `library/` | next |
+| 4c | Publish: compile the library, upload to OSS (private bucket, public-read objects, hashed names) | |
+| 4d | App: download and cache the library, with a bundled snapshot | |
 
 Interface language: Chinese first; strings kept in a String Catalog for later languages.
 

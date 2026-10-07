@@ -6,7 +6,7 @@ See [the product](docs/product.md).
 
 ## Development
 
-Requires Xcode 27, [XcodeGen](https://github.com/yonaskolb/XcodeGen), and [SwiftLint](https://github.com/realm/SwiftLint):
+Requires Node 24 (`npm install` at the root), Xcode 27, [XcodeGen](https://github.com/yonaskolb/XcodeGen), and [SwiftLint](https://github.com/realm/SwiftLint):
 
 ```sh
 brew install xcodegen swiftlint

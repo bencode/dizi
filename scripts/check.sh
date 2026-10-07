@@ -23,6 +23,15 @@ if [[ "$(project_hash)" != "$before" ]]; then
     exit 1
 fi
 
+echo "==> Parser (typecheck, lint, tests)"
+npm run --silent --workspace packages/parser check
+
+echo "==> Score examples compiled from library/"
+if ! node packages/parser/src/cli.ts library/molihua.jianpu | diff -q - docs/examples/molihua.ir.json >/dev/null; then
+    echo "error: docs/examples/molihua.ir.json is out of date; run: node packages/parser/src/cli.ts library/molihua.jianpu > docs/examples/molihua.ir.json" >&2
+    exit 1
+fi
+
 echo "==> ScoreKit tests"
 swift test --quiet --package-path packages/scorekit
 
