@@ -12,7 +12,7 @@ final class Player {
     let score: Score
     let timeline: Timeline
     private(set) var transport: Transport = .stopped(start: 0)
-    private(set) var run: Run?
+    private var run: Run?
     var bpm: Int {
         didSet { UserDefaults.standard.set(bpm, forKey: tempoKey) }
     }
@@ -26,11 +26,11 @@ final class Player {
     init(pieceID: String, score: Score) {
         self.score = score
         timeline = Timeline(score: score)
-        let written = score.marks.lazy.compactMap(startingTempo).first
+        let written = score.startingTempo
         beat = written?.beat ?? 480
         tempoKey = "tempo.\(pieceID)"
         let saved = UserDefaults.standard.integer(forKey: tempoKey)
-        bpm = saved > 0 ? saved : written?.bpm ?? 72
+        bpm = saved > 0 ? saved : written.flatMap(defaultBPM) ?? 72
         clickTrack = {
             do {
                 return try ClickTrack()
@@ -42,6 +42,9 @@ final class Player {
     }
 
     static let tempoRange = 30...240
+
+    /// False for a score without notes, or when the audio could not start up.
+    var canPlay: Bool { !timeline.entries.isEmpty && clickTrack != nil }
 
     var isRunning: Bool {
         if case .running = transport { return true }
@@ -91,9 +94,18 @@ final class Player {
         transport = transport.next(.stop)
     }
 
+    /// Pauses a running run; does nothing otherwise (e.g. when the app leaves the screen).
+    func pause() {
+        guard isRunning else { return }
+        let entry = sweep?.entry ?? run?.from ?? 0
+        halt()
+        transport = transport.next(.pause(entry: entry))
+    }
+
     private func play() {
+        guard canPlay, let clickTrack else { return }
         transport = transport.next(.play)
-        guard case .running(let from, _) = transport, let clickTrack else { return }
+        guard case .running(let from, _) = transport else { return }
         let run = Run(from: from, tempo: Tempo(bpm: Double(bpm), beat: beat))
         do {
             try clickTrack.start(run.clicks(timeline), audible: clickOn)
@@ -116,12 +128,6 @@ final class Player {
         }
     }
 
-    private func pause() {
-        let entry = sweep?.entry ?? run?.from ?? 0
-        halt()
-        transport = transport.next(.pause(entry: entry))
-    }
-
     private func finish() {
         halt()
         transport = transport.next(.finish)
@@ -135,11 +141,11 @@ final class Player {
     }
 }
 
-private func startingTempo(_ mark: Mark) -> (beat: Int, bpm: Int)? {
-    guard case .tempo(let tempo) = mark, tempo.tick == 0 else { return nil }
-    return switch tempo.bpm {
-    case .exact(let bpm): (tempo.beat, bpm)
-    case .range(let low, _): (tempo.beat, low)
+/// The written tempo to start from; the slower end of a range like ♩=58~80.
+private func defaultBPM(_ tempo: TempoMark) -> Int? {
+    switch tempo.bpm {
+    case .exact(let bpm): bpm
+    case .range(let low, _): low
     case nil: nil
     }
 }

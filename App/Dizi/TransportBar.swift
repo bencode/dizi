@@ -22,6 +22,7 @@ struct TransportBar: View {
                     player.playOrPause()
                 }
                 .buttonStyle(.borderedProminent)
+                .disabled(!player.isRunning && !player.canPlay)
                 Button("停止", systemImage: "stop.fill") {
                     player.stop()
                 }

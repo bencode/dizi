@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 import Testing
 
 @testable import ScoreKit
@@ -91,4 +92,41 @@ private let slow = Tempo(bpm: 60, beat: 480)
     let last = try #require(line.anchors.last)
 
     #expect(layout.cursor(at: last.id, progress: 1).map { abs($0.x - line.width) < 0.001 } == true)
+}
+
+/// `5 | 1 2 | 3 - |]` in 2/4: a one-beat pickup, then two full bars.
+private func pickup() throws -> Score {
+    func note(_ id: String, _ start: Int, _ value: Int = 4) -> String {
+        """
+        {"kind": "note", "id": "\(id)", "start": \(start), "duration": \(1920 / value), "value": \(value), "dots": 0, \
+        "pitch": {"degree": 1, "octave": 0, "semitones": 0}}
+        """
+    }
+    let json = """
+        {"irVersion": 1, "meta": {}, "header": {"key": {"tonic": "D"}}, "ticksPerQuarter": 480,
+         "measures": [
+            {"index": 0, "start": 0, "duration": 480, "time": {"beats": 2, "unit": 4}, "barline": "single"},
+            {"index": 1, "start": 480, "duration": 960, "time": {"beats": 2, "unit": 4}, "barline": "single"},
+            {"index": 2, "start": 1440, "duration": 960, "time": {"beats": 2, "unit": 4}, "barline": "final"}],
+         "playOrder": [0, 1, 2],
+         "parts": [{"id": "solo", "role": "solo", "measures": [
+            {"events": [\(note("p", 0))], "beams": []},
+            {"events": [\(note("a", 480)), \(note("b", 960))], "beams": []},
+            {"events": [\(note("c", 1440, 2))], "beams": []}]}],
+         "spans": [], "marks": []}
+        """
+    return try Score.decode(from: Data(json.utf8))
+}
+
+@Test func countsAFullBarAndAPickupAsTheBarsLastBeat() throws {
+    let timeline = Timeline(score: try pickup())
+    let run = Run(from: 0, tempo: slow)
+
+    #expect(run.countInLength(timeline) == 960)
+    #expect(
+        run.clicks(timeline).prefix(4) == [
+            Click(time: 0, accent: true), Click(time: 1, accent: false),
+            Click(time: 2, accent: false), Click(time: 3, accent: true),
+        ])
+    #expect(run.beat(at: 2.5, in: timeline).map { [$0.index, $0.count] } == [1, 2])
 }

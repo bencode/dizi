@@ -33,7 +33,8 @@ struct ScoreView: View {
     private func playedNotation(_ layout: ScoreLayout, scroller: ScrollViewProxy) -> some View {
         let sweep = player.sweep.map { (id: player.timeline.entries[$0.entry].id, progress: $0.progress) }
         let cursor = sweep.flatMap { layout.cursor(at: $0.id, progress: $0.progress) }
-        let start = player.timeline.entries[player.transport.start].id
+        let entries = player.timeline.entries
+        let start = entries.indices.contains(player.transport.start) ? entries[player.transport.start].id : nil
         let row = cursor?.row
         return notation(layout, current: sweep?.id, cursor: cursor, start: start)
             .background(alignment: .top) { rowAnchors(layout) }
@@ -45,7 +46,7 @@ struct ScoreView: View {
     }
 
     private func notation(
-        _ layout: ScoreLayout, current: String?, cursor: (row: Int, x: CGFloat)?, start: String
+        _ layout: ScoreLayout, current: String?, cursor: (row: Int, x: CGFloat)?, start: String?
     ) -> some View {
         let inks =
             playheadInks(layout, cursor: cursor, start: start)
@@ -85,7 +86,7 @@ struct ScoreView: View {
     }
 
     /// The played part of the current line filled in up to the cursor, and a small marker over the start note.
-    private func playheadInks(_ layout: ScoreLayout, cursor: (row: Int, x: CGFloat)?, start: String) -> [Ink] {
+    private func playheadInks(_ layout: ScoreLayout, cursor: (row: Int, x: CGFloat)?, start: String?) -> [Ink] {
         let size = metrics.fontSize
         let rowHeight = layout.height / CGFloat(max(layout.lines.count, 1))
         let sweep = cursor.map { cursor in
@@ -189,7 +190,7 @@ private func headerText(_ score: Score) -> String {
     let parts: [String?] = [
         "1=\(accidental)\(key.tonic)",
         score.measures.first.flatMap { timeText($0.time) },
-        score.marks.lazy.compactMap(startingTempo).first,
+        score.startingTempo.flatMap(tempoText),
     ]
     return parts.compactMap { $0 }.joined(separator: "  ")
 }
@@ -199,8 +200,7 @@ private func timeText(_ time: TimeSignature) -> String? {
     return "\(beats)/\(unit)"
 }
 
-private func startingTempo(_ mark: Mark) -> String? {
-    guard case .tempo(let tempo) = mark, tempo.tick == 0 else { return nil }
+private func tempoText(_ tempo: TempoMark) -> String? {
     // An unusual beat shows the number alone rather than a wrong note symbol.
     let beat = [240: "♪=", 480: "♩=", 720: "♩.=", 960: "𝅗𝅥="][tempo.beat] ?? ""
     return switch tempo.bpm {

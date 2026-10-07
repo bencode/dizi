@@ -17,6 +17,11 @@ public struct Score: Decodable, Sendable {
     public static func decode(from data: Data) throws -> Score {
         try JSONDecoder().decode(Score.self, from: data)
     }
+
+    /// The tempo written at the very start, if any.
+    public var startingTempo: TempoMark? {
+        marks.lazy.compactMap(\.tempo).first { $0.tick == 0 }
+    }
 }
 
 public struct Meta: Decodable, Sendable {
@@ -204,6 +209,13 @@ public enum Mark: Decodable, Sendable {
             case "section": .section(try SectionMark(from: decoder))
             default: .other
             }
+    }
+}
+
+extension Mark {
+    fileprivate var tempo: TempoMark? {
+        guard case .tempo(let tempo) = self else { return nil }
+        return tempo
     }
 }
 

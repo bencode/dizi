@@ -113,13 +113,15 @@ public struct Run: Sendable, Equatable {
         case finished
     }
 
-    public func countIn(_ timeline: Timeline) -> Int {
+    /// The count-in's length in ticks: one full bar of the start's time signature, even when the music
+    /// starts on a pickup; none in 散板.
+    public func countInLength(_ timeline: Timeline) -> Int {
         let bar = timeline.bars.first { $0.measure == timeline.entries[from].measure }
-        return bar.map { beatCount($0) * tempo.beat } ?? 0
+        return bar?.fullLength.map { max(1, $0 / tempo.beat) * tempo.beat } ?? 0
     }
 
     public func position(at seconds: Double, in timeline: Timeline) -> Position {
-        let elapsed = tempo.ticks(seconds) - countIn(timeline)
+        let elapsed = tempo.ticks(seconds) - countInLength(timeline)
         guard elapsed >= 0 else { return .countIn(beatsLeft: (-elapsed - 1) / tempo.beat + 1) }
         let tick = timeline.entries[from].start + elapsed
         guard let index = timeline.entry(at: tick) else { return .finished }
@@ -127,16 +129,16 @@ public struct Run: Sendable, Equatable {
         return .entry(index, progress: Double(tick - entry.start) / Double(entry.duration))
     }
 
-    /// The count-in and every beat from the start entry to the end, accented on each bar's first beat.
+    /// The count-in and every beat from the start entry to the end, accented on each bar's downbeat.
     public func clicks(_ timeline: Timeline) -> [Click] {
         let origin = timeline.entries[from].start
-        let lead = countIn(timeline)
+        let lead = countInLength(timeline)
         let countIn = stride(from: 0, to: lead, by: tempo.beat).map { tick in
             Click(time: tempo.seconds(tick), accent: tick == 0)
         }
         let music = timeline.bars.filter { $0.start + $0.duration > origin }.flatMap { bar in
-            beatTicks(bar).filter { $0 >= origin }.map { tick in
-                Click(time: tempo.seconds(lead + tick - origin), accent: tick == bar.start)
+            beats(of: bar).filter { $0.tick >= origin }.map { beat in
+                Click(time: tempo.seconds(lead + beat.tick - origin), accent: beat.downbeat)
             }
         }
         return countIn + music
@@ -144,25 +146,37 @@ public struct Run: Sendable, Equatable {
 
     /// The beat sounding at a moment, counted within its bar from 0; nil during the count-in, in 散板, and after the end.
     public func beat(at seconds: Double, in timeline: Timeline) -> (index: Int, count: Int)? {
-        let tick = timeline.entries[from].start + tempo.ticks(seconds) - countIn(timeline)
+        let tick = timeline.entries[from].start + tempo.ticks(seconds) - countInLength(timeline)
         guard tick >= timeline.entries[from].start, tick < timeline.end,
-            let bar = timeline.bars.last(where: { $0.start <= tick }), case .meter = bar.time
+            let bar = timeline.bars.last(where: { $0.start <= tick }), let full = bar.fullLength
         else { return nil }
-        return ((tick - bar.start) / tempo.beat, beatCount(bar))
+        return ((tick - downbeat(of: bar, full: full)) / tempo.beat, max(1, full / tempo.beat))
     }
 
     /// Seconds from time 0 to the end of the score.
     public func length(_ timeline: Timeline) -> Double {
-        tempo.seconds(countIn(timeline) + timeline.end - timeline.entries[from].start)
+        tempo.seconds(countInLength(timeline) + timeline.end - timeline.entries[from].start)
     }
 
-    private func beatCount(_ bar: Timeline.Bar) -> Int {
-        max(1, bar.duration / tempo.beat)
+    /// Where a bar's beats fall. A first bar shorter than a full one is a pickup (弱起): its beats are the last
+    /// beats of a bar, so none of them is the downbeat. 散板 bars have no beats.
+    private func beats(of bar: Timeline.Bar) -> [(tick: Int, downbeat: Bool)] {
+        guard let full = bar.fullLength else { return [] }
+        let downbeat = downbeat(of: bar, full: full)
+        return stride(from: downbeat, to: bar.start + bar.duration, by: tempo.beat)
+            .filter { $0 >= bar.start }
+            .map { ($0, $0 == downbeat) }
     }
 
-    /// 散板 bars have no beat to click.
-    private func beatTicks(_ bar: Timeline.Bar) -> [Int] {
-        guard case .meter = bar.time else { return [] }
-        return Array(stride(from: bar.start, to: bar.start + bar.duration, by: tempo.beat))
+    private func downbeat(of bar: Timeline.Bar, full: Int) -> Int {
+        bar.start == 0 && bar.duration < full ? bar.duration - full : bar.start
+    }
+}
+
+extension Timeline.Bar {
+    /// A full bar's length on the time signature; nil in 散板.
+    var fullLength: Int? {
+        guard case .meter(let beats, let unit) = time else { return nil }
+        return beats * 1920 / unit
     }
 }
