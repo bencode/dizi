@@ -162,6 +162,25 @@ public struct Note: Decodable, Sendable {
     public let value: NoteValue
     public let dots: Dots
     public let pitch: Pitch
+    public let techniques: [Technique]
+    public let graces: [Grace]
+
+    private enum CodingKeys: String, CodingKey {
+        case id, start, duration, value, dots, pitch, techniques, graces
+    }
+
+    /// The IR leaves `techniques` and `graces` out when a note has none.
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        start = try container.decode(Int.self, forKey: .start)
+        duration = try container.decode(Int.self, forKey: .duration)
+        value = try container.decode(NoteValue.self, forKey: .value)
+        dots = try container.decode(Dots.self, forKey: .dots)
+        pitch = try container.decode(Pitch.self, forKey: .pitch)
+        techniques = try container.decodeIfPresent([Technique].self, forKey: .techniques) ?? []
+        graces = try container.decodeIfPresent([Grace].self, forKey: .graces) ?? []
+    }
 }
 
 public struct Rest: Decodable, Sendable {
@@ -170,6 +189,22 @@ public struct Rest: Decodable, Sendable {
     public let duration: Int
     public let value: NoteValue
     public let dots: Dots
+    /// Only 延长 (a fermata) is allowed on a rest.
+    public let techniques: [Technique]
+
+    private enum CodingKeys: String, CodingKey {
+        case id, start, duration, value, dots, techniques
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        start = try container.decode(Int.self, forKey: .start)
+        duration = try container.decode(Int.self, forKey: .duration)
+        value = try container.decode(NoteValue.self, forKey: .value)
+        dots = try container.decode(Dots.self, forKey: .dots)
+        techniques = try container.decodeIfPresent([Technique].self, forKey: .techniques) ?? []
+    }
 }
 
 /// The written length; any other number fails decoding.

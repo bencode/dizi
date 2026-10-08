@@ -5,7 +5,9 @@ import SwiftUI
 struct ScoreView: View {
     let player: Player
     private let metrics = ScoreMetrics(fontSize: 24)
-    private var digitFont: Font { .system(size: metrics.fontSize, weight: .medium, design: .rounded) }
+    private func digitFont(_ scale: CGFloat) -> Font {
+        .system(size: metrics.fontSize * scale, weight: .medium, design: .rounded)
+    }
     private var stroke: CGFloat { metrics.fontSize / 16 }
     private var dotRadius: CGFloat { metrics.fontSize / 12 }
     private let margin: CGFloat = 16
@@ -116,15 +118,11 @@ struct ScoreView: View {
     private func ink(_ item: ScoreLayout.Item, current: String?) -> [Ink] {
         switch item {
         case .note(let id, _, let degree, let center):
-            [.digit(degree, center: center, id == current ? .accent : .plain)]
+            [.digit(degree, center: center, id == current ? .accent : .plain, scale: 1)]
         case .rest(let id, _, let center):
-            [.digit(0, center: center, id == current ? .accent : .plain)]
+            [.digit(0, center: center, id == current ? .accent : .plain, scale: 1)]
         case .octaveDot(_, let center), .augmentationDot(_, let center):
-            [
-                .shape(
-                    Path(ellipseIn: CGRect(origin: center, size: .zero).insetBy(dx: -dotRadius, dy: -dotRadius)), .plain
-                )
-            ]
+            [dot(center, radius: dotRadius)]
         case .dash(_, let center, let width):
             [
                 .shape(
@@ -138,19 +136,68 @@ struct ScoreView: View {
                 .shape(Path(CGRect(x: centerX + offset, y: top, width: width, height: bottom - top)), .plain)
             }
         case .repeatDots(let centerX, let top, let bottom):
-            [top, bottom].map { dotY in
-                let center = CGPoint(x: centerX, y: dotY)
-                return .shape(
-                    Path(ellipseIn: CGRect(origin: center, size: .zero).insetBy(dx: -dotRadius, dy: -dotRadius)), .plain
-                )
-            }
+            [top, bottom].map { dot(CGPoint(x: centerX, y: $0), radius: dotRadius) }
         case .ending(let label, let origin):
             [.label(label, point: origin, anchor: .bottomLeading)]
         case .arc(let left, let right, let endY):
             [.shape(arcPath(left: left, right: right, endY: endY), .plain)]
         case .breath(let center):
             [.label("V", point: center, anchor: .center)]
+        case .accidental(_, let sharp, let center):
+            [.label(sharp ? "♯" : "♭", point: center, anchor: .center)]
+        case .technique(_, let technique, let center):
+            techniqueInk(technique, center: center)
+        case .grace(_, let degree, let center):
+            [.digit(degree, center: center, .plain, scale: metrics.graceScale)]
+        case .graceDot(let center):
+            [dot(center, radius: dotRadius * 0.7)]
         }
+    }
+
+    /// A technique as jianpu marks it (docs/score-page.md): a letter or sign as text, or a small drawn shape.
+    private func techniqueInk(_ technique: Technique, center: CGPoint) -> [Ink] {
+        if let symbol = techniqueSigns[technique] {
+            return [.label(symbol, point: center, anchor: .center)]
+        }
+        return switch technique {
+        case .boyin(let rising): [.shape(mordentPath(center, lower: !rising), .plain)]
+        case .yanchang: [.shape(fermataPath(center), .plain), dot(center, radius: dotRadius)]
+        default: []
+        }
+    }
+
+    private func dot(_ center: CGPoint, radius: CGFloat) -> Ink {
+        .shape(Path(ellipseIn: CGRect(origin: center, size: .zero).insetBy(dx: -radius, dy: -radius)), .plain)
+    }
+
+    /// 波音: a short double wave; the lower one has a stroke through it.
+    private func mordentPath(_ center: CGPoint, lower: Bool) -> Path {
+        let (width, height) = (metrics.fontSize * 0.6, metrics.fontSize * 0.12)
+        let left = center.x - width / 2
+        let wave = Path { path in
+            path.move(to: CGPoint(x: left, y: center.y + height / 2))
+            for step in 0..<4 {
+                let endX = left + width * CGFloat(step + 1) / 4
+                let peakY = center.y + (step.isMultiple(of: 2) ? -height : height)
+                path.addQuadCurve(
+                    to: CGPoint(x: endX, y: center.y + (step.isMultiple(of: 2) ? -height : height) / 2),
+                    control: CGPoint(x: endX - width / 8, y: peakY))
+            }
+        }.strokedPath(StrokeStyle(lineWidth: stroke * 1.4, lineCap: .round))
+        guard lower else { return wave }
+        var marked = wave
+        marked.addRect(CGRect(x: center.x - stroke / 2, y: center.y - height * 2, width: stroke, height: height * 4))
+        return marked
+    }
+
+    /// 延长记号: an arc over a dot.
+    private func fermataPath(_ center: CGPoint) -> Path {
+        let radius = metrics.fontSize * 0.28
+        return Path { path in
+            path.addArc(
+                center: CGPoint(x: center.x, y: center.y + radius * 0.3), radius: radius, startAngle: .degrees(180),
+                endAngle: .degrees(0), clockwise: false)
+        }.strokedPath(StrokeStyle(lineWidth: stroke * 1.4, lineCap: .round))
     }
 
     /// A slur or tie as engraved: a crescent, thick in the middle and thin at its ends; it rises with its width.
@@ -182,18 +229,25 @@ struct ScoreView: View {
         switch ink {
         case .shape(let path, let tone):
             context.fill(path, with: .color(tone.color))
-        case .digit(let degree, let center, let tone):
-            context.draw(Text(verbatim: "\(degree)").font(digitFont).foregroundStyle(tone.color), at: center)
+        case .digit(let degree, let center, let tone, let scale):
+            context.draw(Text(verbatim: "\(degree)").font(digitFont(scale)).foregroundStyle(tone.color), at: center)
         case .label(let text, let point, let anchor):
             context.draw(Text(verbatim: text).font(.system(size: metrics.fontSize * 0.55)), at: point, anchor: anchor)
         }
     }
 }
 
+/// The techniques written as a letter or sign; 波音 and 延长 are drawn as shapes instead.
+private let techniqueSigns: [Technique: String] = [
+    .tongue(.front): "T", .tongue(.back): "K", .tongue(.light): "▿", .baochi: "—", .qiang: ">", .trill: "tr",
+    .die: "又", .dayin: "扌", .feizhi: "飞", .huashe: "✱", .fan: "○", .zhizhen: "指", .qizhen: "气", .fuzhen: "腹",
+    .rou: "揉", .hou: "喉", .yuanhua: "⌒", .duo: "↓", .slide(rising: true): "↗", .slide(rising: false): "↘",
+]
+
 /// What the canvas paints.
 private enum Ink {
     case shape(Path, Tone)
-    case digit(Int, center: CGPoint, Tone)
+    case digit(Int, center: CGPoint, Tone, scale: CGFloat)
     /// Small text such as an ending's number or a breath mark, placed by its `anchor` at `point`.
     case label(String, point: CGPoint, anchor: UnitPoint)
 }

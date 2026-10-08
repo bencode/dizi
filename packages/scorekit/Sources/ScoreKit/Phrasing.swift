@@ -39,7 +39,8 @@ private func arcs(of span: Span, on lines: [ScoreLayout.Line], metrics: ScoreMet
     }
 }
 
-/// The highest point of the digits and high-octave dots between `span`: an arc there clears them.
+/// The highest point of what sits above the notes between `span` (digits, high-octave dots, technique marks,
+/// graces): an arc there clears them.
 private func clearance(_ line: ScoreLayout.Line, _ span: ClosedRange<CGFloat>, _ metrics: ScoreMetrics) -> CGFloat {
     let reach = metrics.digitHalfWidth
     let tops = line.items.compactMap { item -> CGFloat? in
@@ -48,6 +49,12 @@ private func clearance(_ line: ScoreLayout.Line, _ span: ClosedRange<CGFloat>, _
             center.y - metrics.digitHeight / 2
         case .octaveDot(_, let center) where (span.lowerBound - reach...span.upperBound + reach).contains(center.x):
             center.y - metrics.dotSpacing / 2
+        case .graceDot(let center) where span.contains(center.x):
+            center.y - metrics.dotSpacing / 2
+        case .technique(_, _, let center) where span.contains(center.x):
+            center.y - metrics.markHeight / 2
+        case .grace(_, _, let center) where span.contains(center.x):
+            center.y - metrics.digitHeight * metrics.graceScale / 2
         default: nil
         }
     }

@@ -14,6 +14,7 @@ struct EventBox {
     let underlines: Int
     let augmentationDots: Int
     let extensions: Int
+    let ornaments: Ornaments
 
     /// The digit and its 附点.
     func headWidth(_ metrics: ScoreMetrics) -> CGFloat {
@@ -21,8 +22,10 @@ struct EventBox {
             + CGFloat(augmentationDots) * metrics.augmentationDotWidth
     }
 
+    /// The head with the ornaments written before and after it, then the 增时线.
     func naturalWidth(_ metrics: ScoreMetrics) -> CGFloat {
-        headWidth(metrics) + CGFloat(extensions) * metrics.quarterWidth
+        ornaments.leadingWidth(metrics) + headWidth(metrics) + ornaments.trailingWidth(metrics)
+            + CGFloat(extensions) * metrics.quarterWidth
     }
 
     /// Shorter notes sit closer together.
@@ -36,19 +39,21 @@ func eventBox(_ event: Event) -> EventBox? {
     case .note(let note):
         EventBox(
             id: note.id, start: note.start, head: .note(degree: note.pitch.degree, octave: note.pitch.octave),
-            shape: Shape(value: note.value, dots: note.dots))
+            shape: Shape(value: note.value, dots: note.dots), ornaments: Ornaments(note))
     case .rest(let rest):
-        EventBox(id: rest.id, start: rest.start, head: .rest, shape: Shape(value: rest.value, dots: rest.dots))
+        EventBox(
+            id: rest.id, start: rest.start, head: .rest, shape: Shape(value: rest.value, dots: rest.dots),
+            ornaments: Ornaments(techniques: rest.techniques))
     case .unknown:
         nil
     }
 }
 
 extension EventBox {
-    fileprivate init(id: String, start: Int, head: Head, shape: Shape) {
+    fileprivate init(id: String, start: Int, head: Head, shape: Shape, ornaments: Ornaments) {
         self.init(
-            id: id, start: start, head: head,
-            underlines: shape.underlines, augmentationDots: shape.augmentationDots, extensions: shape.dashes)
+            id: id, start: start, head: head, underlines: shape.underlines,
+            augmentationDots: shape.augmentationDots, extensions: shape.dashes, ornaments: ornaments)
     }
 }
 
@@ -81,15 +86,16 @@ struct PlacedBox {
 
 func placed(_ box: EventBox, left: CGFloat, scale: CGFloat, baseline: CGFloat, metrics: ScoreMetrics) -> PlacedBox {
     let dotsWidth = CGFloat(box.augmentationDots) * metrics.augmentationDotWidth
-    let digitX = left + (box.headWidth(metrics) - dotsWidth) * scale / 2
+    let leading = box.ornaments.leadingWidth(metrics)
+    let digitX = left + (leading + (box.headWidth(metrics) - dotsWidth) / 2) * scale
     let digit = CGPoint(x: digitX, y: baseline)
     let augmentationDots = (0..<box.augmentationDots).map { index in
         let dotX = digitX + metrics.digitHalfWidth + metrics.augmentationDotWidth * (CGFloat(index) + 0.5)
         return ScoreLayout.Item.augmentationDot(noteID: box.id, center: CGPoint(x: dotX, y: baseline))
     }
     let extensions = (0..<box.extensions).map { index in
-        let center = CGPoint(
-            x: left + (box.headWidth(metrics) + metrics.quarterWidth * (CGFloat(index) + 0.5)) * scale, y: baseline)
+        let before = leading + box.headWidth(metrics) + box.ornaments.trailingWidth(metrics)
+        let center = CGPoint(x: left + (before + metrics.quarterWidth * (CGFloat(index) + 0.5)) * scale, y: baseline)
         let item: ScoreLayout.Item =
             switch box.head {
             case .note: .dash(noteID: box.id, center: center, width: metrics.dashWidth)
@@ -102,7 +108,10 @@ func placed(_ box: EventBox, left: CGFloat, scale: CGFloat, baseline: CGFloat, m
         case .note(let degree, _): .note(id: box.id, start: box.start, degree: degree, center: digit)
         case .rest: .rest(id: box.id, start: box.start, center: digit)
         }
-    let items = [head] + octaveDots(box, digit: digit, metrics: metrics) + augmentationDots + extensions
+    let dots = octaveDots(box, digit: digit, metrics: metrics)
+    let ornaments = box.ornaments.items(
+        noteID: box.id, digit: digit, top: topOfHead(digit, dots, metrics), dotsWidth: dotsWidth, metrics: metrics)
+    let items = [head] + dots + augmentationDots + extensions + ornaments
     let right = digitX + metrics.digitHalfWidth + dotsWidth
     return PlacedBox(box: box, items: items, span: (digitX - metrics.digitHalfWidth)...right)
 }
@@ -118,6 +127,15 @@ private func octaveDots(_ box: EventBox, digit: CGPoint, metrics: ScoreMetrics) 
         let center = CGPoint(x: digit.x, y: digit.y + (above ? -offset : offset))
         return .octaveDot(noteID: box.id, center: center)
     }
+}
+
+/// The top of a digit and the octave dots above it: technique marks stack from here.
+private func topOfHead(_ digit: CGPoint, _ dots: [ScoreLayout.Item], _ metrics: ScoreMetrics) -> CGFloat {
+    let dotTops = dots.compactMap { item -> CGFloat? in
+        guard case .octaveDot(_, let center) = item, center.y < digit.y else { return nil }
+        return center.y - metrics.dotSpacing / 2
+    }
+    return dotTops.min() ?? digit.y - metrics.digitHeight / 2
 }
 
 /// 减时线 of one measure: a beam of a level joins its notes into one line; other short notes get their own.

@@ -21,6 +21,13 @@ public struct ScoreMetrics: Sendable {
     var dashWidth: CGFloat { fontSize * 0.6 }
     var underlineGap: CGFloat { fontSize / 8 }
     var underlineSpacing: CGFloat { fontSize / 5 }
+    /// One technique mark's height; marks stack upward.
+    var markHeight: CGFloat { fontSize * 0.6 }
+    public var graceScale: CGFloat { 0.55 }
+    var graceAdvance: CGFloat { fontSize * 0.4 }
+    var graceRaise: CGFloat { fontSize * 0.3 }
+    var accidentalWidth: CGFloat { fontSize * 0.35 }
+    var slideWidth: CGFloat { fontSize * 0.5 }
 }
 
 /// Where everything of a score goes, for one screen width. Positions are in the score's own coordinates.
@@ -62,6 +69,14 @@ public struct ScoreLayout: Sendable {
         case arc(left: CGFloat, right: CGFloat, endY: CGFloat)
         /// 换气 V, centered at `center`.
         case breath(center: CGPoint)
+        /// A small ♯ or ♭ before a digit.
+        case accidental(noteID: String, sharp: Bool, center: CGPoint)
+        /// One technique mark: above its note, or beside it for a slide.
+        case technique(noteID: String, Technique, center: CGPoint)
+        /// A grace note's small digit.
+        case grace(noteID: String, degree: Int, center: CGPoint)
+        /// A grace note's octave dot.
+        case graceDot(center: CGPoint)
     }
 }
 
@@ -222,7 +237,9 @@ extension ScoreLayout.Item {
         switch self {
         case .note(let id, let start, _, let center), .rest(let id, let start, let center):
             Anchor(id: id, tick: start, position: center.x)
-        case .octaveDot, .augmentationDot, .dash, .underline, .barline, .repeatDots, .ending, .arc, .breath: nil
+        case .octaveDot, .augmentationDot, .dash, .underline, .barline, .repeatDots, .ending, .arc, .breath,
+            .accidental, .technique, .grace, .graceDot:
+            nil
         }
     }
 
@@ -230,7 +247,9 @@ extension ScoreLayout.Item {
     public var head: (id: String, center: CGPoint)? {
         switch self {
         case .note(let id, _, _, let center), .rest(let id, _, let center): (id, center)
-        case .octaveDot, .augmentationDot, .dash, .underline, .barline, .repeatDots, .ending, .arc, .breath: nil
+        case .octaveDot, .augmentationDot, .dash, .underline, .barline, .repeatDots, .ending, .arc, .breath,
+            .accidental, .technique, .grace, .graceDot:
+            nil
         }
     }
 }

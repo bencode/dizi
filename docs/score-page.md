@@ -68,6 +68,21 @@ Then interaction: playhead, playback, beat.
 - A breath mark `V` sits above the line, halfway between the note it follows and the next note (or at the line's end).
 - The demo plays a tie as one note, and the notes of a slur after its first without a new attack (they crossfade from the note before), the way a slur is played on the dizi: only its first note is tongued.
 
+## Techniques, graces, accidentals
+
+- Technique marks sit above their note, over its high-octave dots, stacked upward when there are several; slides sit beside the digit (上滑 before it, 下滑 after it). Slurs pass above the marks.
+- Graces are small raised digits, before the note (前倚音) or after it (后倚音); a ♯ or ♭ sits at the digit's upper left. Both take room in the line, so they never overlap the note before.
+- The demo does not play techniques or graces yet.
+
+| Technique | Mark | Technique | Mark |
+| --- | --- | --- | --- |
+| 吐 t / k, 轻吐 | T / K, ▿ | 保持音, 强音 | —, > |
+| 颤音 | tr | 叠音 | 又 |
+| 打音 | 扌 | 上/下波音 | double wave; down with a stroke through it |
+| 上滑音, 下滑音 | ↗ before, ↘ after | 圆滑音, 剁音 | ⌒, ↓ |
+| 飞指, 花舌, 泛音 | 飞, ✱, ○ | 指震, 气震, 腹震, 揉音, 喉音 | 指, 气, 腹, 揉, 喉 |
+| 延长 | arc over a dot | | |
+
 ## Layout
 
 ```text
