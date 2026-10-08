@@ -69,8 +69,9 @@ private func center(_ id: String, _ line: ScoreLayout.Line) throws -> CGPoint {
     let (first, second) = (try #require(arcs(lines[0]).first), try #require(arcs(lines[1]).first))
     let (start, end) = (try center("n2", lines[0]), try center("n3", lines[1]))
 
-    #expect(first.left == start.x && first.right > start.x && first.right < lines[0].width)
-    #expect(second.right == end.x && second.left < end.x)
+    #expect(first.left == start.x && first.right == lines[0].width)
+    #expect(second.left == 0 && second.right == end.x)
+    #expect([first, second].allSatisfy { $0.rise <= ($0.right - $0.left) / 4 })
 }
 
 @Test func putsABreathMarkBetweenTheNotesAroundIt() throws {

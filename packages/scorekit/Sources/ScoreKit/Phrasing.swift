@@ -51,13 +51,15 @@ private func arcs(of span: Span, on lines: [ScoreLayout.Line], metrics: ScoreMet
 )] {
     guard let first = digit(span.first, on: lines), let last = digit(span.last, on: lines), first.row <= last.row
     else { return [] }
-    let edge = metrics.digitHalfWidth
     return (first.row...last.row).compactMap { row in
         let line = lines[row]
-        let left = row == first.row ? first.center.x : edge
-        let right = row == last.row ? last.center.x : line.width - edge
+        // A piece that continues from the line before or onto the next runs to that edge.
+        let left = row == first.row ? first.center.x : 0
+        let right = row == last.row ? last.center.x : line.width
         guard right > left else { return nil }
-        let rise = min(max((right - left) * 0.12, metrics.fontSize * 0.15), metrics.fontSize * 0.4)
+        // A short piece stays shallow, so it reads as part of an arc rather than as a mark.
+        let width = right - left
+        let rise = min(max(width * 0.12, metrics.fontSize * 0.15), metrics.fontSize * 0.4, width * 0.25)
         let endY = clearance(line, left...right, metrics) - metrics.dotGap
         return (row, .arc(left: left, right: right, endY: endY, rise: rise))
     }
