@@ -1,5 +1,8 @@
 import CoreGraphics
 
+/// An item and the line it goes on.
+private typealias Placed = (row: Int, item: ScoreLayout.Item)
+
 /// The lines with each triplet's arc and 3, each slur's and tie's arcs, and each breath mark, added to the lines
 /// they fall on. Triplets go first, so a slur over one clears its 3.
 func phrased(_ lines: [ScoreLayout.Line], score: Score, metrics: ScoreMetrics) -> [ScoreLayout.Line] {
@@ -11,15 +14,14 @@ func phrased(_ lines: [ScoreLayout.Line], score: Score, metrics: ScoreMetrics) -
     let slurs = score.spans.filter { $0.type == .slur || $0.type == .tie }.flatMap { span in
         arcs(of: span, on: withTuplets, metrics: metrics)
     }
-    let breaths = score.marks.compactMap { mark -> (row: Int, item: ScoreLayout.Item)? in
+    let breaths = score.marks.compactMap { mark -> Placed? in
         guard case .breath(let breath) = mark else { return nil }
         return breathMark(at: breath.tick, on: lines, metrics: metrics)
     }
     return adding(slurs + breaths, to: withTuplets)
 }
 
-private func adding(_ placed: [(row: Int, item: ScoreLayout.Item)], to lines: [ScoreLayout.Line]) -> [ScoreLayout.Line]
-{
+private func adding(_ placed: [Placed], to lines: [ScoreLayout.Line]) -> [ScoreLayout.Line] {
     let added = Dictionary(grouping: placed, by: \.row).mapValues { $0.map(\.item) }
     return lines.enumerated().map { row, line in
         ScoreLayout.Line(
@@ -29,9 +31,7 @@ private func adding(_ placed: [(row: Int, item: ScoreLayout.Item)], to lines: [S
 }
 
 /// A triplet's 3, just above the middle of its arc.
-private func tupletNumber(over piece: (row: Int, item: ScoreLayout.Item), metrics: ScoreMetrics) -> (
-    row: Int, item: ScoreLayout.Item
-)? {
+private func tupletNumber(over piece: Placed, metrics: ScoreMetrics) -> Placed? {
     guard case .arc(let left, let right, let endY, let rise) = piece.item else { return nil }
     let center = CGPoint(x: (left + right) / 2, y: endY - rise - metrics.fontSize * 0.2)
     return (piece.row, .tupletNumber(label: "3", center: center))
@@ -46,9 +46,7 @@ private func digit(_ id: String, on lines: [ScoreLayout.Line]) -> (row: Int, cen
 
 /// One arc per line the span crosses: from its first note to the line's end, across whole lines, and from the
 /// line's start to its last note.
-private func arcs(of span: Span, on lines: [ScoreLayout.Line], metrics: ScoreMetrics) -> [(
-    row: Int, item: ScoreLayout.Item
-)] {
+private func arcs(of span: Span, on lines: [ScoreLayout.Line], metrics: ScoreMetrics) -> [Placed] {
     guard let first = digit(span.first, on: lines), let last = digit(span.last, on: lines), first.row <= last.row
     else { return [] }
     return (first.row...last.row).compactMap { row in
@@ -93,10 +91,8 @@ private func clearance(_ line: ScoreLayout.Line, _ span: ClosedRange<CGFloat>, _
 }
 
 /// A breath mark after the note that ends at `tick`: halfway to the next digit on its line, or at the line's end.
-private func breathMark(at tick: Int, on lines: [ScoreLayout.Line], metrics: ScoreMetrics) -> (
-    row: Int, item: ScoreLayout.Item
-)? {
-    lines.enumerated().lazy.compactMap { row, line -> (row: Int, item: ScoreLayout.Item)? in
+private func breathMark(at tick: Int, on lines: [ScoreLayout.Line], metrics: ScoreMetrics) -> Placed? {
+    lines.enumerated().lazy.compactMap { row, line -> Placed? in
         guard let before = line.anchors.lastIndex(where: { $0.tick < tick }),
             tick <= line.endTick,
             let baseline = line.items.compactMap(\.head).first?.center.y
