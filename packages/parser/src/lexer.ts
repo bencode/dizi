@@ -34,6 +34,8 @@ export type Token =
   | { kind: 'directive'; position: Position; name: string; value: string }
   | { kind: 'slurOpen'; position: Position }
   | { kind: 'slurClose'; position: Position }
+  | { kind: 'tupletOpen'; position: Position }
+  | { kind: 'tupletClose'; position: Position }
   | { kind: 'newline'; position: Position }
 
 /** `\|:` opens a repeat, `:\|` closes one. */
@@ -46,7 +48,7 @@ type Raw = { token: Token | { kind: 'grace'; position: Position; pitches: Grace[
 
 type Rule = { pattern: RegExp; token: (match: RegExpExecArray, position: Position) => Raw['token'] | Diagnostic }
 
-const noteBoundary = /^(?:[\s|){:]|$)/
+const noteBoundary = /^(?:[\s|){:>]|$)/
 
 const rules: Rule[] = [
   { pattern: /^:\|\|?/, token: (_, position) => ({ kind: 'barline', position, style: 'repeatEnd' }) },
@@ -75,6 +77,8 @@ const rules: Rule[] = [
   { pattern: /^[vV]/, token: (match, position) => ({ kind: 'breath', position, circular: match[0] === 'V' }) },
   { pattern: /^\(/, token: (_, position) => ({ kind: 'slurOpen', position }) },
   { pattern: /^\)/, token: (_, position) => ({ kind: 'slurClose', position }) },
+  { pattern: /^</, token: (_, position) => ({ kind: 'tupletOpen', position }) },
+  { pattern: /^>/, token: (_, position) => ({ kind: 'tupletClose', position }) },
   {
     pattern: /^([#b]?)([0-7])('+|,+)?(_*)(\.*)((?:@[A-Za-z]+(?:\([^)]*\))?)*)/,
     token: (match, position) => noteOrRest(match, position),

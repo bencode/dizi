@@ -249,15 +249,19 @@ public struct Pitch: Decodable, Sendable {
     }
 }
 
-/// A slur (连线: one breath, only the first note tongued) or a tie (延音线: two notes held as one), between notes.
+/// A marking from one note to another: a slur (连线: one breath, only the first note tongued), a tie (延音线: two
+/// notes held as one), or a triplet (三连音: three in the time of two; the durations already say so).
 public struct Span: Decodable, Sendable, Equatable {
-    public enum Kind: String, Decodable, Sendable {
+    public enum Kind: String, Sendable {
         case slur
         case tie
+        case tuplet
+        /// A span this app does not draw yet (the IR also defines slides, 历音, hairpins, …); ignored.
+        case other
     }
 
     public let type: Kind
-    /// The first and last note's ids.
+    /// The first and last event's ids.
     public let first: String
     public let last: String
 
@@ -265,6 +269,13 @@ public struct Span: Decodable, Sendable, Equatable {
         case type
         case first = "from"
         case last = "to"
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        type = Kind(rawValue: try container.decode(String.self, forKey: .type)) ?? .other
+        first = try container.decode(String.self, forKey: .first)
+        last = try container.decode(String.self, forKey: .last)
     }
 }
 

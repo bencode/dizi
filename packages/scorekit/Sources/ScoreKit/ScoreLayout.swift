@@ -77,6 +77,8 @@ public struct ScoreLayout: Sendable {
         case grace(noteID: String, degree: Int, center: CGPoint)
         /// A grace note's octave dot.
         case graceDot(center: CGPoint)
+        /// A triplet's number over its arc.
+        case tupletNumber(label: String, center: CGPoint)
     }
 }
 
@@ -262,7 +264,8 @@ extension ScoreLayout.Item {
         case .repeatDots(_, let top, _): top - metrics.dotSpacing / 2
         case .ending(_, let origin): origin.y - metrics.fontSize * 0.55
         case .arc(_, _, let endY, let rise): endY - rise
-        case .breath(let center), .accidental(_, _, let center): center.y - metrics.fontSize * 0.3
+        case .breath(let center), .accidental(_, _, let center), .tupletNumber(_, let center):
+            center.y - metrics.fontSize * 0.3
         case .technique(_, _, let center): center.y - metrics.markHeight / 2
         case .grace(_, _, let center): center.y - metrics.digitHeight * metrics.graceScale / 2
         }
@@ -274,7 +277,7 @@ extension ScoreLayout.Item {
         case .note(let id, let start, _, let center), .rest(let id, let start, let center):
             Anchor(id: id, tick: start, position: center.x)
         case .octaveDot, .augmentationDot, .dash, .underline, .barline, .repeatDots, .ending, .arc, .breath,
-            .accidental, .technique, .grace, .graceDot:
+            .accidental, .technique, .grace, .graceDot, .tupletNumber:
             nil
         }
     }
@@ -284,7 +287,7 @@ extension ScoreLayout.Item {
         switch self {
         case .note(let id, _, _, let center), .rest(let id, _, let center): (id, center)
         case .octaveDot, .augmentationDot, .dash, .underline, .barline, .repeatDots, .ending, .arc, .breath,
-            .accidental, .technique, .grace, .graceDot:
+            .accidental, .technique, .grace, .graceDot, .tupletNumber:
             nil
         }
     }

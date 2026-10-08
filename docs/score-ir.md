@@ -179,7 +179,7 @@ type Span =
   | { type: 'tie'; from: string; to: string }                           // 延音线: same pitch, one long note
   | { type: 'slide'; from: string; to: string }                         // 连线滑音: glide from one note to the next
   | { type: 'li'; direction: 'up' | 'down'; from: string; to: string }  // 历音: a fast scale run between two notes
-  | { type: 'tuplet'; actual: number; normal: number; from: string; to: string }   // 3 in the time of 2 …
+  | { type: 'tuplet'; actual: number; normal: number; from: string; to: string }   // 3 in the time of 2 … (the parser writes triplets only: actual 3, normal 2)
   | { type: 'technique'; technique: Technique; from: string; to: string }          // tr~~, 花舌---, TK---, 喉音---
   | { type: 'hairpin'; direction: 'cresc' | 'dim'; from: string; to: string }
   | { type: 'tempoChange'; direction: 'accel' | 'rit'; text?: string; from: string; to: string }   // 渐快, 渐慢

@@ -99,3 +99,29 @@ private func center(_ id: String, _ line: ScoreLayout.Line) throws -> CGPoint {
     #expect(narrow.height / CGFloat(narrow.lines.count) > ScoreMetrics().lineHeight)
     #expect(plain.height == ScoreMetrics().lineHeight)  // one line whose slur fits needs no extra room
 }
+
+@Test func marksATripletWithAnArcAndAThreeThatASlurClears() throws {
+    let score = try phrasedScore(
+        spans: #"{"type": "tuplet", "actual": 3, "normal": 2, "from": "n1", "to": "n2"}, "#
+            + #"{"type": "slur", "from": "n1", "to": "n2"}"#)
+    let line = try #require(ScoreLayout(score: score, width: 2000).lines.first)
+    let number = try #require(
+        line.items.lazy.compactMap { item -> CGPoint? in
+            guard case .tupletNumber("3", let center) = item else { return nil }
+            return center
+        }.first)
+    let placed = arcs(line)
+    try #require(placed.count == 2)
+    let (tuplet, slur) = (placed[0], placed[1])
+
+    #expect(number.x == (tuplet.left + tuplet.right) / 2 && number.y < tuplet.endY - tuplet.rise)
+    #expect(slur.endY - slur.rise < number.y)  // the slur passes over the 3
+}
+
+@Test func ignoresASpanTypeItDoesNotDraw() throws {
+    let score = try phrasedScore(spans: #"{"type": "hairpin", "direction": "cresc", "from": "n1", "to": "n2"}"#)
+    let line = try #require(ScoreLayout(score: score, width: 2000).lines.first)
+
+    #expect(score.spans.map(\.type) == [.other])
+    #expect(arcs(line).isEmpty)
+}

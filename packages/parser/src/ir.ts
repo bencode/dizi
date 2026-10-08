@@ -88,7 +88,10 @@ export type PartMeasure = { events: Event[]; beams: Beam[] }
 
 export type Part = { id: string; role: 'solo' | 'accompaniment'; measures: PartMeasure[] }
 
-export type Span = { type: 'slur'; from: string; to: string } | { type: 'tie'; from: string; to: string }
+export type Span =
+  | { type: 'slur'; from: string; to: string }
+  | { type: 'tie'; from: string; to: string }
+  | { type: 'tuplet'; actual: 3; normal: 2; from: string; to: string }
 
 export type Mark =
   | { kind: 'section'; at: number; label: string }

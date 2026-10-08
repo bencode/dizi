@@ -1,18 +1,40 @@
 import CoreGraphics
 
-/// The lines with each slur's and tie's arcs, and each breath mark, added to the lines they fall on.
+/// The lines with each triplet's arc and 3, each slur's and tie's arcs, and each breath mark, added to the lines
+/// they fall on. Triplets go first, so a slur over one clears its 3.
 func phrased(_ lines: [ScoreLayout.Line], score: Score, metrics: ScoreMetrics) -> [ScoreLayout.Line] {
-    let arcs = score.spans.flatMap { arcs(of: $0, on: lines, metrics: metrics) }
+    let tuplets = score.spans.filter { $0.type == .tuplet }.flatMap { span in
+        let pieces = arcs(of: span, on: lines, metrics: metrics)
+        return pieces + pieces.prefix(1).compactMap { piece in tupletNumber(over: piece, metrics: metrics) }
+    }
+    let withTuplets = adding(tuplets, to: lines)
+    let slurs = score.spans.filter { $0.type == .slur || $0.type == .tie }.flatMap { span in
+        arcs(of: span, on: withTuplets, metrics: metrics)
+    }
     let breaths = score.marks.compactMap { mark -> (row: Int, item: ScoreLayout.Item)? in
         guard case .breath(let breath) = mark else { return nil }
         return breathMark(at: breath.tick, on: lines, metrics: metrics)
     }
-    let added = Dictionary(grouping: arcs + breaths, by: \.row).mapValues { $0.map(\.item) }
+    return adding(slurs + breaths, to: withTuplets)
+}
+
+private func adding(_ placed: [(row: Int, item: ScoreLayout.Item)], to lines: [ScoreLayout.Line]) -> [ScoreLayout.Line]
+{
+    let added = Dictionary(grouping: placed, by: \.row).mapValues { $0.map(\.item) }
     return lines.enumerated().map { row, line in
         ScoreLayout.Line(
             measures: line.measures, items: line.items + (added[row] ?? []), anchors: line.anchors,
             endTick: line.endTick, width: line.width)
     }
+}
+
+/// A triplet's 3, just above the middle of its arc.
+private func tupletNumber(over piece: (row: Int, item: ScoreLayout.Item), metrics: ScoreMetrics) -> (
+    row: Int, item: ScoreLayout.Item
+)? {
+    guard case .arc(let left, let right, let endY, let rise) = piece.item else { return nil }
+    let center = CGPoint(x: (left + right) / 2, y: endY - rise - metrics.fontSize * 0.2)
+    return (piece.row, .tupletNumber(label: "3", center: center))
 }
 
 /// Where a note's digit is: its line and its center.
@@ -57,6 +79,10 @@ private func clearance(_ line: ScoreLayout.Line, _ span: ClosedRange<CGFloat>, _
             center.y - metrics.markHeight / 2
         case .grace(_, _, let center) where span.contains(center.x):
             center.y - metrics.digitHeight * metrics.graceScale / 2
+        case .tupletNumber(_, let center) where span.contains(center.x):
+            center.y - metrics.fontSize * 0.3
+        case .arc(let left, let right, let endY, let rise) where span.overlaps(left...right):
+            endY - rise
         default: nil
         }
     }

@@ -15,6 +15,8 @@ type Placed = {
   underlines: number[]
   /** The written notes in order, with their ids, for pairing slurs. */
   slurs: { id: string; semitones: number; start: boolean; end: boolean }[]
+  /** Triplets `< >`, from their first event to their last. */
+  tuplets: Span[]
 }
 
 /** The written body as IR: ticks, ids, values, beams, spans, and marks. */
@@ -26,11 +28,16 @@ export const compileScore = (header: Header, body: Body): Compiled => {
   )
   const shapeErrors = body.measures
     .flatMap((measure) => measure.events)
-    .flatMap((event) =>
-      event.kind !== 'breath' && shape(event.underlines, event.dots, event.kind === 'note' ? event.dashes : 0) === null
-        ? [error(event.position, 'this length cannot be written as one note; use a tie (… | …) instead')]
-        : [],
-    )
+    .flatMap((event) => {
+      if (event.kind === 'breath') return []
+      const length = shape(event.underlines, event.dots, event.kind === 'note' ? event.dashes : 0)
+      if (length === null) {
+        return [error(event.position, 'this length cannot be written as one note; use a tie (… | …) instead')]
+      }
+      return event.tuplet.inside && !Number.isInteger(tupletTicks(length.value, length.dots))
+        ? [error(event.position, 'a triplet cannot hold a note this short')]
+        : []
+    })
   const parts: PartMeasure[] = placed.map((measure, index) => ({
     events: measure.events,
     beams: beams(measure, index === 0 && isShort(measure.measure)),
@@ -68,7 +75,7 @@ export const compileScore = (header: Header, body: Body): Compiled => {
     measures,
     playOrder: order,
     parts: [{ id: 'solo', role: 'solo', measures: parts }],
-    spans: spans(placed.flatMap((measure) => measure.slurs)),
+    spans: [...spans(placed.flatMap((measure) => measure.slurs)), ...placed.flatMap((measure) => measure.tuplets)],
     marks: marks.toSorted((a, b) => a.at - b.at),
     ...(breaks.length > 0 ? { layoutHints: { lineBreaksAfter: breaks } } : {}),
   }
@@ -91,6 +98,9 @@ export const shape = (underlines: number, dots: number, dashes: number): { value
 
 export const ticks = (value: NoteValue, dots: Dots): number => (1920 / value) * (2 - 1 / 2 ** dots)
 
+/** A note's length inside a triplet: three in the time of two. */
+const tupletTicks = (value: NoteValue, dots: Dots): number => (ticks(value, dots) * 2) / 3
+
 const fullLength = (time: Time): number | null => (time === 'free' ? null : (time.beats * 1920) / time.unit)
 
 const place = (measures: WrittenMeasure[], initial: Time): Placed[] =>
@@ -111,7 +121,7 @@ const place = (measures: WrittenMeasure[], initial: Time): Placed[] =>
   ).placed
 
 const layEvents = (written: Written[], start: number, firstId: number) =>
-  written.reduce<{ placed: Omit<Placed, 'measure'>; end: number; nextId: number }>(
+  written.reduce<{ placed: Omit<Placed, 'measure'>; end: number; nextId: number; tupletFrom: string | null }>(
     (state, event) => {
       if (event.kind === 'breath') {
         const breath: Mark = { kind: 'breath', at: state.end, style: event.circular ? 'circular' : 'normal' }
@@ -123,7 +133,15 @@ const layEvents = (written: Written[], start: number, firstId: number) =>
         dots: 0,
       }
       const id = `n${String(state.nextId)}`
-      const duration = ticks(length.value, length.dots)
+      // A triplet note that is too short for whole ticks is reported by compileScore; rounding keeps going.
+      const duration = event.tuplet.inside
+        ? Math.round(tupletTicks(length.value, length.dots))
+        : ticks(length.value, length.dots)
+      const tupletFrom = event.tuplet.start ? id : state.tupletFrom
+      const tuplets: Span[] =
+        event.tuplet.end && tupletFrom !== null
+          ? [{ type: 'tuplet', actual: 3, normal: 2, from: tupletFrom, to: id }]
+          : []
       const base = { id, start: state.end, duration, value: length.value, dots: length.dots }
       const techniques = event.techniques.length > 0 ? { techniques: event.techniques } : {}
       const placedEvent: Event =
@@ -146,12 +164,19 @@ const layEvents = (written: Written[], start: number, firstId: number) =>
           events: [...state.placed.events, placedEvent],
           underlines: [...state.placed.underlines, event.underlines],
           slurs: [...state.placed.slurs, ...slurs],
+          tuplets: [...state.placed.tuplets, ...tuplets],
         },
         end: state.end + duration,
         nextId: state.nextId + 1,
+        tupletFrom: event.tuplet.end ? null : tupletFrom,
       }
     },
-    { placed: { events: [], breaths: [], underlines: [], slurs: [] }, end: start, nextId: firstId },
+    {
+      placed: { events: [], breaths: [], underlines: [], slurs: [], tuplets: [] },
+      end: start,
+      nextId: firstId,
+      tupletFrom: null,
+    },
   )
 
 /** Every measure must fill its bar; the first (pickup) and the last may be shorter; 散板 is not checked. */

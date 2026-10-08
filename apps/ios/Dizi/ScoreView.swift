@@ -151,6 +151,8 @@ struct ScoreView: View {
             [.digit(degree, center: center, .plain, scale: metrics.graceScale)]
         case .graceDot(let center):
             [dot(center, radius: dotRadius * 0.7)]
+        case .tupletNumber(let label, let center):
+            [.label(label, point: center, anchor: .center)]
         }
     }
 

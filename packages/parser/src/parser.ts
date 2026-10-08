@@ -14,7 +14,13 @@ export type WrittenNote = {
   graces: Grace[]
   slurStart: boolean
   slurEnd: boolean
+  tuplet: TupletMark
 }
+
+/** Where an event sits in a triplet `< >`: outside, or inside, opening or closing it. */
+export type TupletMark = { inside: boolean; start: boolean; end: boolean }
+
+const outsideTuplet: TupletMark = { inside: false, start: false, end: false }
 
 export type WrittenRest = {
   kind: 'rest'
@@ -22,6 +28,7 @@ export type WrittenRest = {
   underlines: number
   dots: number
   techniques: Technique[]
+  tuplet: TupletMark
 }
 
 export type Written = WrittenNote | WrittenRest | { kind: 'breath'; circular: boolean }
@@ -48,6 +55,8 @@ type State = {
   changes: Changes
   /** A `|:` was written; the next measure opens a repeat. */
   repeatNext: boolean
+  /** An open triplet `<`: where it was written, and whether its next event is its first. */
+  tuplet: { open: Position; startNext: boolean } | null
   slur: { open: Position | null; startNext: boolean }
   diagnostics: Diagnostic[]
 }
@@ -59,6 +68,7 @@ export const parseBody = (tokens: Token[]): Body => {
     events: [],
     changes: {},
     repeatNext: false,
+    tuplet: null,
     slur: { open: null, startNext: false },
     diagnostics: [],
   })
@@ -88,6 +98,11 @@ const step = (state: State, token: Token): State => {
         ? { ...state, slur: { open: open.position, startNext: true } }
         : report(state, error(open.position, 'slurs cannot be nested')),
     slurClose: (close) => closeSlur(state, close.position),
+    tupletOpen: (open) =>
+      state.tuplet === null
+        ? { ...state, tuplet: { open: open.position, startNext: true } }
+        : report(state, error(open.position, 'tuplets cannot be nested')),
+    tupletClose: (close) => closeTuplet(state, close.position),
     newline: (newline) => breakLine(state, newline.position),
   }
   return (handlers[token.kind] as (token: Token) => State)(token)
@@ -106,9 +121,10 @@ const addNote = (state: State, token: NoteToken): State => {
     graces: token.graces,
     slurStart: state.slur.startNext,
     slurEnd: false,
+    tuplet: tupletMark(state),
   }
   return {
-    ...state,
+    ...afterTupletEvent(state),
     events: [...state.events, note],
     slur: { ...state.slur, startNext: false },
     diagnostics: [...state.diagnostics, ...techniques.flatMap((result) => ('severity' in result ? [result] : []))],
@@ -123,8 +139,10 @@ const addRest = (state: State, token: RestToken): State => {
     underlines: token.underlines,
     dots: token.dots,
     techniques: token.techniques.length > wrong.length ? [{ type: 'yanchang' }] : [],
+    tuplet: tupletMark(state),
   }
-  const next = state.slur.startNext ? report(state, error(token.position, "a slur '(' must start on a note")) : state
+  const opened = afterTupletEvent(state)
+  const next = opened.slur.startNext ? report(opened, error(token.position, "a slur '(' must start on a note")) : opened
   const added: State = { ...next, events: [...next.events, rest], slur: { ...next.slur, startNext: false } }
   return wrong.reduce<State>(
     (current, mark) => report(current, error(mark.position, `a rest takes only @yanchang, not @${mark.name}`)),
@@ -148,6 +166,13 @@ const closeMeasure = (state: State, style: BarStyle, position: Position): State 
     // `|:` either replaces the bar line before a measure or starts the score.
     const closed = hasSound(state.events) ? closeMeasure(state, 'single', position) : state
     return { ...closed, repeatNext: true }
+  }
+  if (state.tuplet !== null) {
+    return closeMeasure(
+      { ...report(state, error(state.tuplet.open, 'a tuplet must close within its measure')), tuplet: null },
+      style,
+      position,
+    )
   }
   if (!hasSound(state.events)) return report(state, error(position, 'a measure needs at least one note or rest'))
   const measure: WrittenMeasure = {
@@ -182,6 +207,26 @@ const change = (state: State, name: string, value: string, position: Position): 
   return parsed === null
     ? report(state, error(position, `invalid [${name} ${value}]`))
     : { ...state, changes: { ...state.changes, ...parsed } }
+}
+
+const tupletMark = (state: State): TupletMark =>
+  state.tuplet === null ? outsideTuplet : { inside: true, start: state.tuplet.startNext, end: false }
+
+const afterTupletEvent = (state: State): State =>
+  state.tuplet === null ? state : { ...state, tuplet: { ...state.tuplet, startNext: false } }
+
+/** `>` closes the triplet on the event before it. */
+const closeTuplet = (state: State, position: Position): State => {
+  const last = state.events.at(-1)
+  if (state.tuplet === null) return report(state, error(position, "'>' closes no tuplet"))
+  if (state.tuplet.startNext || last === undefined || last.kind === 'breath') {
+    return report({ ...state, tuplet: null }, error(position, 'a tuplet needs at least one note or rest'))
+  }
+  return {
+    ...state,
+    events: [...state.events.slice(0, -1), { ...last, tuplet: { ...last.tuplet, end: true } }],
+    tuplet: null,
+  }
 }
 
 const closeSlur = (state: State, position: Position): State => {

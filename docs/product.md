@@ -68,6 +68,7 @@ Piece list ─tap─▶ score page (jianpu) ─▶ set the tempo / (optional) ta
 | 4d | App: download and cache the library, with a bundled snapshot | done |
 | 5a | Slurs and ties drawn as arcs (split across lines), breath marks; the demo plays slurs legato and ties as one note | done |
 | 5b | Technique marks, graces, and sharps/flats drawn on the score | done |
+| 5c | Triplets: written `<1_ 1_ 1_>`, timed in the IR, drawn with an arc and 3 | done |
 
 Interface language: Chinese first; strings kept in a String Catalog for later languages.
 
