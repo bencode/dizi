@@ -33,6 +33,13 @@ public struct Meta: Decodable, Sendable {
 
 public struct Header: Decodable, Sendable {
     public let key: Key
+    /// 筒音作几: the note the closed-hole fingering plays, such as 5 below the tonic (全按作5).
+    public let fingering: Fingering?
+}
+
+public struct Fingering: Decodable, Sendable, Equatable {
+    public let degree: Int
+    public let octave: Int
 }
 
 public struct Key: Decodable, Sendable, Equatable {

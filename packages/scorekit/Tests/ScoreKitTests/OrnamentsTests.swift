@@ -111,3 +111,25 @@ private func marks(_ items: [ScoreLayout.Item]) -> [(Technique, CGPoint)] {
     #expect(notes[0].techniques == [.unknown])
     #expect(notes[1].techniques.isEmpty && notes[1].graces.isEmpty)
 }
+
+@Test func writesAGracesSharpBeforeItsDigit() throws {
+    let grace = { (sign: String) in
+        #", "graces": [{"position": "before", "pitches": [{"degree": 4, \#(sign) "octave": 0, "semitones": 6}]}]"#
+    }
+    let sharp = try items(ornamented(grace(#""accidental": "sharp","#)))
+    let natural = try items(ornamented(grace("")))
+    let sign = try #require(
+        sharp.lazy.compactMap { item -> CGPoint? in
+            guard case .accidental("n1", true, let center) = item else { return nil }
+            return center
+        }.first)
+    let graceDigit = try #require(
+        sharp.lazy.compactMap { item -> CGPoint? in
+            guard case .grace("n1", 4, let center) = item else { return nil }
+            return center
+        }.first)
+    let (wider, plain) = (try digit("n2", sharp), try digit("n2", natural))
+
+    #expect(sign.x < graceDigit.x)
+    #expect(wider.x > plain.x)  // the sign takes room
+}

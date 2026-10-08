@@ -4,12 +4,13 @@ import SwiftUI
 /// The score page's notation: header and jianpu drawn from the layout, with the playhead on top.
 struct ScoreView: View {
     let player: Player
-    private let metrics = ScoreMetrics(fontSize: 26)
+    private let metrics = ScoreMetrics(fontSize: 24)
     private func digitFont(_ scale: CGFloat) -> Font {
         Theme.serif(metrics.fontSize * scale)
     }
     private var stroke: CGFloat { metrics.fontSize / 16 }
     private var dotRadius: CGFloat { metrics.fontSize / 12 }
+    /// Narrower than the page gutter, so two measures of 16ths still fit a phone line.
     private let margin: CGFloat = 16
 
     var body: some View {
@@ -18,9 +19,8 @@ struct ScoreView: View {
             ScrollViewReader { scroller in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text(headerText(player.score))
-                            .font(.footnote)
-                            .foregroundStyle(Theme.muted)
+                        header(player.score)
+                            .padding(.horizontal, Theme.Space.gutter - margin)
                         TimelineView(.animation(paused: !player.isRunning)) { _ in
                             playedNotation(layout, scroller: scroller)
                         }
@@ -81,37 +81,46 @@ struct ScoreView: View {
     @ViewBuilder private var countdown: some View {
         if case .countIn(let beatsLeft) = player.position {
             Text(verbatim: "\(beatsLeft)")
-                .font(Theme.serif(96, weight: .semibold))
-                .foregroundStyle(Theme.accent)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .font(Theme.serif(72))
+                .foregroundStyle(Theme.accent.opacity(0.9))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 
-    /// The played part of the current line filled in up to the cursor, and a small marker over the start note.
+    /// Playing: what has been played on the wash band, up to the cursor. Stopped: the cursor at the start note.
     private func playheadInks(_ layout: ScoreLayout, cursor: (row: Int, x: CGFloat)?, start: String?) -> [Ink] {
         let size = metrics.fontSize
         let rowHeight = layout.height / CGFloat(max(layout.lines.count, 1))
+        let baseline = { (row: Int) in
+            layout.lines[row].items.compactMap(\.head).first?.center.y ?? rowHeight * (CGFloat(row) + 0.5)
+        }
+        let band = { (row: Int, width: CGFloat) in
+            Ink.shape(
+                Path(
+                    roundedRect: CGRect(
+                        x: 0, y: rowHeight * (CGFloat(row) + 0.12), width: width, height: rowHeight * 0.76),
+                    cornerRadius: size * 0.2), .wash)
+        }
         let sweep = cursor.map { cursor in
-            let band = CGRect(
-                x: 0, y: rowHeight * (CGFloat(cursor.row) + 0.12), width: cursor.x, height: rowHeight * 0.76)
-            return [
-                Ink.shape(Path(roundedRect: band, cornerRadius: size * 0.2), .wash),
-                Ink.shape(
-                    Path(CGRect(x: cursor.x - stroke, y: band.minY, width: stroke * 2, height: band.height)), .accent),
-            ]
+            (0..<cursor.row).map { band($0, layout.lines[$0].width) } + [band(cursor.row, cursor.x)]
+                + [playhead(centerX: cursor.x, digitY: baseline(cursor.row))]
         }
-        let marker = layout.lines.flatMap(\.items).compactMap(\.head).first { $0.id == start }.map { head in
-            let tip = CGPoint(x: head.center.x, y: head.center.y - size * 1.05)
-            return Ink.shape(
-                Path { path in
-                    path.addLines([
-                        tip, CGPoint(x: tip.x - size / 5, y: tip.y - size / 4),
-                        CGPoint(x: tip.x + size / 5, y: tip.y - size / 4),
-                    ])
-                    path.closeSubpath()
-                }, .accent)
-        }
+        let marker = layout.lines.lazy.compactMap { line -> Ink? in
+            let heads = line.items.compactMap(\.head)
+            guard let head = heads.first(where: { $0.id == start }) else { return nil }
+            // In the gap before the note: halfway from the note before, or just inside the line's start.
+            let before = heads.map(\.center.x).filter { $0 < head.center.x }.max()
+            let centerX = before.map { ($0 + head.center.x) / 2 } ?? max(head.center.x - size * 0.42, 1.25)
+            return playhead(centerX: centerX, digitY: head.center.y)
+        }.first
         return (sweep ?? []) + [marker].compactMap { $0 }
+    }
+
+    /// The accent cursor, the same while playing and stopped: 2.5 pt wide, centred on the digits.
+    private func playhead(centerX: CGFloat, digitY: CGFloat) -> Ink {
+        let size = metrics.fontSize
+        let bar = CGRect(x: centerX - 1.25, y: digitY - size * 0.85, width: 2.5, height: size * 1.7)
+        return .shape(Path(roundedRect: bar, cornerRadius: 1.25), .accent)
     }
 
     /// What one layout item looks like: pure, so the canvas only paints the result.
@@ -130,21 +139,19 @@ struct ScoreView: View {
                     .plain)
             ]
         case .underline(_, let left, let right, let lineY):
-            [.shape(Path(CGRect(x: left, y: lineY - stroke / 2, width: right - left, height: stroke)), .plain)]
+            [.shape(Path(CGRect(x: left, y: lineY - 0.75, width: right - left, height: 1.5)), .plain)]
         case .barline(let style, let centerX, let top, let bottom):
-            barlineStrokes(style).map { offset, width in
-                .shape(Path(CGRect(x: centerX + offset, y: top, width: width, height: bottom - top)), .plain)
-            }
+            barlineInks(style, centerX: centerX, top: top, bottom: bottom)
         case .repeatDots(let centerX, let top, let bottom):
             [top, bottom].map { dot(CGPoint(x: centerX, y: $0), radius: dotRadius) }
         case .ending(let label, let origin):
-            [.label(label, point: origin, anchor: .bottomLeading)]
+            [.mark(label, point: origin, anchor: .bottomLeading)]
         case .arc(let left, let right, let endY, let rise):
             [.shape(arcPath(left: left, right: right, endY: endY, rise: rise), .plain)]
         case .breath(let center):
-            [.label("V", point: center, anchor: .center)]
+            [.mark("V", point: center, anchor: .center)]
         case .accidental(_, let sharp, let center):
-            [.label(sharp ? "♯" : "♭", point: center, anchor: .center)]
+            [.mark(sharp ? "♯" : "♭", point: center, anchor: .center)]
         case .technique(_, let technique, let center):
             techniqueInk(technique, center: center)
         case .grace(_, let degree, let center):
@@ -152,16 +159,16 @@ struct ScoreView: View {
         case .graceDot(let center):
             [dot(center, radius: dotRadius * 0.7)]
         case .tupletNumber(let label, let center):
-            [.label(label, point: center, anchor: .center)]
+            [.mark(label, point: center, anchor: .center)]
         case .section(let label, let origin):
-            [.label(label, point: origin, anchor: .bottomLeading)]
+            [.label(label, point: origin, anchor: .bottomLeading, size: 13, tone: .muted)]
         }
     }
 
     /// A technique as jianpu marks it (docs/score-page.md): a letter or sign as text, or a small drawn shape.
     private func techniqueInk(_ technique: Technique, center: CGPoint) -> [Ink] {
         if let symbol = techniqueSigns[technique] {
-            return [.label(symbol, point: center, anchor: .center)]
+            return [.mark(symbol, point: center, anchor: .center)]
         }
         return switch technique {
         case .boyin(let rising): [.shape(mordentPath(center, lower: !rising), .plain)]
@@ -211,15 +218,24 @@ struct ScoreView: View {
             path.move(to: CGPoint(x: left, y: endY))
             path.addQuadCurve(to: CGPoint(x: right, y: endY), control: CGPoint(x: middle, y: endY - rise * 2))
             path.addQuadCurve(
-                to: CGPoint(x: left, y: endY), control: CGPoint(x: middle, y: endY - rise * 2 + stroke * 2.4))
+                to: CGPoint(x: left, y: endY), control: CGPoint(x: middle, y: endY - rise * 2 + 3.2))
             path.closeSubpath()
+        }
+    }
+
+    /// A bar line's strokes: ink at 60%, a final bar in full ink.
+    private func barlineInks(_ style: Barline, centerX: CGFloat, top: CGFloat, bottom: CGFloat) -> [Ink] {
+        barlineStrokes(style).map { offset, width in
+            .shape(
+                Path(CGRect(x: centerX + offset, y: top, width: width, height: bottom - top)),
+                style == .final ? .plain : .soft)
         }
     }
 
     /// Thin and thick strokes of a bar line, as offsets from its center.
     private func barlineStrokes(_ style: Barline) -> [(offset: CGFloat, width: CGFloat)] {
-        let thin = stroke * 0.7
-        let thick = stroke * 2.5
+        let thin: CGFloat = 1.2
+        let thick: CGFloat = 3
         let gap = stroke * 1.5
         return switch style {
         case .single: [(-thin / 2, thin)]
@@ -234,10 +250,9 @@ struct ScoreView: View {
             context.fill(path, with: .color(tone.color))
         case .digit(let degree, let center, let tone, let scale):
             context.draw(Text(verbatim: "\(degree)").font(digitFont(scale)).foregroundStyle(tone.color), at: center)
-        case .label(let text, let point, let anchor):
+        case .label(let text, let point, let anchor, let size, let tone):
             context.draw(
-                Text(verbatim: text).font(.system(size: metrics.fontSize * 0.55)).foregroundStyle(Theme.ink), at: point,
-                anchor: anchor)
+                Text(verbatim: text).font(.system(size: size)).foregroundStyle(tone.color), at: point, anchor: anchor)
         }
     }
 }
@@ -249,37 +264,66 @@ private let techniqueSigns: [Technique: String] = [
     .rou: "揉", .hou: "喉", .yuanhua: "⌒", .duo: "↓", .slide(rising: true): "↗", .slide(rising: false): "↘",
 ]
 
+extension Ink {
+    /// Technique marks, breath V, triplet 3, ending numbers: the contract's mark size, in ink.
+    fileprivate static func mark(_ text: String, point: CGPoint, anchor: UnitPoint) -> Ink {
+        .label(text, point: point, anchor: anchor, size: 12.5, tone: .plain)
+    }
+}
+
 /// What the canvas paints.
 private enum Ink {
     case shape(Path, Tone)
     case digit(Int, center: CGPoint, Tone, scale: CGFloat)
-    /// Small text such as an ending's number or a breath mark, placed by its `anchor` at `point`.
-    case label(String, point: CGPoint, anchor: UnitPoint)
+    /// Small text such as an ending's number or a section's name, placed by its `anchor` at `point`.
+    case label(String, point: CGPoint, anchor: UnitPoint, size: CGFloat, tone: Tone)
 }
 
 /// Plain notation, the accent for the playhead, a light wash behind the current note.
 private enum Tone {
     case plain
+    /// Bar lines: ink, lighter than the notes.
+    case soft
+    case muted
     case accent
     case wash
 
     var color: Color {
         switch self {
         case .plain: Theme.ink
+        case .soft: Theme.ink.opacity(0.6)
+        case .muted: Theme.muted
         case .accent: Theme.accent
         case .wash: Theme.wash
         }
     }
 }
 
-/// `1=F  2/4  ♩=72`
+/// `1=F  2/4  ♩=72` with the tempo in serif, then 全按作5 and the composer at the right, over a hairline.
+@MainActor private func header(_ score: Score) -> some View {
+    let fingering = score.header.fingering.map { "全按作\($0.degree)" }
+    let right = [fingering, score.meta.composer].compactMap { $0 }.joined(separator: " · ")
+    let tempo = score.startingTempo.flatMap(tempoText) ?? ""
+    return VStack(spacing: Theme.Space.medium) {
+        HStack(alignment: .firstTextBaseline) {
+            Text(verbatim: headerText(score))
+            Text(verbatim: tempo).font(Theme.serif(13))
+            Spacer()
+            Text(verbatim: right)
+        }
+        .font(.footnote)
+        .foregroundStyle(Theme.muted)
+        Theme.rule.frame(height: 1)
+    }
+}
+
+/// `1=F  2/4`
 private func headerText(_ score: Score) -> String {
     let key = score.header.key
     let accidental = key.accidental.map { $0 == .sharp ? "♯" : "♭" } ?? ""
     let parts: [String?] = [
         "1=\(accidental)\(key.tonic)",
         score.measures.first.flatMap { timeText($0.time) },
-        score.startingTempo.flatMap(tempoText),
     ]
     return parts.compactMap { $0 }.joined(separator: "  ")
 }

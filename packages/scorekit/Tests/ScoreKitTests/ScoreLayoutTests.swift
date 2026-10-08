@@ -184,3 +184,39 @@ private func levelOneUnderlines(in items: [ScoreLayout.Item]) -> [ClosedRange<CG
 
     #expect(!ScoreLayout(score: score, width: phone).lines.isEmpty)
 }
+
+@Test func liftsASectionLabelOverAnEndingNumber() throws {
+    let measure = { (index: Int, extra: String) in
+        """
+        {"index": \(index), "start": \(index * 480), "duration": 480, "time": {"beats": 1, "unit": 4}, \
+        "barline": "single"\(extra)}
+        """
+    }
+    let note = { (id: String, start: Int) in
+        """
+        {"kind": "note", "id": "\(id)", "start": \(start), "duration": 480, "value": 4, "dots": 0, \
+        "pitch": {"degree": 1, "octave": 0, "semitones": 0}}
+        """
+    }
+    let json = """
+        {"irVersion": 1, "meta": {}, "header": {"key": {"tonic": "D"}}, "ticksPerQuarter": 480,
+         "measures": [\(measure(0, #", "repeatEnd": true"#)), \(measure(1, #", "volta": [1]"#))],
+         "playOrder": [0, 0, 1],
+         "parts": [{"id": "solo", "role": "solo", "measures": [
+            {"events": [\(note("n1", 0))], "beams": []}, {"events": [\(note("n2", 480))], "beams": []}]}],
+         "spans": [], "marks": [{"kind": "section", "at": 480, "label": "尾声"}]}
+        """
+    let line = try #require(ScoreLayout(score: try Score.decode(from: Data(json.utf8)), width: wide).lines.last)
+    let section = try #require(
+        line.items.lazy.compactMap { item -> CGPoint? in
+            guard case .section(_, let origin) = item else { return nil }
+            return origin
+        }.first)
+    let ending = try #require(
+        line.items.lazy.compactMap { item -> CGPoint? in
+            guard case .ending(_, let origin) = item else { return nil }
+            return origin
+        }.first)
+
+    #expect(section.y < ending.y)
+}

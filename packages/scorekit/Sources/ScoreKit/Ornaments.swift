@@ -102,13 +102,13 @@ struct Ornaments {
 
     /// Room before the digit: graces, then a slide up, then the accidental.
     func leadingWidth(_ metrics: ScoreMetrics) -> CGFloat {
-        CGFloat(before.count) * metrics.graceAdvance + (slideUp ? metrics.slideWidth : 0)
+        advances(before, metrics).reduce(0, +) + (slideUp ? metrics.slideWidth : 0)
             + (accidental == nil ? 0 : metrics.accidentalWidth)
     }
 
     /// Room after the digit and its 附点: a slide down, then graces.
     func trailingWidth(_ metrics: ScoreMetrics) -> CGFloat {
-        (slideDown ? metrics.slideWidth : 0) + CGFloat(after.count) * metrics.graceAdvance
+        (slideDown ? metrics.slideWidth : 0) + advances(after, metrics).reduce(0, +)
     }
 
     /// The items around a digit at `digit`, whose highest point (digit or octave dot) is `top`.
@@ -140,16 +140,34 @@ struct Ornaments {
                         center: CGPoint(x: accidentalX, y: digit.y - metrics.fontSize * 0.25))
                 ]
             } ?? []
-        let leadingGraces = before.enumerated().flatMap { index, pitch in
-            let centerX = gracesEnd - metrics.graceAdvance * (CGFloat(before.count - index) - 0.5)
-            return graceItems(pitch, noteID: noteID, center: CGPoint(x: centerX, y: graceY), metrics: metrics)
-        }
+        let leadingStart = gracesEnd - advances(before, metrics).reduce(0, +)
+        let leadingGraces = placedGraces(before, from: leadingStart, graceY: graceY, noteID: noteID, metrics: metrics)
         let afterStart = rightEdge + (slideDown ? metrics.slideWidth : 0)
-        let trailingGraces = after.enumerated().flatMap { index, pitch in
-            let centerX = afterStart + metrics.graceAdvance * (CGFloat(index) + 0.5)
-            return graceItems(pitch, noteID: noteID, center: CGPoint(x: centerX, y: graceY), metrics: metrics)
-        }
+        let trailingGraces = placedGraces(after, from: afterStart, graceY: graceY, noteID: noteID, metrics: metrics)
         return sign + slides + leadingGraces + trailingGraces + marks
+    }
+}
+
+/// Each grace's width: its digit, plus its ♯ or ♭ when it has one.
+private func advances(_ graces: [Pitch], _ metrics: ScoreMetrics) -> [CGFloat] {
+    graces.map { metrics.graceAdvance + ($0.accidental == nil ? 0 : metrics.graceAccidentalWidth) }
+}
+
+/// Graces laid left to right from `start`, each with its sign before its digit.
+private func placedGraces(
+    _ graces: [Pitch], from start: CGFloat, graceY: CGFloat, noteID: String, metrics: ScoreMetrics
+) -> [ScoreLayout.Item] {
+    let widths = advances(graces, metrics)
+    let lefts = widths.dropLast().reduce(into: [start]) { lefts, width in lefts.append((lefts.last ?? start) + width) }
+    return zip(graces, lefts).flatMap { pitch, left in
+        let sign = pitch.accidental == nil ? 0 : metrics.graceAccidentalWidth
+        let center = CGPoint(x: left + sign + metrics.graceAdvance / 2, y: graceY)
+        let accidental = pitch.accidental.map { accidental in
+            ScoreLayout.Item.accidental(
+                noteID: noteID, sharp: accidental == .sharp,
+                center: CGPoint(x: left + sign / 2, y: graceY - metrics.fontSize * 0.15))
+        }
+        return (accidental.map { [$0] } ?? []) + graceItems(pitch, noteID: noteID, center: center, metrics: metrics)
     }
 }
 

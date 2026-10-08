@@ -28,6 +28,7 @@ public struct ScoreMetrics: Sendable {
     var graceRaise: CGFloat { fontSize * 0.3 }
     var accidentalWidth: CGFloat { fontSize * 0.35 }
     var slideWidth: CGFloat { fontSize * 0.5 }
+    var graceAccidentalWidth: CGFloat { fontSize * 0.25 }
 }
 
 /// Where everything of a score goes, for one screen width. Positions are in the score's own coordinates.
@@ -171,9 +172,11 @@ private func line(_ measures: [Int], row: Int, scale: CGFloat, _ context: LineCo
     let frame = LineFrame(scale: scale, baseline: rowHeight * CGFloat(row) + context.headroom + metrics.lineHeight / 2)
     let widths = measures.map { naturalWidth(context.boxes[$0], metrics) * scale + metrics.barGap }
     let firstTick = measures.first.map { context.score.measures[$0].start }
+    // An ending number takes the line start's label height; a section label then sits one mark higher.
+    let startsEnding = measures.first.map { context.score.measures[$0].volta != nil } ?? false
+    let labelY = frame.baseline - metrics.lineHeight * 0.38 - (startsEnding ? metrics.markHeight : 0)
     let label = context.score.marks.compactMap(\.section).first { $0.tick == firstTick }.map { section in
-        ScoreLayout.Item.section(
-            label: section.label, origin: CGPoint(x: 0, y: frame.baseline - metrics.lineHeight * 0.38))
+        ScoreLayout.Item.section(label: section.label, origin: CGPoint(x: 0, y: labelY))
     }
     let items =
         zip(measures, starts(of: widths, from: 0)).flatMap { index, left in
@@ -203,7 +206,7 @@ private func measureItems(_ index: Int, left: CGFloat, _ frame: LineFrame, _ con
     let barX = left + naturalWidth(boxes, metrics) * scale + metrics.barGap / 2
     let barline = Item.barline(
         context.score.measures[index].barline, centerX: barX,
-        top: baseline - metrics.lineHeight * 0.3, bottom: baseline + metrics.lineHeight * 0.3)
+        top: baseline - metrics.fontSize * 0.65, bottom: baseline + metrics.fontSize * 0.65)
     return placed.flatMap(\.items)
         + underlines(placed, beams: context.part.measures[index].beams, baseline: baseline, metrics: metrics)
         + [barline] + repeats(index, span: left...barX, frame, context)

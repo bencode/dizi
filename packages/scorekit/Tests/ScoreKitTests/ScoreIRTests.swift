@@ -21,6 +21,16 @@ private func oneNote(value: String = "4", dots: String = "0", degree: String = "
     #expect(throws: Never.self) { try Score.decode(from: oneNote()) }
 }
 
+@Test func decodesTheFingeringWhenTheScoreGivesOne() throws {
+    let plain = try Score.decode(from: oneNote())
+    let text = try #require(String(bytes: oneNote(), encoding: .utf8)).replacingOccurrences(
+        of: #"{"tonic": "D"}}"#, with: #"{"tonic": "D"}, "fingering": {"degree": 5, "octave": -1}}"#)
+    let fingered = try Score.decode(from: Data(text.utf8))
+
+    #expect(plain.header.fingering == nil)
+    #expect(fingered.header.fingering == Fingering(degree: 5, octave: -1))
+}
+
 @Test(arguments: [
     oneNote(value: "3"),
     oneNote(dots: "3"),
