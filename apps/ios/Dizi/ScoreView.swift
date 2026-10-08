@@ -4,9 +4,9 @@ import SwiftUI
 /// The score page's notation: header and jianpu drawn from the layout, with the playhead on top.
 struct ScoreView: View {
     let player: Player
-    private let metrics = ScoreMetrics(fontSize: 24)
+    private let metrics = ScoreMetrics(fontSize: 26)
     private func digitFont(_ scale: CGFloat) -> Font {
-        .system(size: metrics.fontSize * scale, weight: .medium, design: .rounded)
+        Theme.serif(metrics.fontSize * scale)
     }
     private var stroke: CGFloat { metrics.fontSize / 16 }
     private var dotRadius: CGFloat { metrics.fontSize / 12 }
@@ -19,8 +19,8 @@ struct ScoreView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 12) {
                         Text(headerText(player.score))
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .font(.footnote)
+                            .foregroundStyle(Theme.muted)
                         TimelineView(.animation(paused: !player.isRunning)) { _ in
                             playedNotation(layout, scroller: scroller)
                         }
@@ -81,8 +81,8 @@ struct ScoreView: View {
     @ViewBuilder private var countdown: some View {
         if case .countIn(let beatsLeft) = player.position {
             Text(verbatim: "\(beatsLeft)")
-                .font(.system(size: 96, weight: .bold, design: .rounded))
-                .foregroundStyle(.tint)
+                .font(Theme.serif(96, weight: .semibold))
+                .foregroundStyle(Theme.accent)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
     }
@@ -235,7 +235,9 @@ struct ScoreView: View {
         case .digit(let degree, let center, let tone, let scale):
             context.draw(Text(verbatim: "\(degree)").font(digitFont(scale)).foregroundStyle(tone.color), at: center)
         case .label(let text, let point, let anchor):
-            context.draw(Text(verbatim: text).font(.system(size: metrics.fontSize * 0.55)), at: point, anchor: anchor)
+            context.draw(
+                Text(verbatim: text).font(.system(size: metrics.fontSize * 0.55)).foregroundStyle(Theme.ink), at: point,
+                anchor: anchor)
         }
     }
 }
@@ -263,9 +265,9 @@ private enum Tone {
 
     var color: Color {
         switch self {
-        case .plain: .primary
-        case .accent: .accentColor
-        case .wash: .accentColor.opacity(0.18)
+        case .plain: Theme.ink
+        case .accent: Theme.accent
+        case .wash: Theme.wash
         }
     }
 }

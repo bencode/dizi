@@ -16,6 +16,7 @@
 		3E699F796C095BA3FD05AF50 /* Voices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DDF2829D5D3185F122237C4 /* Voices.swift */; };
 		432E2FAF7F8AC03D762AFCA7 /* TransportBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */; };
 		694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7DDEBD62C1197359510C59D /* DiziApp.swift */; };
+		9C80785EB6CB99C263A4033E /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7FB92541A5F848689241E1 /* Theme.swift */; };
 		C4CDA40015A7B9D147D4FC20 /* LibraryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79F6644CEF354FA4D521A9BA /* LibraryStore.swift */; };
 		C50C666DD7C22E635F515C10 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */; };
 		D891F5DB445004C54E9B4F75 /* ScoreKit in Frameworks */ = {isa = PBXBuildFile; productRef = 45709811699F8732788DB871 /* ScoreKit */; };
@@ -41,6 +42,7 @@
 		216C0414C7628D24C53FCDA3 /* NavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationTests.swift; sourceTree = "<group>"; };
 		2C2F03512C3298090F9FCB53 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		33A4F41FB44B5B2F0B205D89 /* Samples */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Samples; path = Dizi/Samples; sourceTree = SOURCE_ROOT; };
+		3A7FB92541A5F848689241E1 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		79F6644CEF354FA4D521A9BA /* LibraryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryStore.swift; sourceTree = "<group>"; };
 		86587596978C7D7A172CA03E /* DiziUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DiziUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		89D7C1647EEC53579F92423C /* Dizi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Dizi.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -99,6 +101,7 @@
 				2C2F03512C3298090F9FCB53 /* Player.swift */,
 				AB92B401D832BB364EDD2858 /* RunAudio.swift */,
 				E825365B13D701E585670E85 /* ScoreView.swift */,
+				3A7FB92541A5F848689241E1 /* Theme.swift */,
 				1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */,
 				0DDF2829D5D3185F122237C4 /* Voices.swift */,
 			);
@@ -228,6 +231,7 @@
 				28DC3C1319B643481CE61A0B /* Player.swift in Sources */,
 				012CC5E161A08809FF4437FF /* RunAudio.swift in Sources */,
 				19A7AB3A6A9B33437E1CA0F7 /* ScoreView.swift in Sources */,
+				9C80785EB6CB99C263A4033E /* Theme.swift in Sources */,
 				432E2FAF7F8AC03D762AFCA7 /* TransportBar.swift in Sources */,
 				3E699F796C095BA3FD05AF50 /* Voices.swift in Sources */,
 			);

@@ -35,6 +35,7 @@ struct PieceDetailView: View {
                 ScoreView(player: player)
                 TransportBar(player: player)
             }
+            .background(Theme.ground)
         case .failure:
             ContentUnavailableView("曲谱无法打开", systemImage: "exclamationmark.triangle")
         case nil:
