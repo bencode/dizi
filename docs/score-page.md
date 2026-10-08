@@ -62,6 +62,11 @@ Every element the layout places carries its note id and start tick, so each laye
 
 Then interaction: playhead, playback, beat.
 
+## Sections
+
+- A section mark (引子, 【一】, a drill's number) starts a new line and is labelled at that line's start.
+- Every line is stretched to the full width except the last line of the score or of a section, which keeps its natural spacing.
+
 ## Slurs, ties, breath
 
 - A slur or tie is an arc above its notes, from the first digit to the last, lifted clear of the digits and high-octave dots under it. Across a line break it is split: to the right edge on the first line, edge to edge on lines it spans, from the left edge on the last.

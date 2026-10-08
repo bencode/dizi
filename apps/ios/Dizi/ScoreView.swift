@@ -153,6 +153,8 @@ struct ScoreView: View {
             [dot(center, radius: dotRadius * 0.7)]
         case .tupletNumber(let label, let center):
             [.label(label, point: center, anchor: .center)]
+        case .section(let label, let origin):
+            [.label(label, point: origin, anchor: .bottomLeading)]
         }
     }
 

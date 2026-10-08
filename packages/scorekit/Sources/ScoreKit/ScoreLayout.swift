@@ -79,30 +79,32 @@ public struct ScoreLayout: Sendable {
         case graceDot(center: CGPoint)
         /// A triplet's number over its arc.
         case tupletNumber(label: String, center: CGPoint)
+        /// A section's label (引子, 【一】, 1.) at the start of its first line, at its text's leading baseline point.
+        case section(label: String, origin: CGPoint)
     }
 }
 
 extension ScoreLayout {
-    /// Lays out the solo part. Lines take as many measures as fit, a section mark starts a new line,
-    /// and every line but the last is stretched to the full width.
+    /// Lays out the solo part. Lines take as many measures as fit, a section mark starts a new line (with its
+    /// label), and every line is stretched to the full width but the last line of the score or of a section.
     public init(score: Score, width: CGFloat, metrics: ScoreMetrics = ScoreMetrics()) {
         guard let part = score.parts.first else {
             self.init(lines: [], height: 0)
             return
         }
         let boxes = part.measures.map { $0.events.compactMap(eventBox) }
-        let sectionStarts = Set(score.marks.compactMap(\.sectionTick))
+        let sectionStarts = Set(score.marks.compactMap(\.section).map(\.tick))
+        let forcedStarts = Set(score.measures.filter { sectionStarts.contains($0.start) }.map(\.index))
         let groups = lineGroups(
-            widths: boxes.map { naturalWidth($0, metrics) + metrics.barGap },
-            forcedStarts: Set(score.measures.filter { sectionStarts.contains($0.start) }.map(\.index)),
+            widths: boxes.map { naturalWidth($0, metrics) + metrics.barGap }, forcedStarts: forcedStarts,
             available: width)
         let laidOut = { (headroom: CGFloat) in
             let context = LineContext(score: score, part: part, boxes: boxes, metrics: metrics, headroom: headroom)
             let lines = groups.enumerated().map { row, measures in
                 let natural = measures.map { naturalWidth(boxes[$0], metrics) }.reduce(0, +)
                 let gaps = CGFloat(measures.count) * metrics.barGap
-                let isLast = row == groups.count - 1
-                let scale = isLast || natural == 0 ? 1 : max(1, (width - gaps) / natural)
+                let endsSection = row == groups.count - 1 || groups[row + 1].first.map(forcedStarts.contains) == true
+                let scale = endsSection || natural == 0 ? 1 : max(1, (width - gaps) / natural)
                 return line(measures, row: row, scale: scale, context)
             }
             return phrased(lines, score: score, metrics: metrics)
@@ -168,9 +170,15 @@ private func line(_ measures: [Int], row: Int, scale: CGFloat, _ context: LineCo
     let rowHeight = metrics.lineHeight + context.headroom
     let frame = LineFrame(scale: scale, baseline: rowHeight * CGFloat(row) + context.headroom + metrics.lineHeight / 2)
     let widths = measures.map { naturalWidth(context.boxes[$0], metrics) * scale + metrics.barGap }
-    let items = zip(measures, starts(of: widths, from: 0)).flatMap { index, left in
-        measureItems(index, left: left, frame, context)
+    let firstTick = measures.first.map { context.score.measures[$0].start }
+    let label = context.score.marks.compactMap(\.section).first { $0.tick == firstTick }.map { section in
+        ScoreLayout.Item.section(
+            label: section.label, origin: CGPoint(x: 0, y: frame.baseline - metrics.lineHeight * 0.38))
     }
+    let items =
+        zip(measures, starts(of: widths, from: 0)).flatMap { index, left in
+            measureItems(index, left: left, frame, context)
+        } + (label.map { [$0] } ?? [])
     // A long rest repeats its digit under one id; the first is where it starts.
     let anchors = items.compactMap(\.anchor).reduce(into: [Anchor]()) { anchors, anchor in
         if anchors.last?.id != anchor.id {
@@ -220,9 +228,9 @@ private func repeats(_ index: Int, span: ClosedRange<CGFloat>, _ frame: LineFram
 }
 
 extension Mark {
-    fileprivate var sectionTick: Int? {
+    fileprivate var section: SectionMark? {
         guard case .section(let section) = self else { return nil }
-        return section.tick
+        return section
     }
 }
 
@@ -262,7 +270,7 @@ extension ScoreLayout.Item {
         case .underline(_, _, _, let lineY): lineY
         case .barline(_, _, let top, _): top
         case .repeatDots(_, let top, _): top - metrics.dotSpacing / 2
-        case .ending(_, let origin): origin.y - metrics.fontSize * 0.55
+        case .ending(_, let origin), .section(_, let origin): origin.y - metrics.fontSize * 0.55
         case .arc(_, _, let endY, let rise): endY - rise
         case .breath(let center), .accidental(_, _, let center), .tupletNumber(_, let center):
             center.y - metrics.fontSize * 0.3
@@ -277,7 +285,7 @@ extension ScoreLayout.Item {
         case .note(let id, let start, _, let center), .rest(let id, let start, let center):
             Anchor(id: id, tick: start, position: center.x)
         case .octaveDot, .augmentationDot, .dash, .underline, .barline, .repeatDots, .ending, .arc, .breath,
-            .accidental, .technique, .grace, .graceDot, .tupletNumber:
+            .accidental, .technique, .grace, .graceDot, .tupletNumber, .section:
             nil
         }
     }
@@ -287,7 +295,7 @@ extension ScoreLayout.Item {
         switch self {
         case .note(let id, _, _, let center), .rest(let id, _, let center): (id, center)
         case .octaveDot, .augmentationDot, .dash, .underline, .barline, .repeatDots, .ending, .arc, .breath,
-            .accidental, .technique, .grace, .graceDot, .tupletNumber:
+            .accidental, .technique, .grace, .graceDot, .tupletNumber, .section:
             nil
         }
     }

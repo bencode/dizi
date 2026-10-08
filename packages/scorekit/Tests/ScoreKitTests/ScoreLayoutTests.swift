@@ -91,6 +91,24 @@ private func levelOneUnderlines(in items: [ScoreLayout.Item]) -> [ClosedRange<CG
     #expect(lines.map(\.measures) == [[0], [1, 2]])
 }
 
+@Test func leavesTheLastLineOfASectionUnstretched() throws {
+    let lines = ScoreLayout(score: try sectioned(), width: wide).lines
+
+    #expect(lines[0].width < wide / 2)  // the line before 【二】 keeps its natural width
+}
+
+@Test func labelsASectionAtTheStartOfItsLine() throws {
+    let line = ScoreLayout(score: try sectioned(), width: wide).lines[1]
+    let label = try #require(
+        line.items.lazy.compactMap { item -> CGPoint? in
+            guard case .section("【二】", let origin) = item else { return nil }
+            return origin
+        }.first)
+    let firstDigit = try #require(line.items.compactMap(\.head).first).center
+
+    #expect(label.x == 0 && label.y < firstDigit.y)
+}
+
 @Test func wrapsAtABarLineWhenTooNarrow() throws {
     let metrics = ScoreMetrics()
 
