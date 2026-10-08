@@ -4,12 +4,13 @@ import Testing
 
 @testable import ScoreKit
 
-/// `1 2' | 3 3 |]` in 2/4 (ids n1…n4), quarter notes, with the given spans and marks.
-func phrasedScore(spans: String, marks: String = "") throws -> Score {
-    func note(_ id: String, _ start: Int, _ degree: Int, _ octave: Int) -> String {
+/// `1 2' | 3 3 |]` in 2/4 (ids n1…n4), quarter notes, with the given spans and marks, and `secondNote` added to
+/// n2's fields (such as its techniques).
+func phrasedScore(spans: String, marks: String = "", secondNote: String = "") throws -> Score {
+    func note(_ id: String, _ start: Int, _ degree: Int, _ octave: Int, _ extra: String = "") -> String {
         """
         {"kind": "note", "id": "\(id)", "start": \(start), "duration": 480, "value": 4, "dots": 0, \
-        "pitch": {"degree": \(degree), "octave": \(octave), "semitones": \(octave * 12)}}
+        "pitch": {"degree": \(degree), "octave": \(octave), "semitones": \(octave * 12)}\(extra)}
         """
     }
     func measure(_ index: Int, _ barline: String) -> String {
@@ -23,7 +24,7 @@ func phrasedScore(spans: String, marks: String = "") throws -> Score {
          "measures": [\(measure(0, "single")), \(measure(1, "final"))],
          "playOrder": [0, 1],
          "parts": [{"id": "solo", "role": "solo", "measures": [
-            {"events": [\(note("n1", 0, 1, 0)), \(note("n2", 480, 2, 1))], "beams": []},
+            {"events": [\(note("n1", 0, 1, 0)), \(note("n2", 480, 2, 1, secondNote))], "beams": []},
             {"events": [\(note("n3", 960, 3, 0)), \(note("n4", 1440, 3, 0))], "beams": []}]}],
          "spans": [\(spans)],
          "marks": [{"kind": "tempo", "at": 0, "beat": 480, "bpm": 60}\(marks)]}
@@ -35,12 +36,13 @@ private struct Arc {
     let left: CGFloat
     let right: CGFloat
     let endY: CGFloat
+    let rise: CGFloat
 }
 
 private func arcs(_ line: ScoreLayout.Line) -> [Arc] {
     line.items.compactMap { item in
-        guard case .arc(let left, let right, let endY) = item else { return nil }
-        return Arc(left: left, right: right, endY: endY)
+        guard case .arc(let left, let right, let endY, let rise) = item else { return nil }
+        return Arc(left: left, right: right, endY: endY, rise: rise)
     }
 }
 
@@ -82,4 +84,18 @@ private func center(_ id: String, _ line: ScoreLayout.Line) throws -> CGPoint {
     let (before, after) = (try center("n1", line), try center("n2", line))
 
     #expect(breath.x > before.x && breath.x < after.x && breath.y < before.y)
+}
+
+@Test func makesRoomAboveTheFirstLineForAHighSlur() throws {
+    let slur = #"{"type": "slur", "from": "n1", "to": "n3"}"#
+    let plain = ScoreLayout(score: try phrasedScore(spans: slur), width: 2000)
+    // n2 is a high note with two marks; a slur over it, split by a line break, must not leave the first line's top.
+    let marked = try phrasedScore(spans: slur, secondNote: #", "techniques": [{"type": "die"}, {"type": "tr"}]"#)
+    let narrow = ScoreLayout(score: marked, width: 100)
+    let firstLine = try #require(narrow.lines.first)
+    let first = try #require(arcs(firstLine).first)
+
+    #expect(first.endY - first.rise >= 0)
+    #expect(narrow.height / CGFloat(narrow.lines.count) > ScoreMetrics().lineHeight)
+    #expect(plain.height == ScoreMetrics().lineHeight)  // one line whose slur fits needs no extra room
 }

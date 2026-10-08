@@ -139,8 +139,8 @@ struct ScoreView: View {
             [top, bottom].map { dot(CGPoint(x: centerX, y: $0), radius: dotRadius) }
         case .ending(let label, let origin):
             [.label(label, point: origin, anchor: .bottomLeading)]
-        case .arc(let left, let right, let endY):
-            [.shape(arcPath(left: left, right: right, endY: endY), .plain)]
+        case .arc(let left, let right, let endY, let rise):
+            [.shape(arcPath(left: left, right: right, endY: endY, rise: rise), .plain)]
         case .breath(let center):
             [.label("V", point: center, anchor: .center)]
         case .accidental(_, let sharp, let center):
@@ -200,9 +200,8 @@ struct ScoreView: View {
         }.strokedPath(StrokeStyle(lineWidth: stroke * 1.4, lineCap: .round))
     }
 
-    /// A slur or tie as engraved: a crescent, thick in the middle and thin at its ends; it rises with its width.
-    private func arcPath(left: CGFloat, right: CGFloat, endY: CGFloat) -> Path {
-        let rise = min(max((right - left) * 0.12, metrics.fontSize * 0.15), metrics.fontSize * 0.4)
+    /// A slur or tie as engraved: a crescent, thick in the middle and thin at its ends.
+    private func arcPath(left: CGFloat, right: CGFloat, endY: CGFloat, rise: CGFloat) -> Path {
         let middle = (left + right) / 2
         return Path { path in
             path.move(to: CGPoint(x: left, y: endY))

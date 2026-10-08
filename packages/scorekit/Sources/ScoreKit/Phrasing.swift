@@ -35,7 +35,9 @@ private func arcs(of span: Span, on lines: [ScoreLayout.Line], metrics: ScoreMet
         let left = row == first.row ? first.center.x : edge
         let right = row == last.row ? last.center.x : line.width - edge
         guard right > left else { return nil }
-        return (row, .arc(left: left, right: right, endY: clearance(line, left...right, metrics) - metrics.dotGap))
+        let rise = min(max((right - left) * 0.12, metrics.fontSize * 0.15), metrics.fontSize * 0.4)
+        let endY = clearance(line, left...right, metrics) - metrics.dotGap
+        return (row, .arc(left: left, right: right, endY: endY, rise: rise))
     }
 }
 

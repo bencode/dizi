@@ -64,9 +64,9 @@ public struct ScoreLayout: Sendable {
         case repeatDots(centerX: CGFloat, top: CGFloat, bottom: CGFloat)
         /// An ending's number (`1.`, `1.2.`) over its first measure, at its text's leading baseline point.
         case ending(label: String, origin: CGPoint)
-        /// A slur or tie above the notes, from `left` to `right` with its ends at `endY`; the piece of one that
-        /// continues from the line before or onto the next line runs to that edge.
-        case arc(left: CGFloat, right: CGFloat, endY: CGFloat)
+        /// A slur or tie above the notes, from `left` to `right` with its ends at `endY`, rising `rise` in its
+        /// middle; the piece of one that continues from the line before or onto the next line runs to that edge.
+        case arc(left: CGFloat, right: CGFloat, endY: CGFloat, rise: CGFloat)
         /// 换气 V, centered at `center`.
         case breath(center: CGPoint)
         /// A small ♯ or ♭ before a digit.
@@ -94,17 +94,32 @@ extension ScoreLayout {
             widths: boxes.map { naturalWidth($0, metrics) + metrics.barGap },
             forcedStarts: Set(score.measures.filter { sectionStarts.contains($0.start) }.map(\.index)),
             available: width)
-        let context = LineContext(score: score, part: part, boxes: boxes, metrics: metrics)
-        let lines = groups.enumerated().map { row, measures in
-            let natural = measures.map { naturalWidth(boxes[$0], metrics) }.reduce(0, +)
-            let gaps = CGFloat(measures.count) * metrics.barGap
-            let isLast = row == groups.count - 1
-            let scale = isLast || natural == 0 ? 1 : max(1, (width - gaps) / natural)
-            return line(measures, row: row, scale: scale, context)
+        let laidOut = { (headroom: CGFloat) in
+            let context = LineContext(score: score, part: part, boxes: boxes, metrics: metrics, headroom: headroom)
+            let lines = groups.enumerated().map { row, measures in
+                let natural = measures.map { naturalWidth(boxes[$0], metrics) }.reduce(0, +)
+                let gaps = CGFloat(measures.count) * metrics.barGap
+                let isLast = row == groups.count - 1
+                let scale = isLast || natural == 0 ? 1 : max(1, (width - gaps) / natural)
+                return line(measures, row: row, scale: scale, context)
+            }
+            return phrased(lines, score: score, metrics: metrics)
         }
-        self.init(
-            lines: phrased(lines, score: score, metrics: metrics), height: metrics.lineHeight * CGFloat(lines.count))
+        // Marks and slurs over high notes can reach above a line's top; then every line grows by that much.
+        let plain = laidOut(0)
+        let headroom = overshoot(plain, metrics: metrics)
+        let lines = headroom > 0 ? laidOut(headroom) : plain
+        self.init(lines: lines, height: (metrics.lineHeight + headroom) * CGFloat(lines.count))
     }
+}
+
+/// How far the highest content of any line reaches above that line's top, with a little air; 0 when all fits.
+private func overshoot(_ lines: [ScoreLayout.Line], metrics: ScoreMetrics) -> CGFloat {
+    let reach = lines.enumerated().map { row, line in
+        metrics.lineHeight * CGFloat(row) - (line.items.map { $0.highestPoint(metrics) }.min() ?? 0)
+    }
+    let most = reach.max() ?? 0
+    return most > 0 ? most + metrics.dotGap : 0
 }
 
 private func naturalWidth(_ boxes: [EventBox], _ metrics: ScoreMetrics) -> CGFloat {
@@ -136,6 +151,8 @@ private struct LineContext {
     let part: Part
     let boxes: [[EventBox]]
     let metrics: ScoreMetrics
+    /// Room added above every line, so tall marks fit.
+    let headroom: CGFloat
 }
 
 /// One line's stretch factor and vertical position.
@@ -146,7 +163,8 @@ private struct LineFrame {
 
 private func line(_ measures: [Int], row: Int, scale: CGFloat, _ context: LineContext) -> ScoreLayout.Line {
     let metrics = context.metrics
-    let frame = LineFrame(scale: scale, baseline: metrics.lineHeight * (CGFloat(row) + 0.5))
+    let rowHeight = metrics.lineHeight + context.headroom
+    let frame = LineFrame(scale: scale, baseline: rowHeight * CGFloat(row) + context.headroom + metrics.lineHeight / 2)
     let widths = measures.map { naturalWidth(context.boxes[$0], metrics) * scale + metrics.barGap }
     let items = zip(measures, starts(of: widths, from: 0)).flatMap { index, left in
         measureItems(index, left: left, frame, context)
@@ -232,6 +250,24 @@ extension ScoreLayout {
 }
 
 extension ScoreLayout.Item {
+    /// The top of what the item draws.
+    fileprivate func highestPoint(_ metrics: ScoreMetrics) -> CGFloat {
+        switch self {
+        case .note(_, _, _, let center), .rest(_, _, let center): center.y - metrics.digitHeight / 2
+        case .octaveDot(_, let center), .augmentationDot(_, let center), .graceDot(let center):
+            center.y - metrics.dotSpacing / 2
+        case .dash(_, let center, _): center.y
+        case .underline(_, _, _, let lineY): lineY
+        case .barline(_, _, let top, _): top
+        case .repeatDots(_, let top, _): top - metrics.dotSpacing / 2
+        case .ending(_, let origin): origin.y - metrics.fontSize * 0.55
+        case .arc(_, _, let endY, let rise): endY - rise
+        case .breath(let center), .accidental(_, _, let center): center.y - metrics.fontSize * 0.3
+        case .technique(_, _, let center): center.y - metrics.markHeight / 2
+        case .grace(_, _, let center): center.y - metrics.digitHeight * metrics.graceScale / 2
+        }
+    }
+
     /// A note's or rest's digit as a point the playhead passes.
     fileprivate var anchor: Anchor? {
         switch self {

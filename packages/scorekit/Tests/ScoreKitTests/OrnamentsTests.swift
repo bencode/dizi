@@ -94,7 +94,7 @@ private func marks(_ items: [ScoreLayout.Item]) -> [(Technique, CGPoint)] {
     let mark = try #require(marks(laid).first).1
     let arcY = try #require(
         laid.lazy.compactMap { item -> CGFloat? in
-            guard case .arc(_, _, let endY) = item else { return nil }
+            guard case .arc(_, _, let endY, _) = item else { return nil }
             return endY
         }.first)
 
