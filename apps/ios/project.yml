@@ -26,6 +26,14 @@ targets:
       - path: Dizi/Library
         type: folder
         buildPhase: resources
+    # The generated launch screen, on the 宣纸 ground instead of the system background.
+    info:
+      path: Dizi/Info.plist
+      properties:
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen:
+          UIColorName: Ground
     dependencies:
       - package: ScoreKit
     scheme:

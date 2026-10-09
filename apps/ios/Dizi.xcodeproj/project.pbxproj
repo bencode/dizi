@@ -18,6 +18,7 @@
 		45066C24AA96725AF5407ABB /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD2F9D0A9FA611EE51B5E630 /* SettingsView.swift */; };
 		51EFEA316FC5EB4CBA4878A5 /* SongFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198F5DC6C201A01E002FEC4F /* SongFont.swift */; };
 		694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7DDEBD62C1197359510C59D /* DiziApp.swift */; };
+		804EC165DEA0995AB5F6270C /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DB234CECED42DB96C159D214 /* AppIcon.icon */; };
 		9C80785EB6CB99C263A4033E /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7FB92541A5F848689241E1 /* Theme.swift */; };
 		C4CDA40015A7B9D147D4FC20 /* LibraryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79F6644CEF354FA4D521A9BA /* LibraryStore.swift */; };
 		C50C666DD7C22E635F515C10 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */; };
@@ -46,6 +47,7 @@
 		1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportBar.swift; sourceTree = "<group>"; };
 		216C0414C7628D24C53FCDA3 /* NavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationTests.swift; sourceTree = "<group>"; };
 		2C2F03512C3298090F9FCB53 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
+		2C6B3DF07D1A77E660CB3E30 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		33A4F41FB44B5B2F0B205D89 /* Samples */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Samples; path = Dizi/Samples; sourceTree = SOURCE_ROOT; };
 		3A7FB92541A5F848689241E1 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		79F6644CEF354FA4D521A9BA /* LibraryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryStore.swift; sourceTree = "<group>"; };
@@ -56,6 +58,7 @@
 		A5D9FBF8D0C34328E8A93612 /* PieceListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceListView.swift; sourceTree = "<group>"; };
 		AB92B401D832BB364EDD2858 /* RunAudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunAudio.swift; sourceTree = "<group>"; };
 		AD2F9D0A9FA611EE51B5E630 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		DB234CECED42DB96C159D214 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		E825365B13D701E585670E85 /* ScoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreView.swift; sourceTree = "<group>"; };
 		EB1C17AA2689870EAD830B9C /* scorekit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scorekit; path = ../../packages/scorekit; sourceTree = SOURCE_ROOT; };
 		F2AF968099F1CC1C2518E6DA /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -98,8 +101,10 @@
 		91B23B00863E128D038FF620 /* Dizi */ = {
 			isa = PBXGroup;
 			children = (
+				DB234CECED42DB96C159D214 /* AppIcon.icon */,
 				940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */,
 				F7DDEBD62C1197359510C59D /* DiziApp.swift */,
+				2C6B3DF07D1A77E660CB3E30 /* Info.plist */,
 				79F6644CEF354FA4D521A9BA /* LibraryStore.swift */,
 				F2AF968099F1CC1C2518E6DA /* Localizable.xcstrings */,
 				035DC4279B86CF3EF6B6B6E2 /* PieceCard.swift */,
@@ -219,6 +224,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				804EC165DEA0995AB5F6270C /* AppIcon.icon in Resources */,
 				C50C666DD7C22E635F515C10 /* Assets.xcassets in Resources */,
 				31FE4B35E75F4F98B7846937 /* Library in Resources */,
 				10F94D349285BC70691F27B3 /* Localizable.xcstrings in Resources */,
@@ -294,6 +300,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Dizi/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "鱼米竹笛";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -319,6 +326,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Dizi/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "鱼米竹笛";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
