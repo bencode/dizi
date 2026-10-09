@@ -15,6 +15,7 @@
 		31FE4B35E75F4F98B7846937 /* Library in Resources */ = {isa = PBXBuildFile; fileRef = 950D485C1F8F347121E6746A /* Library */; };
 		3E699F796C095BA3FD05AF50 /* Voices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DDF2829D5D3185F122237C4 /* Voices.swift */; };
 		432E2FAF7F8AC03D762AFCA7 /* TransportBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */; };
+		45066C24AA96725AF5407ABB /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD2F9D0A9FA611EE51B5E630 /* SettingsView.swift */; };
 		51EFEA316FC5EB4CBA4878A5 /* SongFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198F5DC6C201A01E002FEC4F /* SongFont.swift */; };
 		694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7DDEBD62C1197359510C59D /* DiziApp.swift */; };
 		9C80785EB6CB99C263A4033E /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7FB92541A5F848689241E1 /* Theme.swift */; };
@@ -54,6 +55,7 @@
 		950D485C1F8F347121E6746A /* Library */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Library; path = Dizi/Library; sourceTree = SOURCE_ROOT; };
 		A5D9FBF8D0C34328E8A93612 /* PieceListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceListView.swift; sourceTree = "<group>"; };
 		AB92B401D832BB364EDD2858 /* RunAudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunAudio.swift; sourceTree = "<group>"; };
+		AD2F9D0A9FA611EE51B5E630 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		E825365B13D701E585670E85 /* ScoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreView.swift; sourceTree = "<group>"; };
 		EB1C17AA2689870EAD830B9C /* scorekit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scorekit; path = ../../packages/scorekit; sourceTree = SOURCE_ROOT; };
 		F2AF968099F1CC1C2518E6DA /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -106,6 +108,7 @@
 				2C2F03512C3298090F9FCB53 /* Player.swift */,
 				AB92B401D832BB364EDD2858 /* RunAudio.swift */,
 				E825365B13D701E585670E85 /* ScoreView.swift */,
+				AD2F9D0A9FA611EE51B5E630 /* SettingsView.swift */,
 				198F5DC6C201A01E002FEC4F /* SongFont.swift */,
 				3A7FB92541A5F848689241E1 /* Theme.swift */,
 				1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */,
@@ -238,6 +241,7 @@
 				28DC3C1319B643481CE61A0B /* Player.swift in Sources */,
 				012CC5E161A08809FF4437FF /* RunAudio.swift in Sources */,
 				19A7AB3A6A9B33437E1CA0F7 /* ScoreView.swift in Sources */,
+				45066C24AA96725AF5407ABB /* SettingsView.swift in Sources */,
 				51EFEA316FC5EB4CBA4878A5 /* SongFont.swift in Sources */,
 				9C80785EB6CB99C263A4033E /* Theme.swift in Sources */,
 				432E2FAF7F8AC03D762AFCA7 /* TransportBar.swift in Sources */,

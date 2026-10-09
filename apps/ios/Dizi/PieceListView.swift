@@ -11,6 +11,16 @@ struct PieceListView: View {
         content
             .navigationTitle("曲目")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink {
+                        SettingsView()
+                    } label: {
+                        Label("设置", systemImage: "gearshape")
+                    }
+                    .tint(Theme.ink)
+                }
+            }
             .navigationDestination(for: LibraryPiece.self) { piece in
                 PieceDetailView(piece: piece)
             }

@@ -4,6 +4,7 @@ import SwiftUI
 struct DiziApp: App {
     @State private var library = LibraryStore()
     @State private var song = SongFont()
+    @AppStorage("appearance") private var appearance: Appearance = .system
 
     init() {
         styleNavigationBars(song: false)
@@ -24,6 +25,8 @@ struct DiziApp: App {
             }
             .task { await song.load() }
             .onChange(of: song.isReady) { _, ready in styleNavigationBars(song: ready) }
+            .task { apply(appearance) }
+            .onChange(of: appearance) { _, chosen in apply(chosen) }
         }
     }
 }
@@ -55,4 +58,12 @@ private func navigationBars(under controller: UIViewController?) -> [UINavigatio
     guard let controller else { return [] }
     let own = (controller as? UINavigationController).map { [$0.navigationBar] } ?? []
     return own + controller.children.flatMap { navigationBars(under: $0) }
+}
+
+/// The chosen appearance on every window. UIKit's override, not `.preferredColorScheme`: it returns cleanly to
+/// following the phone and restyles the bars with the content.
+@MainActor private func apply(_ appearance: Appearance) {
+    for window in UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).flatMap(\.windows) {
+        window.overrideUserInterfaceStyle = appearance.style
+    }
 }
