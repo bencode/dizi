@@ -1,7 +1,7 @@
 import ScoreKit
 import SwiftUI
 
-/// The score page's notation: header and jianpu drawn from the layout, with the playhead on top.
+/// The score page's notation: jianpu drawn from the layout, with the playhead on top.
 struct ScoreView: View {
     let player: Player
     private let metrics = ScoreMetrics(fontSize: 24)
@@ -18,12 +18,8 @@ struct ScoreView: View {
             let layout = ScoreLayout(score: player.score, width: proxy.size.width - margin * 2, metrics: metrics)
             ScrollViewReader { scroller in
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 12) {
-                        header(player.score)
-                            .padding(.horizontal, Theme.Space.gutter - margin)
-                        TimelineView(.animation(paused: !player.isRunning)) { _ in
-                            playedNotation(layout, scroller: scroller)
-                        }
+                    TimelineView(.animation(paused: !player.isRunning)) { _ in
+                        playedNotation(layout, scroller: scroller)
                     }
                     .padding(margin)
                 }
@@ -299,21 +295,54 @@ private enum Tone {
     }
 }
 
-/// `1=F  2/4  ♩=72` with the tempo in serif, then 全按作5 and the composer at the right, over a hairline.
-@MainActor private func header(_ score: Score) -> some View {
-    let fingering = score.header.fingering.map { "全按作\($0.degree)" }
-    let right = [fingering, score.meta.composer].compactMap { $0 }.joined(separator: " · ")
-    let tempo = score.startingTempo.flatMap(tempoText) ?? ""
-    return VStack(spacing: Theme.Space.medium) {
-        HStack(alignment: .firstTextBaseline) {
+/// The pinned line above the score: `1=F  2/4`, the practice tempo `− ♩=72 +`, then 全按作5 and the composer.
+struct ScoreHeader: View {
+    @Bindable var player: Player
+
+    var body: some View {
+        let score = player.score
+        let fingering = score.header.fingering.map { "全按作\($0.degree)" }
+        let right = [fingering, score.meta.composer].compactMap { $0 }.joined(separator: " · ")
+        HStack(spacing: 0) {
             Text(verbatim: headerText(score))
-            Text(verbatim: tempo).font(Theme.serif(13))
-            Spacer()
-            Text(verbatim: right)
+                .padding(.trailing, Theme.Space.small)
+            tempo
+                .disabled(player.isRunning)
+                .opacity(player.isRunning ? 0.4 : 1)
+            Spacer(minLength: Theme.Space.small)
+            Text(verbatim: right).lineLimit(1)
         }
         .font(.footnote)
         .foregroundStyle(Theme.muted)
-        Theme.rule.frame(height: 1)
+        .frame(height: 44)
+        .padding(.horizontal, Theme.Space.gutter)
+        .overlay(alignment: .bottom) { Theme.rule.frame(height: 1).padding(.horizontal, Theme.Space.gutter) }
+    }
+
+    private var tempo: some View {
+        HStack(spacing: 0) {
+            Button {
+                player.bpm = max(Player.tempoRange.lowerBound, player.bpm - 1)
+            } label: {
+                Label("减慢", systemImage: "minus").frame(width: 44, height: 44).contentShape(Rectangle())
+            }
+            .disabled(player.bpm <= Player.tempoRange.lowerBound)
+            Text(verbatim: "\(beatSymbol(player.score.startingTempo?.beat))\(player.bpm)")
+                .font(Theme.serif(15))
+                .monospacedDigit()
+                .foregroundStyle(Theme.ink)
+                .fixedSize()
+            Button {
+                player.bpm = min(Player.tempoRange.upperBound, player.bpm + 1)
+            } label: {
+                Label("加快", systemImage: "plus").frame(width: 44, height: 44).contentShape(Rectangle())
+            }
+            .disabled(player.bpm >= Player.tempoRange.upperBound)
+        }
+        .labelStyle(.iconOnly)
+        .font(.system(size: 13, weight: .medium))
+        .foregroundStyle(Theme.ink)
+        .buttonRepeatBehavior(.enabled)
     }
 }
 
@@ -333,12 +362,7 @@ private func timeText(_ time: TimeSignature) -> String? {
     return "\(beats)/\(unit)"
 }
 
-private func tempoText(_ tempo: TempoMark) -> String? {
-    // An unusual beat shows the number alone rather than a wrong note symbol.
-    let beat = [240: "♪=", 480: "♩=", 720: "♩.=", 960: "𝅗𝅥="][tempo.beat] ?? ""
-    return switch tempo.bpm {
-    case .exact(let bpm): "\(beat)\(bpm)"
-    case .range(let low, let high): "\(beat)\(low)~\(high)"
-    case nil: tempo.text
-    }
+/// `♩=` for a quarter-note beat; an unusual beat shows the number alone rather than a wrong note symbol.
+private func beatSymbol(_ beat: Int?) -> String {
+    [240: "♪=", 480: "♩=", 720: "♩.=", 960: "𝅗𝅥="][beat ?? 480] ?? ""
 }

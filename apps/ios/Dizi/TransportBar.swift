@@ -1,18 +1,14 @@
 import ScoreKit
 import SwiftUI
 
-/// The controls under the score: beat, tempo, click switch, start/pause, stop.
+/// The controls under the score, in one row: the 示范 and 节拍 switches, the beat, then stop and start/pause.
 struct TransportBar: View {
     @Bindable var player: Player
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        VStack(spacing: 12) {
-            HStack {
-                TimelineView(.animation(paused: !player.isRunning)) { _ in
-                    beatDots(player.beatInBar)
-                }
-                Spacer()
-                tempo
+        HStack(spacing: Theme.Space.small) {
+            Group {
                 Button("示范") { player.demoOn.toggle() }
                     .buttonStyle(Pill(isOn: player.demoOn))
                     .accessibilityAddTraits(player.demoOn ? .isSelected : [])
@@ -22,53 +18,77 @@ struct TransportBar: View {
                     .accessibilityAddTraits(player.clickOn ? .isSelected : [])
             }
             .disabled(player.isRunning)
-            HStack(spacing: 16) {
-                Button(playTitle, systemImage: player.isRunning ? "pause.fill" : "play.fill") {
-                    player.playOrPause()
-                }
-                .buttonStyle(Pill(isOn: true))
-                .disabled(!player.isRunning && !player.canPlay)
-                Button("停止", systemImage: "stop.fill") {
-                    player.stop()
-                }
-                .buttonStyle(Pill(isOn: false))
+            TimelineView(.animation(paused: !player.isRunning)) { _ in
+                beatDots(player.beatInBar)
             }
+            .padding(.leading, Theme.Space.small)
+            Spacer(minLength: 0)
+            if !isStopped {
+                Button {
+                    player.stop()
+                } label: {
+                    Label("停止", systemImage: "stop.fill")
+                        .frame(width: 44, height: 44)
+                        .overlay { Circle().strokeBorder(Theme.rule, lineWidth: 1) }
+                        .contentShape(Circle())
+                }
+                .labelStyle(.iconOnly)
+                .font(.system(size: 15))
+                .foregroundStyle(Theme.ink)
+            }
+            playButton
         }
-        .padding(Theme.Space.large)
+        .padding(.horizontal, Theme.Space.gutter)
+        .padding(.vertical, Theme.Space.small)
         .background(Theme.raised)
         .overlay(alignment: .top) { Theme.rule.frame(height: 1) }
+        .animation(.easeInOut(duration: 0.2), value: isStopped)
+    }
+
+    private var playButton: some View {
+        // The frame and disc sit inside the label, so the whole disc is the target and dims when pressed.
+        Button {
+            player.playOrPause()
+        } label: {
+            Label(playTitle, systemImage: player.isRunning ? "pause.fill" : "play.fill")
+                .frame(width: 56, height: 56)
+                .background(Theme.accent, in: Circle())
+                .contentShape(Circle())
+        }
+        .labelStyle(.iconOnly)
+        .font(.system(size: 22))
+        .foregroundStyle(Theme.onAccent)
+        .shadow(color: colorScheme == .dark ? .clear : Theme.accent.opacity(0.28), radius: 9, y: 6)
+        .contentTransition(.opacity)
+        .animation(.easeInOut(duration: 0.2), value: player.isRunning)
+        .disabled(!player.isRunning && !player.canPlay)
+        .opacity(player.isRunning || player.canPlay ? 1 : 0.4)
+    }
+
+    /// Before playing, the dots show the piece's meter, none lit.
+    private var beatsPerBar: Int {
+        guard case .meter(let beats, _) = player.score.measures.first?.time else { return 0 }
+        return beats
+    }
+
+    private var isStopped: Bool {
+        if case .stopped = player.transport { true } else { false }
     }
 
     private var playTitle: LocalizedStringKey { player.isRunning ? "暂停" : "开始" }
 
-    private var tempo: some View {
-        HStack(spacing: 4) {
-            Button("减慢", systemImage: "minus") {
-                player.bpm = max(Player.tempoRange.lowerBound, player.bpm - 1)
-            }
-            Text(verbatim: "♩=\(player.bpm)")
-                .font(Theme.serif(19))
-                .monospacedDigit()
-                .foregroundStyle(Theme.ink)
-                .frame(minWidth: 56)
-            Button("加快", systemImage: "plus") {
-                player.bpm = min(Player.tempoRange.upperBound, player.bpm + 1)
-            }
-        }
-        .labelStyle(.iconOnly)
-        .foregroundStyle(Theme.ink)
-        .buttonRepeatBehavior(.enabled)
-    }
-
     private func beatDots(_ beat: (index: Int, count: Int)?) -> some View {
-        HStack(spacing: 6) {
-            ForEach(0..<(beat?.count ?? 0), id: \.self) { index in
-                Circle()
-                    .fill(index == beat?.index ? Theme.accent : Theme.muted.opacity(0.35))
-                    .frame(width: 10, height: 10)
+        let count = beat?.count ?? beatsPerBar
+        return HStack(spacing: count > 4 ? 6 : 8) {
+            ForEach(0..<count, id: \.self) { index in
+                if index == beat?.index {
+                    Circle().fill(Theme.accent).frame(width: 11, height: 11)
+                } else {
+                    Circle().strokeBorder(Theme.muted, lineWidth: 1.5).frame(width: 11, height: 11)
+                }
             }
         }
-        .frame(minHeight: 10)
+        .frame(minHeight: 11)
     }
 }
 
@@ -79,12 +99,16 @@ private struct Pill: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.body)
+            .font(.subheadline)
             .padding(.horizontal, Theme.Space.large)
-            .frame(minHeight: 44)
+            .frame(minHeight: 36)
             .foregroundStyle(isOn ? Theme.onAccent : Theme.ink)
             .background(isOn ? Theme.accent : Color.clear, in: Capsule())
             .overlay { Capsule().strokeBorder(isOn ? Color.clear : Theme.rule, lineWidth: 1) }
             .opacity(isEnabled ? (configuration.isPressed ? 0.7 : 1) : 0.4)
+            .animation(.easeInOut(duration: 0.2), value: isOn)
+            // The capsule is 36 pt; the tap area reaches 44.
+            .padding(.vertical, 4)
+            .contentShape(Rectangle())
     }
 }

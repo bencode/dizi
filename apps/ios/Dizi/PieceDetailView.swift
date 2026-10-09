@@ -32,6 +32,7 @@ struct PieceDetailView: View {
         switch loaded {
         case .success(let player):
             VStack(spacing: 0) {
+                ScoreHeader(player: player)
                 ScoreView(player: player)
                 TransportBar(player: player)
             }
