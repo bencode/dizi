@@ -14,9 +14,9 @@ private let logger = Logger(subsystem: "io.upivot.dizi", category: "font")
         UIFont(name: SongFont.regular, size: 12) != nil && UIFont(name: SongFont.bold, size: 12) != nil
 
     /// A title font: Songti when downloaded, the theme's serif before.
-    func font(_ size: CGFloat, bold: Bool = false) -> Font {
+    func font(_ size: CGFloat, bold: Bool = false, relativeTo style: Font.TextStyle = .body) -> Font {
         isReady
-            ? .custom(bold ? Self.bold : Self.regular, size: size)
+            ? .custom(bold ? Self.bold : Self.regular, size: size, relativeTo: style)
             : Theme.serif(size, weight: bold ? .semibold : .medium)
     }
 

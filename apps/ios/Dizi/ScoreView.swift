@@ -317,6 +317,8 @@ struct ScoreHeader: View {
         .frame(height: 44)
         .padding(.horizontal, Theme.Space.gutter)
         .overlay(alignment: .bottom) { Theme.rule.frame(height: 1).padding(.horizontal, Theme.Space.gutter) }
+        // One fixed-height row above the score.
+        .dynamicTypeSize(...DynamicTypeSize.xxLarge)
     }
 
     private var tempo: some View {
@@ -343,6 +345,19 @@ struct ScoreHeader: View {
         .font(.system(size: 13, weight: .medium))
         .foregroundStyle(Theme.ink)
         .buttonRepeatBehavior(.enabled)
+        // One adjustable element for VoiceOver: "速度, 每分钟 60 拍", swipe up or down to change it.
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("速度")
+        .accessibilityValue("每分钟 \(player.bpm) 拍")
+        .accessibilityAdjustableAction { direction in
+            // Locked while playing, as the buttons are.
+            guard !player.isRunning else { return }
+            switch direction {
+            case .increment: player.bpm = min(Player.tempoRange.upperBound, player.bpm + 1)
+            case .decrement: player.bpm = max(Player.tempoRange.lowerBound, player.bpm - 1)
+            @unknown default: break
+            }
+        }
     }
 }
 

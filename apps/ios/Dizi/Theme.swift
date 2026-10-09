@@ -15,6 +15,8 @@ enum Theme {
     static let gold = Color("Gold")
     /// Behind a card's first character.
     static let tile = Color("Tile")
+    /// The edge of an outlined control (an off pill, the stop ring): rule in light, a step brighter in dark.
+    static let outline = Color("Outline")
     /// An unlit level dot.
     static let dotOff = Color("DotOff")
 

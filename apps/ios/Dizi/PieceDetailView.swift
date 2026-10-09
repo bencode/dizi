@@ -38,7 +38,7 @@ struct PieceDetailView: View {
             }
             .background(Theme.ground)
         case .failure:
-            ContentUnavailableView("曲谱无法打开", systemImage: "exclamationmark.triangle")
+            unavailable("曲谱无法打开", detail: "这首曲谱的数据有误，请先练习其他曲目")
         case nil:
             Color.clear
         }

@@ -29,7 +29,7 @@ struct TransportBar: View {
                 } label: {
                     Label("停止", systemImage: "stop.fill")
                         .frame(width: 44, height: 44)
-                        .overlay { Circle().strokeBorder(Theme.rule, lineWidth: 1) }
+                        .overlay { Circle().strokeBorder(Theme.outline, lineWidth: 1) }
                         .contentShape(Circle())
                 }
                 .labelStyle(.iconOnly)
@@ -42,6 +42,8 @@ struct TransportBar: View {
         .padding(.vertical, Theme.Space.small)
         .background(Theme.raised)
         .overlay(alignment: .top) { Theme.rule.frame(height: 1) }
+        // One fixed-height row: larger text would push the controls off the screen.
+        .dynamicTypeSize(...DynamicTypeSize.xxLarge)
         .animation(.easeInOut(duration: 0.2), value: isStopped)
     }
 
@@ -104,7 +106,7 @@ private struct Pill: ButtonStyle {
             .frame(minHeight: 36)
             .foregroundStyle(isOn ? Theme.onAccent : Theme.ink)
             .background(isOn ? Theme.accent : Color.clear, in: Capsule())
-            .overlay { Capsule().strokeBorder(isOn ? Color.clear : Theme.rule, lineWidth: 1) }
+            .overlay { Capsule().strokeBorder(isOn ? Color.clear : Theme.outline, lineWidth: 1) }
             .opacity(isEnabled ? (configuration.isPressed ? 0.7 : 1) : 0.4)
             .animation(.easeInOut(duration: 0.2), value: isOn)
             // The capsule is 36 pt; the tap area reaches 44.

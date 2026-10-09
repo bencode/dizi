@@ -10,13 +10,15 @@ struct PieceCard: View {
     var body: some View {
         HStack(spacing: Theme.Space.medium) {
             Text(verbatim: String(title.prefix(1)))
-                .font(song.font(19))
+                .font(song.font(19, relativeTo: .title3))
                 .foregroundStyle(Theme.accent)
                 .frame(width: 38, height: 38)
                 .background(Theme.tile, in: RoundedRectangle(cornerRadius: 10))
+                // The glyph fills a fixed tile.
+                .dynamicTypeSize(...DynamicTypeSize.xxLarge)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 3) {
-                Text(verbatim: title).font(song.font(17)).foregroundStyle(Theme.ink).lineLimit(1)
+                Text(verbatim: title).font(song.font(17, relativeTo: .body)).foregroundStyle(Theme.ink).lineLimit(1)
                 meta.font(.footnote).foregroundStyle(Theme.muted)
             }
             Spacer(minLength: 0)
