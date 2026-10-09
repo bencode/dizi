@@ -12,17 +12,27 @@ struct ScoreView: View {
     private var dotRadius: CGFloat { metrics.fontSize / 12 }
     /// Narrower than the page gutter, so two measures of 16ths still fit a phone line.
     private let margin: CGFloat = 16
+    /// Measured on the scroll view itself, not by a GeometryReader around it, so the scroll view runs under the
+    /// glass bars above and below.
+    @State private var width: CGFloat = 0
 
     var body: some View {
-        GeometryReader { proxy in
-            let layout = ScoreLayout(score: player.score, width: proxy.size.width - margin * 2, metrics: metrics)
-            ScrollViewReader { scroller in
-                ScrollView {
+        ScrollViewReader { scroller in
+            ScrollView {
+                // A full-width placeholder, so the scroll view has a size to measure before the score exists.
+                Color.clear.frame(maxWidth: .infinity, maxHeight: 0)
+                if width > 0 {
+                    let layout = ScoreLayout(score: player.score, width: width - margin * 2, metrics: metrics)
                     TimelineView(.animation(paused: !player.isRunning)) { _ in
                         playedNotation(layout, scroller: scroller)
                     }
                     .padding(margin)
                 }
+            }
+            .onGeometryChange(for: CGFloat.self) {
+                $0.size.width
+            } action: {
+                width = $0
             }
         }
     }
@@ -316,7 +326,6 @@ struct ScoreHeader: View {
         .foregroundStyle(Theme.muted)
         .frame(height: 44)
         .padding(.horizontal, Theme.Space.gutter)
-        .overlay(alignment: .bottom) { Theme.rule.frame(height: 1).padding(.horizontal, Theme.Space.gutter) }
         // One fixed-height row above the score.
         .dynamicTypeSize(...DynamicTypeSize.xxLarge)
     }

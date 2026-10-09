@@ -31,12 +31,11 @@ struct PieceDetailView: View {
     @ViewBuilder private var content: some View {
         switch loaded {
         case .success(let player):
-            VStack(spacing: 0) {
-                ScoreHeader(player: player)
-                ScoreView(player: player)
-                TransportBar(player: player)
-            }
-            .background(Theme.ground)
+            // The score fills the page; the header and the controls float over it as bars.
+            ScoreView(player: player)
+                .safeAreaBar(edge: .top) { ScoreHeader(player: player) }
+                .safeAreaBar(edge: .bottom) { TransportBar(player: player) }
+                .background(Theme.ground)
         case .failure:
             unavailable("曲谱无法打开", detail: "这首曲谱的数据有误，请先练习其他曲目")
         case nil:

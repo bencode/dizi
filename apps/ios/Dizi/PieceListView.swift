@@ -56,10 +56,8 @@ struct PieceListView: View {
             .animation(.easeInOut(duration: 0.2), value: level)
             .background(Theme.ground)
             // Pinned under the search bar, so the level can change anywhere in the list.
-            .safeAreaInset(edge: .top, spacing: 0) {
-                levels
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Theme.ground)
+            .safeAreaBar(edge: .top) {
+                levels.frame(maxWidth: .infinity, alignment: .leading)
             }
             .searchable(
                 text: $query, placement: .navigationBarDrawer(displayMode: .always),
