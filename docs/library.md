@@ -20,6 +20,7 @@ type Catalog = {
     category: 'tones' | 'etude' | 'piece'
     level: 1 | 2 | 3 | 4 // 入门 … 高级
     lesson?: number // the course lesson it comes from
+    series?: string // pieces sharing it fold into one card: '双吐练习'
     key: string // as printed: '1=E'
     time: string // as printed: '2/4', or '散板'
     score: string // relative to the catalog: 'scores/3f9a0c…json'

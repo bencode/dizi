@@ -12,6 +12,8 @@ export type Entry = {
   category: Category
   level: 1 | 2 | 3 | 4
   lesson?: number
+  /** Pieces sharing a series fold into one card in the app: '双吐练习'. */
+  series?: string
   /** Uploaded to OSS by `npm run publish-library`; pieces without it stay private. */
   publish?: true
 }
@@ -26,13 +28,14 @@ const isCount = (value: unknown): value is number => Number.isInteger(value) && 
 /** One catalog piece checked field by field: the entry, or what is wrong with it. */
 const parseEntry = (value: unknown, at: string): Entry | string[] => {
   if (!isRecord(value)) return [`${at}: expected an object`]
-  const { id, title, category, level, lesson, publish } = value
+  const { id, title, category, level, lesson, series, publish } = value
   const problems = [
     ...(typeof id === 'string' && /^[a-z0-9-]+$/.test(id) ? [] : [`${at}.id: expected lowercase letters, digits, -`]),
     ...(typeof title === 'string' && title !== '' ? [] : [`${at}.title: expected text`]),
     ...(isCategory(category) ? [] : [`${at}.category: expected ${categories.join(', ')}`]),
     ...(isLevel(level) ? [] : [`${at}.level: expected 1 to 4`]),
     ...(lesson === undefined || isCount(lesson) ? [] : [`${at}.lesson: expected a lesson number`]),
+    ...(series === undefined || (typeof series === 'string' && series !== '') ? [] : [`${at}.series: expected text`]),
     ...(publish === undefined || publish === true ? [] : [`${at}.publish: expected true, or leave it out`]),
   ]
   if (problems.length > 0 || typeof id !== 'string' || typeof title !== 'string') return problems
@@ -43,6 +46,7 @@ const parseEntry = (value: unknown, at: string): Entry | string[] => {
     category,
     level,
     ...(isCount(lesson) ? { lesson } : {}),
+    ...(typeof series === 'string' && series !== '' ? { series } : {}),
     ...(publish === true ? { publish } : {}),
   }
 }
@@ -124,6 +128,7 @@ export const listing = (
     category: entry.category,
     level: entry.level,
     ...(entry.lesson === undefined ? {} : { lesson: entry.lesson }),
+    ...(entry.series === undefined ? {} : { series: entry.series }),
     key: keyText(score),
     time: timeText(score),
     score: scores[index]?.path ?? '',

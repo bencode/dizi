@@ -15,10 +15,12 @@
 		31FE4B35E75F4F98B7846937 /* Library in Resources */ = {isa = PBXBuildFile; fileRef = 950D485C1F8F347121E6746A /* Library */; };
 		3E699F796C095BA3FD05AF50 /* Voices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DDF2829D5D3185F122237C4 /* Voices.swift */; };
 		432E2FAF7F8AC03D762AFCA7 /* TransportBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */; };
+		51EFEA316FC5EB4CBA4878A5 /* SongFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = 198F5DC6C201A01E002FEC4F /* SongFont.swift */; };
 		694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7DDEBD62C1197359510C59D /* DiziApp.swift */; };
 		9C80785EB6CB99C263A4033E /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7FB92541A5F848689241E1 /* Theme.swift */; };
 		C4CDA40015A7B9D147D4FC20 /* LibraryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79F6644CEF354FA4D521A9BA /* LibraryStore.swift */; };
 		C50C666DD7C22E635F515C10 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */; };
+		CCA985315C19D0AAD75388D1 /* PieceCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 035DC4279B86CF3EF6B6B6E2 /* PieceCard.swift */; };
 		D891F5DB445004C54E9B4F75 /* ScoreKit in Frameworks */ = {isa = PBXBuildFile; productRef = 45709811699F8732788DB871 /* ScoreKit */; };
 		E188A2E7A8091A2A88D0CAE9 /* Samples in Resources */ = {isa = PBXBuildFile; fileRef = 33A4F41FB44B5B2F0B205D89 /* Samples */; };
 		E2AD70163AE8542ADACCE077 /* NavigationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 216C0414C7628D24C53FCDA3 /* NavigationTests.swift */; };
@@ -36,8 +38,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		035DC4279B86CF3EF6B6B6E2 /* PieceCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceCard.swift; sourceTree = "<group>"; };
 		0DDF2829D5D3185F122237C4 /* Voices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Voices.swift; sourceTree = "<group>"; };
 		1657F2512FB10BB5DB9A727B /* PieceDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceDetailView.swift; sourceTree = "<group>"; };
+		198F5DC6C201A01E002FEC4F /* SongFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongFont.swift; sourceTree = "<group>"; };
 		1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportBar.swift; sourceTree = "<group>"; };
 		216C0414C7628D24C53FCDA3 /* NavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationTests.swift; sourceTree = "<group>"; };
 		2C2F03512C3298090F9FCB53 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
@@ -96,11 +100,13 @@
 				F7DDEBD62C1197359510C59D /* DiziApp.swift */,
 				79F6644CEF354FA4D521A9BA /* LibraryStore.swift */,
 				F2AF968099F1CC1C2518E6DA /* Localizable.xcstrings */,
+				035DC4279B86CF3EF6B6B6E2 /* PieceCard.swift */,
 				1657F2512FB10BB5DB9A727B /* PieceDetailView.swift */,
 				A5D9FBF8D0C34328E8A93612 /* PieceListView.swift */,
 				2C2F03512C3298090F9FCB53 /* Player.swift */,
 				AB92B401D832BB364EDD2858 /* RunAudio.swift */,
 				E825365B13D701E585670E85 /* ScoreView.swift */,
+				198F5DC6C201A01E002FEC4F /* SongFont.swift */,
 				3A7FB92541A5F848689241E1 /* Theme.swift */,
 				1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */,
 				0DDF2829D5D3185F122237C4 /* Voices.swift */,
@@ -226,11 +232,13 @@
 			files = (
 				694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */,
 				C4CDA40015A7B9D147D4FC20 /* LibraryStore.swift in Sources */,
+				CCA985315C19D0AAD75388D1 /* PieceCard.swift in Sources */,
 				E4E731720DFB69589538B60F /* PieceDetailView.swift in Sources */,
 				1C82DAB466F726D3BC86ACBC /* PieceListView.swift in Sources */,
 				28DC3C1319B643481CE61A0B /* Player.swift in Sources */,
 				012CC5E161A08809FF4437FF /* RunAudio.swift in Sources */,
 				19A7AB3A6A9B33437E1CA0F7 /* ScoreView.swift in Sources */,
+				51EFEA316FC5EB4CBA4878A5 /* SongFont.swift in Sources */,
 				9C80785EB6CB99C263A4033E /* Theme.swift in Sources */,
 				432E2FAF7F8AC03D762AFCA7 /* TransportBar.swift in Sources */,
 				3E699F796C095BA3FD05AF50 /* Voices.swift in Sources */,

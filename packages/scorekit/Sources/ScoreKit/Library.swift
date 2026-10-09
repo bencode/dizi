@@ -32,6 +32,8 @@ public struct LibraryPiece: Decodable, Sendable, Hashable, Identifiable {
     /// 1 入门 … 4 高级
     public let level: Int
     public let lesson: Int?
+    /// Pieces sharing a series fold into one card: 双吐练习.
+    public let series: String?
     /// As printed: `1=E`, `2/4`.
     public let key: String
     public let time: String
