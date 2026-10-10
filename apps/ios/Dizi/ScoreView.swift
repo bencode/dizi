@@ -57,7 +57,7 @@ struct ScoreView: View {
         _ layout: ScoreLayout, current: String?, cursor: (row: Int, x: CGFloat)?, start: String?
     ) -> some View {
         let inks =
-            playheadInks(layout, cursor: cursor, start: start)
+            passageInks(layout) + playheadInks(layout, cursor: cursor, start: start)
             + layout.lines.flatMap(\.items).flatMap { ink($0, current: current) }
         return Canvas { context, _ in
             for ink in inks {
@@ -68,7 +68,7 @@ struct ScoreView: View {
         .contentShape(Rectangle())
         .onTapGesture { location in
             if let id = layout.note(near: location) {
-                player.select(noteID: id)
+                player.tap(noteID: id)
             }
         }
         .accessibilityElement()
@@ -120,6 +120,25 @@ struct ScoreView: View {
             return playhead(centerX: centerX, digitY: head.center.y)
         }.first
         return (sweep ?? []) + [marker].compactMap { $0 }
+    }
+
+    /// 选段: a thin accent rule over the marked bars, one per line, above the played band.
+    private func passageInks(_ layout: ScoreLayout) -> [Ink] {
+        let bars: ClosedRange<Int>? =
+            switch player.selection {
+            case .first(let bar): bar...bar
+            case .passage(let passage): passage.first...passage.last
+            case .off, .picking: nil
+            }
+        guard let bars else { return [] }
+        let rowHeight = layout.height / CGFloat(max(layout.lines.count, 1))
+        return layout.spans(of: bars).map { span in
+            Ink.shape(
+                Path(
+                    roundedRect: CGRect(
+                        x: span.left, y: rowHeight * (CGFloat(span.row) + 0.04), width: span.right - span.left,
+                        height: 2), cornerRadius: 1), .accent)
+        }
     }
 
     /// The accent cursor, the same while playing and stopped: 2.5 pt wide, centred on the digits.
@@ -310,17 +329,18 @@ struct ScoreHeader: View {
     @Bindable var player: Player
 
     var body: some View {
-        let score = player.score
-        let fingering = score.header.fingering.map { "全按作\($0.degree)" }
-        let right = [fingering, score.meta.composer].compactMap { $0 }.joined(separator: " · ")
         HStack(spacing: 0) {
-            Text(verbatim: headerText(score))
+            Text(verbatim: headerText(player.score))
                 .padding(.trailing, Theme.Space.small)
             tempo
                 .disabled(player.isRunning)
                 .opacity(player.isRunning ? 0.4 : 1)
             Spacer(minLength: Theme.Space.small)
-            Text(verbatim: right).lineLimit(1)
+            selectionText.lineLimit(1)
+            Button("选段") { player.toggleSelection() }
+                .buttonStyle(Switch(isOn: player.selection != .off))
+                .accessibilityAddTraits(player.selection != .off ? .isSelected : [])
+                .disabled(player.isRunning)
         }
         .font(.footnote)
         .foregroundStyle(Theme.muted)
@@ -328,6 +348,19 @@ struct ScoreHeader: View {
         .padding(.horizontal, Theme.Space.gutter)
         // One fixed-height row above the score.
         .dynamicTypeSize(...DynamicTypeSize.xxLarge)
+    }
+
+    /// With 选段 off: the fingering and the composer. On: what to tap next, then the marked bars.
+    private var selectionText: Text {
+        switch player.selection {
+        case .off:
+            let fingering = player.score.header.fingering.map { "全按作\($0.degree)" }
+            return Text(verbatim: [fingering, player.score.meta.composer].compactMap { $0 }.joined(separator: " · "))
+        case .picking: return Text("点起始小节")
+        case .first: return Text("点结束小节")
+        case .passage(let passage) where passage.first == passage.last: return Text("第 \(passage.first + 1) 小节")
+        case .passage(let passage): return Text("第 \(passage.first + 1)–\(passage.last + 1) 小节")
+        }
     }
 
     private var tempo: some View {

@@ -94,15 +94,43 @@ public struct Click: Sendable, Equatable {
     public let accent: Bool
 }
 
-/// One pass of 走谱 from an entry: a bar of count-in, then the score to its end. Time 0 is the first count-in click.
+/// Bars to practise (选段): from one printed bar through another, as played.
+public struct Passage: Sendable, Equatable {
+    /// The first and last bar, as indices into `Score.measures`.
+    public let first: Int
+    public let last: Int
+    /// The entry the passage starts on, and the tick it ends at.
+    public let from: Int
+    public let until: Int
+}
+
+/// The passage between two tapped bars, in either order: from the first time the earlier bar is played,
+/// through the first time the later bar is played after it. Nil when the bars hold nothing to play.
+public func passage(_ one: Int, _ other: Int, in timeline: Timeline) -> Passage? {
+    let (first, last) = (min(one, other), max(one, other))
+    guard let opening = timeline.bars.firstIndex(where: { $0.measure == first }),
+        let closing = timeline.bars[opening...].first(where: { $0.measure == last }),
+        let from = timeline.entries.firstIndex(where: { $0.start >= timeline.bars[opening].start }),
+        timeline.entries[from].start < closing.start + closing.duration
+    else { return nil }
+    return Passage(first: first, last: last, from: from, until: closing.start + closing.duration)
+}
+
+/// One pass of 走谱 from an entry: a bar of count-in, then the score up to `until` (a tick; nil = its end).
+/// Time 0 is the first count-in click.
 public struct Run: Sendable, Equatable {
     public let from: Int
+    public let until: Int?
     public let tempo: Tempo
 
-    public init(from: Int, tempo: Tempo) {
+    public init(from: Int, until: Int? = nil, tempo: Tempo) {
         self.from = from
+        self.until = until
         self.tempo = tempo
     }
+
+    /// The tick the run ends at: the passage's end, or the score's.
+    public func end(_ timeline: Timeline) -> Int { until ?? timeline.end }
 
     /// What the run shows at a moment.
     public enum Position: Sendable, Equatable {
@@ -124,7 +152,7 @@ public struct Run: Sendable, Equatable {
         let elapsed = tempo.ticks(seconds) - countInLength(timeline)
         guard elapsed >= 0 else { return .countIn(beatsLeft: (-elapsed - 1) / tempo.beat + 1) }
         let tick = timeline.entries[from].start + elapsed
-        guard let index = timeline.entry(at: tick) else { return .finished }
+        guard tick < end(timeline), let index = timeline.entry(at: tick) else { return .finished }
         let entry = timeline.entries[index]
         return .entry(index, progress: Double(tick - entry.start) / Double(entry.duration))
     }
@@ -132,12 +160,13 @@ public struct Run: Sendable, Equatable {
     /// The count-in and every beat from the start entry to the end, accented on each bar's downbeat.
     public func clicks(_ timeline: Timeline) -> [Click] {
         let origin = timeline.entries[from].start
+        let end = end(timeline)
         let lead = countInLength(timeline)
         let countIn = stride(from: 0, to: lead, by: tempo.beat).map { tick in
             Click(time: tempo.seconds(tick), accent: tick == 0)
         }
-        let music = timeline.bars.filter { $0.start + $0.duration > origin }.flatMap { bar in
-            beats(of: bar).filter { $0.tick >= origin }.map { beat in
+        let music = timeline.bars.filter { $0.start + $0.duration > origin && $0.start < end }.flatMap { bar in
+            beats(of: bar).filter { $0.tick >= origin && $0.tick < end }.map { beat in
                 Click(time: tempo.seconds(lead + beat.tick - origin), accent: beat.downbeat)
             }
         }
@@ -147,15 +176,15 @@ public struct Run: Sendable, Equatable {
     /// The beat sounding at a moment, counted within its bar from 0; nil during the count-in, in 散板, and after the end.
     public func beat(at seconds: Double, in timeline: Timeline) -> (index: Int, count: Int)? {
         let tick = timeline.entries[from].start + tempo.ticks(seconds) - countInLength(timeline)
-        guard tick >= timeline.entries[from].start, tick < timeline.end,
+        guard tick >= timeline.entries[from].start, tick < end(timeline),
             let bar = timeline.bars.last(where: { $0.start <= tick }), let full = bar.fullLength
         else { return nil }
         return ((tick - downbeat(of: bar, full: full)) / tempo.beat, max(1, full / tempo.beat))
     }
 
-    /// Seconds from time 0 to the end of the score.
+    /// Seconds from time 0 to the end of the run.
     public func length(_ timeline: Timeline) -> Double {
-        tempo.seconds(countInLength(timeline) + timeline.end - timeline.entries[from].start)
+        tempo.seconds(countInLength(timeline) + end(timeline) - timeline.entries[from].start)
     }
 
     /// Where a bar's beats fall. A first bar shorter than a full one is a pickup (弱起): its beats are the last

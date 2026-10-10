@@ -18,7 +18,8 @@ extension Run {
         let tonic = tonicMIDI(score.header.key)
         let origin = timeline.entries[from].start
         let lead = countInLength(timeline)
-        let entries = Array(timeline.entries[from...])
+        let end = end(timeline)
+        let entries = timeline.entries[from...].prefix { $0.start < end }
         return zip(entries, [nil] + entries.map(Optional.some)).reduce(into: [MelodyNote]()) { melody, pair in
             let (entry, previous) = pair
             guard let offset = semitones[entry.id] else { return }

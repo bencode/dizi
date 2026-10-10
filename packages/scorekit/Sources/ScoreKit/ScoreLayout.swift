@@ -248,6 +248,27 @@ extension ScoreLayout {
 }
 
 extension ScoreLayout {
+    /// How far a run of bars reaches on each line it touches: from the bar line before its first bar on that line
+    /// (or the line's start) to the bar line closing its last.
+    public func spans(of measures: ClosedRange<Int>) -> [(row: Int, left: CGFloat, right: CGFloat)] {
+        lines.enumerated().compactMap { row, line in
+            // Each measure closes with one bar line, in order.
+            let bars = line.items.compactMap(\.barlineX)
+            let inside = line.measures.indices.filter { measures.contains(line.measures[$0]) }
+            guard let first = inside.first, let last = inside.last, bars.indices.contains(last) else { return nil }
+            return (row, first == 0 ? 0 : bars[first - 1], bars[last])
+        }
+    }
+}
+
+extension ScoreLayout.Item {
+    fileprivate var barlineX: CGFloat? {
+        guard case .barline(_, let centerX, _, _) = self else { return nil }
+        return centerX
+    }
+}
+
+extension ScoreLayout {
     /// The playhead while a note sounds: on the note's digit when it starts, on the next one's when that
     /// starts, moving smoothly in between. Nil when the note is not on the score.
     public func cursor(at id: String, progress: Double) -> (row: Int, x: CGFloat)? {

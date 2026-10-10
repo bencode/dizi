@@ -178,3 +178,26 @@ func repeatedScore() throws -> Score {
     #expect(dots.count == 2)
     #expect(endings == ["1.", "2."])
 }
+
+@Test func playsAPassageOfBarsTappedEitherWayAndStopsAtItsEnd() throws {
+    let timeline = Timeline(score: try molihua())
+    let bars = try #require(passage(4, 2, in: timeline))
+    let run = Run(from: bars.from, until: bars.until, tempo: slow)
+
+    #expect(timeline.entries[bars.from].measure == 2)
+    #expect(bars.until == 5 * 960)
+    #expect(bars.first == 2 && bars.last == 4)
+    // A bar of count-in, then three bars of 2/4: 8 seconds, 8 clicks, then finished.
+    #expect(run.length(timeline) == 8.0)
+    #expect(run.clicks(timeline).count == 2 + 3 * 2)
+    #expect(run.position(at: 7.9, in: timeline) != .finished)
+    #expect(run.position(at: 8, in: timeline) == .finished)
+}
+
+@Test func takesTheFirstPlayingOfARepeatedBar() throws {
+    let timeline = Timeline(score: try repeatedScore())
+
+    #expect(passage(0, 0, in: timeline)?.until == 960)
+    let both = try #require(passage(0, 2, in: timeline))
+    #expect(both.from == 0 && both.until == 3840)
+}

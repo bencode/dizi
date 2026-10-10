@@ -40,3 +40,15 @@ func placesTheTonicWhereTheFluteFingeringPutsIt(_ tonic: String, _ accidental: A
     #expect(melody.map(\.legato) == [false, true, false])
     #expect(melody.last?.duration == 2)
 }
+
+@Test func endsTheMelodyWithThePassage() throws {
+    let score = try molihua()
+    let timeline = Timeline(score: score)
+    let bars = try #require(passage(2, 4, in: timeline))
+    let melody = Run(from: bars.from, until: bars.until, tempo: Tempo(bpm: 60, beat: 480)).melody(
+        timeline, score: score)
+    let inside = timeline.entries.filter { (2...4).contains($0.measure) && $0.start < bars.until }
+
+    #expect(melody.count <= inside.count && !melody.isEmpty)
+    #expect(melody.allSatisfy { $0.time + $0.duration <= 8 })
+}

@@ -220,3 +220,16 @@ private func levelOneUnderlines(in items: [ScoreLayout.Item]) -> [ClosedRange<CG
 
     #expect(section.y < ending.y)
 }
+
+@Test func spansAPassageAcrossALineBreak() throws {
+    let metrics = ScoreMetrics()
+    let narrow = ScoreLayout(score: try molihua(), width: metrics.quarterWidth * 2, metrics: metrics)
+    let wide = ScoreLayout(score: try molihua(), width: 2000, metrics: metrics)
+
+    // One bar per line: each bar spans its own line from the start to its bar line.
+    #expect(narrow.spans(of: 1...2).map(\.row) == [1, 2])
+    #expect(narrow.spans(of: 1...2).allSatisfy { $0.left == 0 && $0.right > 0 })
+    // On one line, the passage starts at the bar line before it.
+    let span = try #require(wide.spans(of: 1...2).first)
+    #expect(wide.spans(of: 1...2).count == 1 && span.left > 0 && span.right > span.left)
+}

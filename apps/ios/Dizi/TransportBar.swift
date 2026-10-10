@@ -100,8 +100,8 @@ struct TransportBar: View {
     }
 }
 
-/// A switch inside the glass capsule: an accent capsule when on, plain ink text when off.
-private struct Switch: ButtonStyle {
+/// A switch (示范, 节拍, 选段): an accent capsule when on, plain ink text when off.
+struct Switch: ButtonStyle {
     let isOn: Bool
     @Environment(\.isEnabled) private var isEnabled
 
