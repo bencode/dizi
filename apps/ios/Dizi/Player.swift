@@ -25,6 +25,8 @@ final class Player {
     private let audio: RunAudio?
     private let voices: [Voice]
     private var finishTask: Task<Void, Never>?
+    /// Pauses the run when the system stops its audio; lives as long as the run.
+    private var interruptionTask: Task<Void, Never>?
 
     init(pieceID: String, score: Score) {
         self.score = score
@@ -144,6 +146,12 @@ final class Player {
             }
             self?.finish()
         }
+        interruptionTask = Task { [weak self, interruptions = audio.interruptions()] in
+            for await _ in interruptions {
+                self?.pause()
+                return
+            }
+        }
     }
 
     private func finish() {
@@ -154,6 +162,8 @@ final class Player {
     private func halt() {
         finishTask?.cancel()
         finishTask = nil
+        interruptionTask?.cancel()
+        interruptionTask = nil
         audio?.stop()
         run = nil
     }

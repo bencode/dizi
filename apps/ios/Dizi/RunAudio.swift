@@ -1,5 +1,8 @@
 import AVFoundation
+import OSLog
 import ScoreKit
+
+private let logger = Logger(subsystem: "io.upivot.dizi", category: "audio")
 
 /// The audio edge of 走谱: plays a run's clicks and, optionally, its demo melody, both sample-accurately from
 /// one start time, and reports the time since the run began, which is the clock the cursor follows.
@@ -13,6 +16,8 @@ final class RunAudio {
     private let format: AVAudioFormat
     private let accentBuffer: AVAudioPCMBuffer
     private let beatBuffer: AVAudioPCMBuffer
+    /// Host time of the run's time 0, while a run is scheduled.
+    private var startHostTime: UInt64?
 
     init() throws {
         guard let format = AVAudioFormat(standardFormatWithSampleRate: Self.sampleRate, channels: 1),
@@ -51,24 +56,67 @@ final class RunAudio {
         let startTime = AVAudioTime(hostTime: mach_absolute_time() + AVAudioTime.hostTime(forSeconds: 0.05))
         clickNode.play(at: startTime)
         melodyNode.play(at: startTime)
+        startHostTime = startTime.hostTime
     }
 
+    /// Ends the run and gives the audio back: the hardware (pause() would keep the IO thread running) and the
+    /// session, so music that 走谱 interrupted may resume.
     func stop() {
         clickNode.stop()
         melodyNode.stop()
-        engine.pause()
+        engine.stop()
+        startHostTime = nil
+        do {
+            try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        } catch {
+            logger.error("Cannot release the audio session: \(error, privacy: .public)")
+        }
     }
 
-    /// Seconds since time 0 of the current run; nil when nothing is playing yet.
+    /// Seconds since time 0 of the current run, from the render clock; when the engine has stopped under the run
+    /// (an interruption, a route change), from the host clock, so a pause still lands where the run was.
+    /// Nil when nothing is scheduled.
     var time: Double? {
+        guard let startHostTime else { return nil }
+        let now = mach_absolute_time()
         guard let nodeTime = clickNode.lastRenderTime, nodeTime.isHostTimeValid,
             let playerTime = clickNode.playerTime(forNodeTime: nodeTime)
-        else { return nil }
+        else { return max(0, seconds(from: startHostTime, to: now)) }
         // The render time moves once per audio buffer; add the time since that render so every frame advances.
-        let sinceRender =
-            AVAudioTime.seconds(forHostTime: mach_absolute_time()) - AVAudioTime.seconds(forHostTime: nodeTime.hostTime)
-        return max(0, Double(playerTime.sampleTime) / playerTime.sampleRate + sinceRender)
+        return max(0, Double(playerTime.sampleTime) / playerTime.sampleRate + seconds(from: nodeTime.hostTime, to: now))
     }
+
+    /// Yields each time the system stops this audio: an interruption begins (Siri, an alarm, a call), or the
+    /// engine's configuration changes (headphones unplugged, a Bluetooth route). Ends when its consumer does.
+    func interruptions() -> AsyncStream<Void> {
+        let (stream, continuation) = AsyncStream<Void>.makeStream()
+        let center = NotificationCenter.default
+        let session = Task {
+            for await note in center.notifications(named: AVAudioSession.interruptionNotification)
+            where interruptionBegan(note) {
+                continuation.yield()
+            }
+        }
+        let route = Task {
+            for await _ in center.notifications(named: .AVAudioEngineConfigurationChange, object: engine) {
+                continuation.yield()
+            }
+        }
+        continuation.onTermination = { _ in
+            session.cancel()
+            route.cancel()
+        }
+        return stream
+    }
+}
+
+private func seconds(from start: UInt64, to end: UInt64) -> Double {
+    AVAudioTime.seconds(forHostTime: end) - AVAudioTime.seconds(forHostTime: start)
+}
+
+private func interruptionBegan(_ note: Notification) -> Bool {
+    (note.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt).flatMap(AVAudioSession.InterruptionType.init)
+        == .began
 }
 
 enum RunAudioError: Error {
