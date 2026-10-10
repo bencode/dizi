@@ -24,9 +24,11 @@ public enum ShelfRow: Hashable, Sendable, Identifiable {
     }
 }
 
-/// The list as shown: per section of the catalog (empty ones dropped), the pieces matching `level` (nil = all)
-/// and `query`, each series with two or more matches folded into one row at its first member.
-public func shelf(_ catalog: LibraryCatalog, level: Stage?, query: String) -> [(LibrarySection, [ShelfRow])] {
+/// The list as shown: per section of the catalog of `kind` (nil = all; empty ones dropped), the pieces matching
+/// `level` (nil = all) and `query`, each series with two or more matches folded into one row at its first member.
+public func shelf(_ catalog: LibraryCatalog, kind: SectionKind?, level: Stage?, query: String)
+    -> [(LibrarySection, [ShelfRow])]
+{
     let needle = query.trimmingCharacters(in: .whitespaces)
     let matching = catalog.pieces.filter { piece in
         (level == nil || piece.level == level) && (needle.isEmpty || matches(piece, needle))
@@ -39,7 +41,7 @@ public func shelf(_ catalog: LibraryCatalog, level: Stage?, query: String) -> [(
         // The series takes the place of its first member; the others are inside it.
         return group.first == piece ? (piece.section, .series(PieceSeries(name: name, pieces: group))) : nil
     }
-    return catalog.sections.compactMap { section in
+    return catalog.sections.filter { kind == nil || $0.kind == kind }.compactMap { section in
         let inSection = rows.filter { $0.0 == section.id }.map(\.1)
         return inSection.isEmpty ? nil : (section, inSection)
     }

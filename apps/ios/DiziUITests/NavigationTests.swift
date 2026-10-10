@@ -2,7 +2,7 @@ import XCTest
 
 final class NavigationTests: XCTestCase {
     @MainActor
-    func testOpensAScoreFromTheList() {
+    func testOpensAScoreFromEachTab() {
         let app = XCUIApplication()
         app.launch()
 
@@ -12,6 +12,10 @@ final class NavigationTests: XCTestCase {
         list.name = "list"
         list.lifetime = .keepAlways
         add(list)
+
+        // The 乐曲 tab lists its own pieces; a section kind lost on the way would leave it empty.
+        app.tabBars.buttons["乐曲"].tap()
+        XCTAssertTrue(firstPiece.waitForExistence(timeout: 5))
         firstPiece.tap()
 
         XCTAssertTrue(app.descendants(matching: .any)["score"].waitForExistence(timeout: 5))

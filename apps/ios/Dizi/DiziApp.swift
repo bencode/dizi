@@ -12,13 +12,19 @@ struct DiziApp: App {
 
     var body: some Scene {
         WindowGroup {
-            NavigationStack {
-                PieceListView()
+            TabView {
+                Tab("练习", systemImage: "metronome") { NavigationStack { PieceListView(kind: .practice) } }
+                Tab("乐曲", systemImage: "music.note") { NavigationStack { PieceListView(kind: .repertoire) } }
+                Tab(role: .search) { NavigationStack { SearchView() } }
             }
+            .tabBarMinimizeBehavior(.onScrollDown)
+            // Search as the system's own trailing circle: tapping it opens the field; on iOS 27 only a tab that
+            // activates search gets that place.
+            .tabViewSearchActivation(.searchTabSelection)
             .environment(library)
             .environment(song)
             .tint(Theme.accent)
-            // On the stack, not the list: the list's tasks restart each time a piece is closed.
+            // On the tabs, not a list: they run once, and a list's tasks restart each time a piece is closed.
             .task {
                 library.load()
                 await library.refresh()

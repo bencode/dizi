@@ -63,6 +63,16 @@ public enum Stage: Int, Decodable, Sendable, Hashable, Comparable, CaseIterable 
 public struct LibrarySection: Decodable, Sendable, Hashable, Identifiable {
     public let id: String
     public let title: String
+    public let kind: SectionKind
+}
+
+/// The tab a section shows in. The tabs are app structure, so this is a closed set: a catalog with any other kind
+/// does not decode, and the app falls back to the bundled catalog.
+public enum SectionKind: String, Decodable, Sendable, Hashable {
+    /// 练习
+    case practice
+    /// 乐曲
+    case repertoire
 }
 
 public enum LibraryError: Error, Equatable {

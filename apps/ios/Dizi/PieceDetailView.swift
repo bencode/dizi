@@ -14,6 +14,8 @@ struct PieceDetailView: View {
         content
             .navigationTitle(piece.title)
             .navigationBarTitleDisplayMode(.inline)
+            // The transport bar owns the bottom of the page.
+            .toolbar(.hidden, for: .tabBar)
             .task { loaded = loadScore(piece, from: library).map { Player(pieceID: piece.id, score: $0) } }
             .onChange(of: scenePhase) { _, phase in
                 // Leaving the app (or a phone call) stops the audio; pause so the page is not left running.

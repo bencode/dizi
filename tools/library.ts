@@ -5,7 +5,9 @@ import { join } from 'node:path'
 import { compile, type Diagnostic, type Score } from '../packages/parser/src/index.ts'
 
 /** A group of the list, in display order: 吐音, 乐曲. Content, so it is data, not app code. */
-export type Section = { id: string; title: string }
+export type Section = { id: string; title: string; kind: SectionKind }
+/** The app tab a section shows in. The tabs are app structure, so the set is closed. */
+export type SectionKind = 'practice' | 'repertoire'
 export type Entry = {
   id: string
   title: string
@@ -30,6 +32,7 @@ export type Outcome = {
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null
 const isID = (value: unknown): value is string => typeof value === 'string' && /^[a-z0-9-]+$/.test(value)
 const isText = (value: unknown): value is string => typeof value === 'string' && value !== ''
+const isKind = (value: unknown): value is SectionKind => value === 'practice' || value === 'repertoire'
 const isLevel = (value: unknown): value is Entry['level'] => value === 1 || value === 2
 const isCount = (value: unknown): value is number => Number.isInteger(value) && (value as number) >= 1
 
@@ -38,9 +41,13 @@ const idProblem = (at: string): string => `${at}.id: expected lowercase letters,
 /** One catalog section checked: the section, or what is wrong with it. */
 const parseSection = (value: unknown, at: string): Section | string[] => {
   if (!isRecord(value)) return [`${at}: expected an object`]
-  const { id, title } = value
-  if (isID(id) && isText(title)) return { id, title }
-  return [...(isID(id) ? [] : [idProblem(at)]), ...(isText(title) ? [] : [`${at}.title: expected text`])]
+  const { id, title, kind } = value
+  if (isID(id) && isText(title) && isKind(kind)) return { id, title, kind }
+  return [
+    ...(isID(id) ? [] : [idProblem(at)]),
+    ...(isText(title) ? [] : [`${at}.title: expected text`]),
+    ...(isKind(kind) ? [] : [`${at}.kind: expected practice or repertoire`]),
+  ]
 }
 
 /** One catalog piece checked field by field against the catalog's sections: the entry, or what is wrong with it. */
@@ -152,7 +159,7 @@ export const fromExamples = (root: string): Outcome => {
       }
     })
   return {
-    sections: [{ id: 'pieces', title: '乐曲' }],
+    sections: [{ id: 'pieces', title: '乐曲', kind: 'repertoire' }],
     built,
     errors: [],
     warnings: [],

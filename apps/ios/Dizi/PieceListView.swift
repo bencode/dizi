@@ -1,15 +1,15 @@
 import ScoreKit
 import SwiftUI
 
+/// One tab's list: 练习 or 乐曲, with the stage chips.
 struct PieceListView: View {
+    let kind: SectionKind
     @Environment(LibraryStore.self) private var library
-    @Environment(SongFont.self) private var song
-    @State private var query = ""
     @State private var level: Stage?
 
     var body: some View {
         content
-            .navigationTitle("曲目")
+            .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -21,59 +21,29 @@ struct PieceListView: View {
                     .tint(Theme.ink)
                 }
             }
-            .navigationDestination(for: LibraryPiece.self) { piece in
-                PieceDetailView(piece: piece)
-            }
-            .navigationDestination(for: PieceSeries.self) { series in
-                SeriesView(series: series)
-            }
+            .libraryDestinations()
+    }
+
+    private var title: LocalizedStringKey {
+        switch kind {
+        case .practice: "练习"
+        case .repertoire: "乐曲"
+        }
     }
 
     @ViewBuilder private var content: some View {
         switch library.catalog {
         case .success(let catalog):
-            let sections = shelf(catalog, level: level, query: query)
-            List {
-                Group {
-                    // Headers are plain rows, not Section headers: those pin while scrolling and pad themselves.
-                    ForEach(sections, id: \.0.id) { section, rows in
-                        sectionHeader(section.title, count: rows.map(\.pieceCount).reduce(0, +))
-                        ForEach(rows) { row in
-                            link(to: row)
-                        }
-                    }
+            ShelfList(sections: shelf(catalog, kind: kind, level: level, query: ""))
+                .animation(.easeInOut(duration: 0.2), value: level)
+                // Pinned under the title, so the level can change anywhere in the list.
+                .safeAreaBar(edge: .top) {
+                    levels.frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .cardRow()
-            }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
-            .scrollDismissesKeyboard(.immediately)
-            .overlay {
-                if sections.isEmpty {
-                    ContentUnavailableView.search(text: query).foregroundStyle(Theme.muted)
-                }
-            }
-            .animation(.easeInOut(duration: 0.2), value: level)
-            .background(Theme.ground)
-            // Pinned under the search bar, so the level can change anywhere in the list.
-            .safeAreaBar(edge: .top) {
-                levels.frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .searchable(
-                text: $query, placement: .navigationBarDrawer(displayMode: .always),
-                prompt: Text("搜索 \(catalog.pieces.count) 首曲目"))
         case .failure:
             unavailable("曲库无法打开", detail: "请稍后重新打开应用")
         case nil:
             Color.clear
-        }
-    }
-
-    /// The card, leading to the score or to the series' own list.
-    @ViewBuilder private func link(to row: ShelfRow) -> some View {
-        switch row {
-        case .piece(let piece): NavigationLink(value: piece) { PieceCard(row: row) }.cardLink()
-        case .series(let series): NavigationLink(value: series) { PieceCard(row: row) }.cardLink()
         }
     }
 
@@ -111,6 +81,39 @@ struct PieceListView: View {
         .buttonStyle(.plain)
         .accessibilityAddTraits(isOn ? .isSelected : [])
     }
+}
+
+/// Sections of cards, as `shelf` returns them; shared by the tabs and search.
+struct ShelfList: View {
+    let sections: [(LibrarySection, [ShelfRow])]
+    @Environment(SongFont.self) private var song
+
+    var body: some View {
+        List {
+            Group {
+                // Headers are plain rows, not Section headers: those pin while scrolling and pad themselves.
+                ForEach(sections, id: \.0.id) { section, rows in
+                    sectionHeader(section.title, count: rows.map(\.pieceCount).reduce(0, +))
+                    ForEach(rows) { row in
+                        link(to: row)
+                    }
+                }
+            }
+            .cardRow()
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .scrollDismissesKeyboard(.immediately)
+        .background(Theme.ground)
+    }
+
+    /// The card, leading to the score or to the series' own list.
+    @ViewBuilder private func link(to row: ShelfRow) -> some View {
+        switch row {
+        case .piece(let piece): NavigationLink(value: piece) { PieceCard(row: row) }.cardLink()
+        case .series(let series): NavigationLink(value: series) { PieceCard(row: row) }.cardLink()
+        }
+    }
 
     private func sectionHeader(_ title: String, count: Int) -> some View {
         HStack(alignment: .firstTextBaseline) {
@@ -139,6 +142,16 @@ extension ShelfRow {
 }
 
 extension View {
+    /// Where a card leads, on each tab's stack: a piece to its score, a series to its own list.
+    func libraryDestinations() -> some View {
+        navigationDestination(for: LibraryPiece.self) { piece in
+            PieceDetailView(piece: piece)
+        }
+        .navigationDestination(for: PieceSeries.self) { series in
+            SeriesView(series: series)
+        }
+    }
+
     /// A card that opens something: no disclosure chevron, found by the UI test.
     func cardLink() -> some View {
         navigationLinkIndicatorVisibility(.hidden).accessibilityIdentifier("piece")

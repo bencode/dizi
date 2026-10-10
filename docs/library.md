@@ -16,7 +16,11 @@ type Catalog = {
   updated: number // Unix seconds when the catalog was built or published
   // The list's groups in display order (长音与连音 … 乐曲); only those with pieces in this catalog. Content, so a new
   // group, a new title or a new order needs a publish, not an app release.
-  sections: { id: string; title: string }[]
+  sections: {
+    id: string
+    title: string
+    kind: 'practice' | 'repertoire' // the app tab it shows in, 练习 or 乐曲; tabs are app structure, so a closed set
+  }[]
   pieces: {
     id: string
     title: string
