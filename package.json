@@ -1,0 +1,18 @@
+{
+  "name": "dizi",
+  "private": true,
+  "type": "module",
+  "description": "Workspace root for the TypeScript packages; Swift packages and the iOS app have their own tooling.",
+  "workspaces": [
+    "packages/parser"
+  ],
+  "scripts": {
+    "library": "node tools/build-library.ts",
+    "check:tools": "tsc -p tools && eslint tools && prettier --config packages/parser/.prettierrc.json --check 'tools/*.ts'",
+    "publish-library": "node --env-file=.env tools/publish-library.ts"
+  },
+  "devDependencies": {
+    "@types/ali-oss": "^6.23.3",
+    "ali-oss": "^6.23.0"
+  }
+}

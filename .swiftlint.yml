@@ -1,0 +1,42 @@
+# Length limits follow the project's rule of thumb: warnings ask for a second look, errors stop the check.
+included:
+  - apps/ios
+  - packages/scorekit
+excluded:
+  - apps/ios/Dizi.xcodeproj
+  - "**/.build"
+
+opt_in_rules:
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - fatal_error_message
+  - empty_count
+  - first_where
+  - contains_over_first_not_nil
+  - sorted_first_last
+  - closure_spacing
+
+disabled_rules:
+  - trailing_comma # swift-format owns trailing commas
+
+force_unwrapping: error
+implicitly_unwrapped_optional: error
+
+file_length:
+  warning: 200
+  error: 400
+  ignore_comment_only_lines: true
+function_body_length:
+  warning: 40
+  error: 80
+line_length:
+  warning: 120
+  error: 160
+  ignores_comments: true
+
+custom_rules:
+  empty_catch:
+    name: Empty catch
+    regex: 'catch\s*(let\s+\w+\s*)?\{\s*\}'
+    message: "Handle the error visibly (log or rethrow); never hide it."
+    severity: error

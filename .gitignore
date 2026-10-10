@@ -5,3 +5,6 @@ DerivedData/
 xcuserdata/
 .swiftpm/
 .env
+.build/
+node_modules/
+apps/ios/Dizi/Library/

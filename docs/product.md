@@ -47,10 +47,28 @@ Piece list ─tap─▶ score page (jianpu) ─▶ set the tempo / (optional) ta
 
 **Foundations** laid in phase 1:
 
-- **Score parser**: everything else depends on it.
-- **Timeline**: each note's start time and length, computed from the score. The cursor, click, and demo melody follow it; phase 2 aligns pitch with it.
+- **Score IR**: the [music of a score as JSON](score-ir.md), the same on iOS, Android, and Web. Start times and lengths are in it; the cursor, click, and demo melody follow them, and phase 2 aligns pitch with them.
+- **Score parser**, in TypeScript: compiles score text into the IR on the server and in scripts, so no platform writes its own.
+- **Score page**: layout and drawing in [layers](score-page.md) over one shared layout.
 - **Audio out**: click and demo melody through AVAudioEngine.
 - **Library service**: static files, no backend code (see [The library](#the-library)).
+
+**Iterations**, each ending in something to see on the phone:
+
+| # | Iteration | State |
+| --- | --- | --- |
+| 0 | App skeleton: project, piece list, empty score page; checks (format, lint, UI test) | done |
+| 1 | Score page with static notation drawn from IR: digits, octave dots, 减时线, dots, bar lines, full-width lines | done |
+| 2 | 走谱: playhead sweeping continuously, count-in, click, page following, tempo, start from any note | done |
+| 3 | Demo melody from CC0 dizi samples, in sync with the clicks | done |
+| 4a | TypeScript parser (`packages/parser`): score text → IR; the score format published | done |
+| 4a+ | Repeats and endings | done |
+| 4b | Library: course pieces as data in `priv/library`, compiled into the app; catalog-driven piece list | done |
+| 4c | Publish: compile the library, upload the pieces marked for publishing to OSS (hashed names); see [library.md](library.md) | done |
+| 4d | App: download and cache the library, with a bundled snapshot | done |
+| 5a | Slurs and ties drawn as arcs (split across lines), breath marks; the demo plays slurs legato and ties as one note | done |
+| 5b | Technique marks, graces, and sharps/flats drawn on the score | done |
+| 5c | Triplets: written `<1_ 1_ 1_>`, timed in the IR, drawn with an arc and 3 | done |
 
 Interface language: Chinese first; strings kept in a String Catalog for later languages.
 
@@ -79,16 +97,16 @@ Interface language: Chinese first; strings kept in a String Catalog for later la
 - **Served as static files** from phase 1, so content updates without a release:
 
   ```text
-  library/ (this repository) ─publish script─▶ Aliyun OSS (Hong Kong) + CDN
-                                                ├── catalog.json        pieces, versions, score format version
-                                                └── scores/<id>.jianpu
+  priv/library/ (private) ─publish script─▶ Aliyun OSS (Hangzhou), g.upivot.cn
+                                            ├── catalog.json        pieces, versions, score format version
+                                            └── scores/<hash>.json  compiled IR
   App: fetch catalog.json ─▶ download new or changed scores ─▶ cache for offline use
   ```
 
 - **A snapshot is bundled** in the app, so it works on first launch without a network.
 - **Format version** in the catalog: an older app skips pieces whose format it cannot read.
-- **Hong Kong** first: fast enough from the mainland and needs no ICP filing; move to the mainland later if needed.
-- **Copyright**: record each score's source and status. Traditional and folk pieces are mostly free to use; many études and arrangements are not, and need permission before public distribution.
+- **Hangzhou** (`oss-cn-hangzhou`), served from `g.upivot.cn`.
+- **Copyright**: record each score's source and status. Traditional and folk pieces are mostly free to use; many études and arrangements are not, and need permission before public distribution. Only pieces marked `"publish": true` are uploaded.
 
 ## Platform
 

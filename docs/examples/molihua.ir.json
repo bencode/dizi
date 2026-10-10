@@ -1,0 +1,1503 @@
+{
+  "irVersion": 1,
+  "meta": {
+    "title": "茉莉花"
+  },
+  "header": {
+    "key": {
+      "tonic": "F"
+    }
+  },
+  "ticksPerQuarter": 480,
+  "measures": [
+    {
+      "index": 0,
+      "start": 0,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 1,
+      "start": 960,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 2,
+      "start": 1920,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 3,
+      "start": 2880,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 4,
+      "start": 3840,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 5,
+      "start": 4800,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 6,
+      "start": 5760,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 7,
+      "start": 6720,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 8,
+      "start": 7680,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 9,
+      "start": 8640,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 10,
+      "start": 9600,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 11,
+      "start": 10560,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 12,
+      "start": 11520,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 13,
+      "start": 12480,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 14,
+      "start": 13440,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 15,
+      "start": 14400,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 16,
+      "start": 15360,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 17,
+      "start": 16320,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 18,
+      "start": 17280,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 19,
+      "start": 18240,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 20,
+      "start": 19200,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 21,
+      "start": 20160,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 22,
+      "start": 21120,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 23,
+      "start": 22080,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 24,
+      "start": 23040,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 25,
+      "start": 24000,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "single"
+    },
+    {
+      "index": 26,
+      "start": 24960,
+      "duration": 960,
+      "time": {
+        "beats": 2,
+        "unit": 4
+      },
+      "barline": "final"
+    }
+  ],
+  "playOrder": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26
+  ],
+  "parts": [
+    {
+      "id": "solo",
+      "role": "solo",
+      "measures": [
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n1",
+              "start": 0,
+              "duration": 480,
+              "value": 4,
+              "dots": 0,
+              "pitch": {
+                "degree": 3,
+                "octave": 0,
+                "semitones": 4
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n2",
+              "start": 480,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 3,
+                "octave": 0,
+                "semitones": 4
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n3",
+              "start": 720,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            }
+          ],
+          "beams": [
+            {
+              "level": 1,
+              "from": "n2",
+              "to": "n3"
+            }
+          ]
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n4",
+              "start": 960,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 6,
+                "octave": 0,
+                "semitones": 9
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n5",
+              "start": 1200,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 1,
+                "octave": 1,
+                "semitones": 12
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n6",
+              "start": 1440,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 1,
+                "octave": 1,
+                "semitones": 12
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n7",
+              "start": 1680,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 6,
+                "octave": 0,
+                "semitones": 9
+              }
+            }
+          ],
+          "beams": [
+            {
+              "level": 1,
+              "from": "n4",
+              "to": "n5"
+            },
+            {
+              "level": 1,
+              "from": "n6",
+              "to": "n7"
+            }
+          ]
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n8",
+              "start": 1920,
+              "duration": 480,
+              "value": 4,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n9",
+              "start": 2400,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n10",
+              "start": 2640,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 6,
+                "octave": 0,
+                "semitones": 9
+              }
+            }
+          ],
+          "beams": [
+            {
+              "level": 1,
+              "from": "n9",
+              "to": "n10"
+            }
+          ]
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n11",
+              "start": 2880,
+              "duration": 960,
+              "value": 2,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            }
+          ],
+          "beams": []
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n12",
+              "start": 3840,
+              "duration": 480,
+              "value": 4,
+              "dots": 0,
+              "pitch": {
+                "degree": 3,
+                "octave": 0,
+                "semitones": 4
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n13",
+              "start": 4320,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 3,
+                "octave": 0,
+                "semitones": 4
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n14",
+              "start": 4560,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            }
+          ],
+          "beams": [
+            {
+              "level": 1,
+              "from": "n13",
+              "to": "n14"
+            }
+          ]
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n15",
+              "start": 4800,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 6,
+                "octave": 0,
+                "semitones": 9
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n16",
+              "start": 5040,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 1,
+                "octave": 1,
+                "semitones": 12
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n17",
+              "start": 5280,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 1,
+                "octave": 1,
+                "semitones": 12
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n18",
+              "start": 5520,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 6,
+                "octave": 0,
+                "semitones": 9
+              }
+            }
+          ],
+          "beams": [
+            {
+              "level": 1,
+              "from": "n15",
+              "to": "n16"
+            },
+            {
+              "level": 1,
+              "from": "n17",
+              "to": "n18"
+            }
+          ]
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n19",
+              "start": 5760,
+              "duration": 480,
+              "value": 4,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n20",
+              "start": 6240,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n21",
+              "start": 6480,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 6,
+                "octave": 0,
+                "semitones": 9
+              }
+            }
+          ],
+          "beams": [
+            {
+              "level": 1,
+              "from": "n20",
+              "to": "n21"
+            }
+          ]
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n22",
+              "start": 6720,
+              "duration": 960,
+              "value": 2,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            }
+          ],
+          "beams": []
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n23",
+              "start": 7680,
+              "duration": 480,
+              "value": 4,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n24",
+              "start": 8160,
+              "duration": 480,
+              "value": 4,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            }
+          ],
+          "beams": []
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n25",
+              "start": 8640,
+              "duration": 480,
+              "value": 4,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n26",
+              "start": 9120,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 3,
+                "octave": 0,
+                "semitones": 4
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n27",
+              "start": 9360,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            }
+          ],
+          "beams": [
+            {
+              "level": 1,
+              "from": "n26",
+              "to": "n27"
+            }
+          ]
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n28",
+              "start": 9600,
+              "duration": 480,
+              "value": 4,
+              "dots": 0,
+              "pitch": {
+                "degree": 6,
+                "octave": 0,
+                "semitones": 9
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n29",
+              "start": 10080,
+              "duration": 480,
+              "value": 4,
+              "dots": 0,
+              "pitch": {
+                "degree": 6,
+                "octave": 0,
+                "semitones": 9
+              }
+            }
+          ],
+          "beams": []
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n30",
+              "start": 10560,
+              "duration": 960,
+              "value": 2,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            }
+          ],
+          "beams": []
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n31",
+              "start": 11520,
+              "duration": 480,
+              "value": 4,
+              "dots": 0,
+              "pitch": {
+                "degree": 3,
+                "octave": 0,
+                "semitones": 4
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n32",
+              "start": 12000,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 2,
+                "octave": 0,
+                "semitones": 2
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n33",
+              "start": 12240,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 3,
+                "octave": 0,
+                "semitones": 4
+              }
+            }
+          ],
+          "beams": [
+            {
+              "level": 1,
+              "from": "n32",
+              "to": "n33"
+            }
+          ]
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n34",
+              "start": 12480,
+              "duration": 480,
+              "value": 4,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n35",
+              "start": 12960,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 3,
+                "octave": 0,
+                "semitones": 4
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n36",
+              "start": 13200,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 2,
+                "octave": 0,
+                "semitones": 2
+              }
+            }
+          ],
+          "beams": [
+            {
+              "level": 1,
+              "from": "n35",
+              "to": "n36"
+            }
+          ]
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n37",
+              "start": 13440,
+              "duration": 480,
+              "value": 4,
+              "dots": 0,
+              "pitch": {
+                "degree": 1,
+                "octave": 0,
+                "semitones": 0
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n38",
+              "start": 13920,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 1,
+                "octave": 0,
+                "semitones": 0
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n39",
+              "start": 14160,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 2,
+                "octave": 0,
+                "semitones": 2
+              }
+            }
+          ],
+          "beams": [
+            {
+              "level": 1,
+              "from": "n38",
+              "to": "n39"
+            }
+          ]
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n40",
+              "start": 14400,
+              "duration": 960,
+              "value": 2,
+              "dots": 0,
+              "pitch": {
+                "degree": 1,
+                "octave": 0,
+                "semitones": 0
+              }
+            }
+          ],
+          "beams": []
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n41",
+              "start": 15360,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 3,
+                "octave": 0,
+                "semitones": 4
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n42",
+              "start": 15600,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 2,
+                "octave": 0,
+                "semitones": 2
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n43",
+              "start": 15840,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 1,
+                "octave": 0,
+                "semitones": 0
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n44",
+              "start": 16080,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 3,
+                "octave": 0,
+                "semitones": 4
+              }
+            }
+          ],
+          "beams": [
+            {
+              "level": 1,
+              "from": "n41",
+              "to": "n42"
+            },
+            {
+              "level": 1,
+              "from": "n43",
+              "to": "n44"
+            }
+          ]
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n45",
+              "start": 16320,
+              "duration": 960,
+              "value": 2,
+              "dots": 0,
+              "pitch": {
+                "degree": 2,
+                "octave": 0,
+                "semitones": 2
+              }
+            }
+          ],
+          "beams": []
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n46",
+              "start": 17280,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 3,
+                "octave": 0,
+                "semitones": 4
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n47",
+              "start": 17520,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n48",
+              "start": 17760,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 6,
+                "octave": 0,
+                "semitones": 9
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n49",
+              "start": 18000,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 1,
+                "octave": 1,
+                "semitones": 12
+              }
+            }
+          ],
+          "beams": [
+            {
+              "level": 1,
+              "from": "n46",
+              "to": "n47"
+            },
+            {
+              "level": 1,
+              "from": "n48",
+              "to": "n49"
+            }
+          ]
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n50",
+              "start": 18240,
+              "duration": 960,
+              "value": 2,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            }
+          ],
+          "beams": []
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n51",
+              "start": 19200,
+              "duration": 480,
+              "value": 4,
+              "dots": 0,
+              "pitch": {
+                "degree": 2,
+                "octave": 0,
+                "semitones": 2
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n52",
+              "start": 19680,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 3,
+                "octave": 0,
+                "semitones": 4
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n53",
+              "start": 19920,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": 0,
+                "semitones": 7
+              }
+            }
+          ],
+          "beams": [
+            {
+              "level": 1,
+              "from": "n52",
+              "to": "n53"
+            }
+          ]
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n54",
+              "start": 20160,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 2,
+                "octave": 0,
+                "semitones": 2
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n55",
+              "start": 20400,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 3,
+                "octave": 0,
+                "semitones": 4
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n56",
+              "start": 20640,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 1,
+                "octave": 0,
+                "semitones": 0
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n57",
+              "start": 20880,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 6,
+                "octave": -1,
+                "semitones": -3
+              }
+            }
+          ],
+          "beams": [
+            {
+              "level": 1,
+              "from": "n54",
+              "to": "n55"
+            },
+            {
+              "level": 1,
+              "from": "n56",
+              "to": "n57"
+            }
+          ]
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n58",
+              "start": 21120,
+              "duration": 480,
+              "value": 4,
+              "dots": 0,
+              "pitch": {
+                "degree": 6,
+                "octave": -1,
+                "semitones": -3
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n59",
+              "start": 21600,
+              "duration": 480,
+              "value": 4,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": -1,
+                "semitones": -5
+              }
+            }
+          ],
+          "beams": []
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n60",
+              "start": 22080,
+              "duration": 960,
+              "value": 2,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": -1,
+                "semitones": -5
+              }
+            }
+          ],
+          "beams": []
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n61",
+              "start": 23040,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 6,
+                "octave": -1,
+                "semitones": -3
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n62",
+              "start": 23280,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 1,
+                "octave": 0,
+                "semitones": 0
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n63",
+              "start": 23520,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 2,
+                "octave": 0,
+                "semitones": 2
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n64",
+              "start": 23760,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 3,
+                "octave": 0,
+                "semitones": 4
+              }
+            }
+          ],
+          "beams": [
+            {
+              "level": 1,
+              "from": "n61",
+              "to": "n62"
+            },
+            {
+              "level": 1,
+              "from": "n63",
+              "to": "n64"
+            }
+          ]
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n65",
+              "start": 24000,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 1,
+                "octave": 0,
+                "semitones": 0
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n66",
+              "start": 24240,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 2,
+                "octave": 0,
+                "semitones": 2
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n67",
+              "start": 24480,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 1,
+                "octave": 0,
+                "semitones": 0
+              }
+            },
+            {
+              "kind": "note",
+              "id": "n68",
+              "start": 24720,
+              "duration": 240,
+              "value": 8,
+              "dots": 0,
+              "pitch": {
+                "degree": 6,
+                "octave": -1,
+                "semitones": -3
+              }
+            }
+          ],
+          "beams": [
+            {
+              "level": 1,
+              "from": "n65",
+              "to": "n66"
+            },
+            {
+              "level": 1,
+              "from": "n67",
+              "to": "n68"
+            }
+          ]
+        },
+        {
+          "events": [
+            {
+              "kind": "note",
+              "id": "n69",
+              "start": 24960,
+              "duration": 960,
+              "value": 2,
+              "dots": 0,
+              "pitch": {
+                "degree": 5,
+                "octave": -1,
+                "semitones": -5
+              }
+            }
+          ],
+          "beams": []
+        }
+      ]
+    }
+  ],
+  "spans": [],
+  "marks": [
+    {
+      "kind": "tempo",
+      "at": 0,
+      "beat": 480,
+      "bpm": 72
+    }
+  ],
+  "layoutHints": {
+    "lineBreaksAfter": [
+      3,
+      7,
+      11,
+      15,
+      19,
+      23
+    ]
+  }
+}

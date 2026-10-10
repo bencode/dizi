@@ -1,0 +1,66 @@
+name: Dizi
+options:
+  bundleIdPrefix: io.upivot
+  developmentLanguage: zh-Hans
+  deploymentTarget:
+    iOS: "26.0"
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+    GCC_TREAT_WARNINGS_AS_ERRORS: YES
+packages:
+  ScoreKit:
+    path: ../../packages/scorekit
+targets:
+  Dizi:
+    type: application
+    platform: iOS
+    sources:
+      - path: Dizi
+        excludes: ["Samples/**", "Library/**"]
+      - path: Dizi/Samples
+        type: folder
+        buildPhase: resources
+      # Built by `npm run library` (not committed): the catalog and the compiled scores.
+      - path: Dizi/Library
+        type: folder
+        buildPhase: resources
+    # The generated launch screen, on the 宣纸 ground instead of the system background.
+    info:
+      path: Dizi/Info.plist
+      properties:
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen:
+          UIColorName: Ground
+    dependencies:
+      - package: ScoreKit
+    scheme:
+      testTargets: [DiziUITests]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.upivot.dizi
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: 鱼米竹笛
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+        SWIFT_EMIT_LOC_STRINGS: YES
+  DiziUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [DiziUITests]
+    dependencies:
+      - target: Dizi
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.upivot.dizi.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Dizi

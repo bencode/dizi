@@ -6,12 +6,29 @@ See [the product](docs/product.md).
 
 ## Development
 
-Requires Xcode 27 and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`).
+Requires Node 24 (`npm install` at the root), Xcode 27, [XcodeGen](https://github.com/yonaskolb/XcodeGen), and [SwiftLint](https://github.com/realm/SwiftLint):
 
 ```sh
-cd App
+brew install xcodegen swiftlint
+```
+
+```sh
+npm run library     # compile the scores the app bundles (a fresh clone uses docs/examples)
+cd apps/ios
 xcodegen generate   # after changing project.yml
 open Dizi.xcodeproj
 ```
 
-`App/project.yml` defines the project; the generated `Dizi.xcodeproj` is committed so it opens without XcodeGen.
+`apps/ios/project.yml` defines the project; the generated `Dizi.xcodeproj` is committed so it opens without XcodeGen.
+
+Before committing, run every check (format, lint, project sync, build, tests):
+
+```sh
+scripts/check.sh
+```
+
+See [AGENTS.md](AGENTS.md) for what each check enforces.
+
+## Credits
+
+The demo melody uses dizi recordings by [Hypnotriod](https://freesound.org/people/Hypnotriod/packs/21613/) (CC0), with thanks.
