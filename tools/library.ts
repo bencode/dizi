@@ -1,6 +1,6 @@
 // The score library: catalog.json and the pieces it lists, compiled. Shared by build-library and publish-library.
 import { createHash } from 'node:crypto'
-import { readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { compile, type Diagnostic, type Score } from '../packages/parser/src/index.ts'
 
@@ -22,8 +22,27 @@ export type Entry = {
   publish?: true
 }
 export type Built = { entry: Entry; score: Score }
+
+/** The 词典 (dictionary.json): entries to look up, and the fingering table their charts are drawn from. */
+export type Dictionary = {
+  categories: { id: string; title: string }[]
+  /** One per pitch: `above` is semitones above the tube note; holes from the blow hole down, x / o / h (half). */
+  fingerings: { above: number; holes: string; breath: 'gentle' | 'strong' | 'over'; or?: string[] }[]
+  entries: {
+    id: string
+    title: string
+    category: string
+    aliases: string[]
+    text: string
+    /** A fingering chart for this tube note: { degree: 5, octave: -1 } is 筒音作5̣. */
+    chart?: { degree: number; octave: number }
+  }[]
+}
+const emptyDictionary: Dictionary = { categories: [], fingerings: [], entries: [] }
+
 export type Outcome = {
   sections: Section[]
+  dictionary: Dictionary
   built: Built[]
   errors: string[]
   warnings: string[]
@@ -77,7 +96,7 @@ const parseEntry = (value: unknown, at: string, sections: Set<string>): Entry | 
 }
 
 const duplicates = (ids: string[], what: string): string[] =>
-  ids.filter((id, index) => ids.indexOf(id) !== index).map((id) => `${what} id '${id}' is used twice`)
+  ids.filter((id, index) => ids.indexOf(id) !== index).map((id) => `${what} '${id}' is used twice`)
 
 /** The values parsed, and the problems of the ones that did not parse. */
 const split = <T>(results: (T | string[])[]): { values: T[]; problems: string[] } => ({
@@ -106,12 +125,104 @@ const parseCatalog = (json: unknown): { sections: Section[]; entries: Entry[]; p
       ...sections.problems,
       ...duplicates(
         sections.values.map((section) => section.id),
-        'section',
+        'section id',
       ),
       ...entries.problems,
       ...duplicates(
         entries.values.map((entry) => entry.id),
-        'piece',
+        'piece id',
+      ),
+    ],
+  }
+}
+
+const isHoles = (value: unknown): value is string => typeof value === 'string' && /^[xoh]{6}$/.test(value)
+const isBreath = (value: unknown): value is Dictionary['fingerings'][number]['breath'] =>
+  value === 'gentle' || value === 'strong' || value === 'over'
+const isTube = (value: unknown): value is { degree: number; octave: number } =>
+  isRecord(value) &&
+  Number.isInteger(value.degree) &&
+  (value.degree as number) >= 1 &&
+  (value.degree as number) <= 7 &&
+  Number.isInteger(value.octave)
+const isTexts = (value: unknown): value is string[] => Array.isArray(value) && value.every(isText)
+
+const parseFingering = (value: unknown, at: string): Dictionary['fingerings'][number] | string[] => {
+  if (!isRecord(value)) return [`${at}: expected an object`]
+  const { above, holes, breath, or } = value
+  const alternatives = or === undefined ? [] : or
+  const isAbove = isCount(above) || above === 0
+  const isOr = Array.isArray(alternatives) && alternatives.every(isHoles)
+  if (isAbove && above <= 36 && isHoles(holes) && isBreath(breath) && isOr) {
+    return { above, holes, breath, ...(alternatives.length === 0 ? {} : { or: alternatives }) }
+  }
+  return [
+    ...(isAbove && above <= 36 ? [] : [`${at}.above: expected semitones above the tube, 0–36`]),
+    ...(isHoles(holes) && isOr ? [] : [`${at}.holes: expected six of x (closed), o (open), h (half)`]),
+    ...(isBreath(breath) ? [] : [`${at}.breath: expected gentle, strong or over`]),
+  ]
+}
+
+const parseDictionaryEntry = (
+  value: unknown,
+  at: string,
+  categories: Set<string>,
+): Dictionary['entries'][number] | string[] => {
+  if (!isRecord(value)) return [`${at}: expected an object`]
+  const { id, title, category, aliases, text, chart } = value
+  const isCategory = (candidate: unknown): candidate is string => isID(candidate) && categories.has(candidate)
+  if (isID(id) && isText(title) && isCategory(category) && isTexts(aliases) && isText(text)) {
+    if (chart === undefined) return { id, title, category, aliases, text }
+    if (isTube(chart))
+      return { id, title, category, aliases, text, chart: { degree: chart.degree, octave: chart.octave } }
+  }
+  return [
+    ...(isID(id) ? [] : [idProblem(at)]),
+    ...(isText(title) ? [] : [`${at}.title: expected text`]),
+    ...(isCategory(category) ? [] : [`${at}.category: ${JSON.stringify(category)} is not a category`]),
+    ...(isTexts(aliases) ? [] : [`${at}.aliases: expected a list of texts`]),
+    ...(isText(text) ? [] : [`${at}.text: expected text`]),
+    ...(chart === undefined || isTube(chart) ? [] : [`${at}.chart: expected { degree: 1–7, octave }`]),
+  ]
+}
+
+/** dictionary.json parsed, with every problem found. */
+const parseDictionary = (json: unknown): { dictionary: Dictionary; problems: string[] } => {
+  const { categories: listed, fingerings: table, entries: listedEntries } = isRecord(json) ? json : {}
+  if (!Array.isArray(listed) || !Array.isArray(table) || !Array.isArray(listedEntries)) {
+    return { dictionary: emptyDictionary, problems: ['categories, fingerings, entries: expected three lists'] }
+  }
+  const categories = split(
+    listed.map((category, index) => {
+      const at = `categories[${String(index)}]`
+      if (isRecord(category) && isID(category.id) && isText(category.title)) {
+        return { id: category.id, title: category.title }
+      }
+      return [`${at}: expected { id, title }`]
+    }),
+  )
+  const known = new Set(categories.values.map((category) => category.id))
+  const fingerings = split(table.map((row, index) => parseFingering(row, `fingerings[${String(index)}]`)))
+  const entries = split(
+    listedEntries.map((entry, index) => parseDictionaryEntry(entry, `entries[${String(index)}]`, known)),
+  )
+  return {
+    dictionary: { categories: categories.values, fingerings: fingerings.values, entries: entries.values },
+    problems: [
+      ...categories.problems,
+      ...duplicates(
+        categories.values.map((category) => category.id),
+        'category id',
+      ),
+      ...fingerings.problems,
+      ...duplicates(
+        fingerings.values.map((row) => String(row.above)),
+        'fingering above',
+      ),
+      ...entries.problems,
+      ...duplicates(
+        entries.values.map((entry) => entry.id),
+        'entry id',
       ),
     ],
   }
@@ -124,6 +235,10 @@ const located = (file: string, diagnostic: Diagnostic): string =>
 export const fromLibrary = (directory: string): Outcome => {
   const catalogFile = join(directory, 'catalog.json')
   const { sections, entries, problems } = parseCatalog(JSON.parse(readFileSync(catalogFile, 'utf8')))
+  const dictionaryFile = join(directory, 'dictionary.json')
+  const { dictionary, problems: dictionaryProblems } = existsSync(dictionaryFile)
+    ? parseDictionary(JSON.parse(readFileSync(dictionaryFile, 'utf8')))
+    : { dictionary: emptyDictionary, problems: [] }
   const results = entries.map((entry) => {
     const file = join(directory, `${entry.id}.jianpu`)
     return { entry, file, result: compile(readFileSync(file, 'utf8')) }
@@ -134,8 +249,13 @@ export const fromLibrary = (directory: string): Outcome => {
     )
   return {
     sections,
+    dictionary,
     built: results.flatMap(({ entry, result }) => (result.score === null ? [] : [{ entry, score: result.score }])),
-    errors: [...problems.map((problem) => `${catalogFile}: ${problem}`), ...diagnostics('error')],
+    errors: [
+      ...problems.map((problem) => `${catalogFile}: ${problem}`),
+      ...dictionaryProblems.map((problem) => `${dictionaryFile}: ${problem}`),
+      ...diagnostics('error'),
+    ],
     warnings: diagnostics('warning'),
   }
 }
@@ -160,6 +280,7 @@ export const fromExamples = (root: string): Outcome => {
     })
   return {
     sections: [{ id: 'pieces', title: '乐曲', kind: 'repertoire' }],
+    dictionary: emptyDictionary,
     built,
     errors: [],
     warnings: [],
@@ -181,10 +302,11 @@ const hashName = (body: string): string => createHash('sha256').update(body).dig
 
 /**
  * The library as files (docs/library.md): each score named by its content hash, and the catalog that lists them
- * with the sections that have pieces. The app's bundled snapshot and the published library share this layout.
+ * with the sections that have pieces, and the dictionary. The app's bundled snapshot and the published library
+ * share this layout.
  */
 export const listing = (
-  sections: Section[],
+  { sections, dictionary }: { sections: Section[]; dictionary: Dictionary },
   built: Built[],
   updated: number,
 ): { scores: { path: string; body: string }[]; catalog: string } => {
@@ -206,6 +328,6 @@ export const listing = (
   const used = sections.filter((section) => built.some(({ entry }) => entry.section === section.id))
   return {
     scores,
-    catalog: json({ irVersion: 1, updated, sections: used, pieces }),
+    catalog: json({ irVersion: 1, updated, sections: used, pieces, dictionary }),
   }
 }

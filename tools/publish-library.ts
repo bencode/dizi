@@ -4,7 +4,7 @@
 //   npm run publish-library                  upload (OSS_* settings from .env)
 import { join } from 'node:path'
 import OSS from 'ali-oss'
-import { fromLibrary, listing, type Built, type Section } from './library.ts'
+import { fromLibrary, listing, type Built, type Dictionary, type Section } from './library.ts'
 
 /** The bucket's public address (custom domain bound to upivot-static). */
 const publicBase = 'https://g.upivot.cn'
@@ -13,8 +13,12 @@ const settings = ['OSS_REGION', 'OSS_BUCKET', 'OSS_ACCESS_KEY_ID', 'OSS_ACCESS_K
 type Upload = { key: string; body: string; cacheControl: string }
 
 /** What to upload: the library's files under the prefix, scores cached for good and the catalog briefly. */
-const uploads = (sections: Section[], built: Built[], prefix: string): { scores: Upload[]; catalog: Upload } => {
-  const { scores, catalog } = listing(sections, built, Math.floor(Date.now() / 1000))
+const uploads = (
+  library: { sections: Section[]; dictionary: Dictionary },
+  built: Built[],
+  prefix: string,
+): { scores: Upload[]; catalog: Upload } => {
+  const { scores, catalog } = listing(library, built, Math.floor(Date.now() / 1000))
   return {
     scores: scores.map(({ path, body }) => ({
       key: `${prefix}/${path}`,
@@ -30,7 +34,7 @@ const uploads = (sections: Section[], built: Built[], prefix: string): { scores:
 }
 
 const directory = join(import.meta.dirname, '..', 'priv/library')
-const { sections, built, errors, warnings } = fromLibrary(directory)
+const { sections, dictionary, built, errors, warnings } = fromLibrary(directory)
 for (const message of warnings) console.error(`warning: ${message}`)
 if (errors.length > 0) {
   console.error(errors.join('\n'))
@@ -45,11 +49,14 @@ if (missing.length > 0) {
 const env = (name: (typeof settings)[number]): string => process.env[name] ?? ''
 const prefix = `${env('OSS_UPLOAD_PATH').replace(/^\/+|\/+$/g, '')}/library`
 const published = built.filter(({ entry }) => entry.publish === true)
-const { scores, catalog } = uploads(sections, published, prefix)
+const { scores, catalog } = uploads({ sections, dictionary }, published, prefix)
 
 console.log(`${String(published.length)} pieces to publish, ${String(built.length - published.length)} kept private`)
 const listed = sections.filter((section) => published.some(({ entry }) => entry.section === section.id))
 console.log(`sections: ${listed.map((section) => section.title).join(' · ')}`)
+console.log(
+  `词典: ${dictionary.entries.map((entry) => entry.title).join(' · ')} (${String(dictionary.fingerings.length)} fingerings)`,
+)
 published.forEach(({ entry }, index) => {
   console.log(`  ${entry.id}  ${entry.title}  ${scores[index]?.key ?? ''}`)
 })

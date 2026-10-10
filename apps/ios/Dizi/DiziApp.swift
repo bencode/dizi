@@ -15,6 +15,7 @@ struct DiziApp: App {
             TabView {
                 Tab("练习", systemImage: "metronome") { NavigationStack { PieceListView(kind: .practice) } }
                 Tab("乐曲", systemImage: "music.note") { NavigationStack { PieceListView(kind: .repertoire) } }
+                Tab("词典", systemImage: "book.closed") { NavigationStack { DictionaryView() } }
                 Tab(role: .search) { NavigationStack { SearchView() } }
             }
             .tabBarMinimizeBehavior(.onScrollDown)

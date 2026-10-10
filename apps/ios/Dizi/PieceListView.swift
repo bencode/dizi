@@ -83,17 +83,21 @@ struct PieceListView: View {
     }
 }
 
-/// Sections of cards, as `shelf` returns them; shared by the tabs and search.
-struct ShelfList: View {
+/// Sections of cards, as `shelf` returns them, after any leading rows (search puts dictionary entries there);
+/// shared by the tabs and search.
+struct ShelfList<Leading: View>: View {
     let sections: [(LibrarySection, [ShelfRow])]
-    @Environment(SongFont.self) private var song
+    @ViewBuilder var leading: Leading
 
     var body: some View {
         List {
             Group {
+                leading
                 // Headers are plain rows, not Section headers: those pin while scrolling and pad themselves.
                 ForEach(sections, id: \.0.id) { section, rows in
-                    sectionHeader(section.title, count: rows.map(\.pieceCount).reduce(0, +))
+                    SectionHeader(
+                        title: Text(verbatim: section.title),
+                        count: Text("\(rows.map(\.pieceCount).reduce(0, +)) 首"))
                     ForEach(rows) { row in
                         link(to: row)
                     }
@@ -115,11 +119,25 @@ struct ShelfList: View {
         }
     }
 
-    private func sectionHeader(_ title: String, count: Int) -> some View {
+}
+
+extension ShelfList where Leading == EmptyView {
+    init(sections: [(LibrarySection, [ShelfRow])]) {
+        self.init(sections: sections) { EmptyView() }
+    }
+}
+
+/// A list's section header: the title in Song, the count at the right.
+struct SectionHeader: View {
+    let title: Text
+    let count: Text
+    @Environment(SongFont.self) private var song
+
+    var body: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(title).font(song.font(17, bold: true, relativeTo: .headline)).foregroundStyle(Theme.ink)
+            title.font(song.font(17, bold: true, relativeTo: .headline)).foregroundStyle(Theme.ink)
             Spacer()
-            Text("\(count) 首").font(.footnote).foregroundStyle(Theme.muted)
+            count.font(.footnote).foregroundStyle(Theme.muted)
         }
         .padding(.top, 10)
     }

@@ -2,7 +2,7 @@ import XCTest
 
 final class NavigationTests: XCTestCase {
     @MainActor
-    func testOpensAScoreFromEachTab() {
+    func testOpensAChartAndAScoreFromTheTabs() {
         let app = XCUIApplication()
         app.launch()
 
@@ -12,6 +12,18 @@ final class NavigationTests: XCTestCase {
         list.name = "list"
         list.lifetime = .keepAlways
         add(list)
+
+        // The 词典 opens a chart; a dictionary lost between the tools and the app would list no entry.
+        app.tabBars.buttons["词典"].tap()
+        let entry = app.collectionViews.buttons.matching(identifier: "entry").firstMatch
+        XCTAssertTrue(entry.waitForExistence(timeout: 5))
+        entry.tap()
+        let chartRow = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS '缓吹'"))
+        XCTAssertTrue(chartRow.firstMatch.waitForExistence(timeout: 5))
+        let chart = XCTAttachment(screenshot: app.screenshot())
+        chart.name = "chart"
+        chart.lifetime = .keepAlways
+        add(chart)
 
         // The 乐曲 tab lists its own pieces; a section kind lost on the way would leave it empty.
         app.tabBars.buttons["乐曲"].tap()

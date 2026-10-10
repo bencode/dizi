@@ -8,9 +8,10 @@ public struct LibraryCatalog: Decodable, Sendable, Equatable {
     /// In display order.
     public let sections: [LibrarySection]
     public let pieces: [LibraryPiece]
+    public let dictionary: LibraryDictionary
 
     private enum CodingKeys: String, CodingKey {
-        case irVersion, updated, sections, pieces
+        case irVersion, updated, sections, pieces, dictionary
     }
 
     public init(from decoder: any Decoder) throws {
@@ -21,6 +22,7 @@ public struct LibraryCatalog: Decodable, Sendable, Equatable {
         updated = try container.decode(Int.self, forKey: .updated)
         sections = try container.decode([LibrarySection].self, forKey: .sections)
         pieces = try container.decode([LibraryPiece].self, forKey: .pieces)
+        dictionary = try container.decodeIfPresent(LibraryDictionary.self, forKey: .dictionary) ?? .empty
         // Every piece is listed somewhere; a catalog that breaks this is rejected whole.
         let known = Set(sections.map(\.id))
         if let stray = pieces.first(where: { !known.contains($0.section) }) {
@@ -78,6 +80,7 @@ public enum SectionKind: String, Decodable, Sendable, Hashable {
 public enum LibraryError: Error, Equatable {
     case unsupportedVersion(Int)
     case unknownSection(String)
+    case unknownCategory(String)
 }
 
 /// The catalog to show: the most recently updated one whose scores are all available; the first wins a tie.

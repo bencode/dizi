@@ -32,9 +32,25 @@ type Catalog = {
     time: string // as printed: '2/4', or '散板'
     score: string // relative to the catalog: 'scores/3f9a0c…json'
   }[]
+  // The 词典 tab (source: priv/library/dictionary.json). Absent means empty.
+  dictionary?: {
+    categories: { id: string; title: string }[] // display order: 指法 …
+    // One fingering per pitch, by semitones above the tube note (筒音, all holes closed). Holes run from the blow
+    // hole down: x closed, o open, h half. breath: gentle 缓吹, strong 急吹, over 超吹.
+    fingerings: { above: number; holes: string; breath: 'gentle' | 'strong' | 'over'; or?: string[] }[]
+    entries: {
+      id: string
+      title: string
+      category: string // the id of one of `categories`
+      aliases: string[] // other names and pinyin, for search: '全按作5', 'zuo5'
+      text: string
+      chart?: { degree: number; octave: number } // a fingering chart for this tube note: 筒音作5̣ → { 5, -1 }
+    }[]
+  }
 }
 ```
 
+- A dictionary entry whose category is not listed rejects the catalog whole, as a stray section does. A chart row whose pitch has no fingering shows none: the table holds only fingerings taken from a source.
 - Within a section, pieces show in catalog order, kept by hand in the source (`priv/library/catalog.json`). A catalog whose piece names no listed section is rejected whole.
 - A changed score gets a new name, so a cached copy is never stale. Old score files stay, so an app holding an older catalog keeps working.
 - Scores are uploaded before the catalog, so the catalog never lists a missing file. A score already on OSS is not uploaded again.

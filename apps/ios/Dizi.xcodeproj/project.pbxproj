@@ -21,6 +21,7 @@
 		694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7DDEBD62C1197359510C59D /* DiziApp.swift */; };
 		804EC165DEA0995AB5F6270C /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DB234CECED42DB96C159D214 /* AppIcon.icon */; };
 		9C80785EB6CB99C263A4033E /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7FB92541A5F848689241E1 /* Theme.swift */; };
+		B0494E44A5D2F65AC2868249 /* DictionaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8686E35C9F6777DCD047DB8A /* DictionaryView.swift */; };
 		C4CDA40015A7B9D147D4FC20 /* LibraryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79F6644CEF354FA4D521A9BA /* LibraryStore.swift */; };
 		C50C666DD7C22E635F515C10 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */; };
 		CCA985315C19D0AAD75388D1 /* PieceCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 035DC4279B86CF3EF6B6B6E2 /* PieceCard.swift */; };
@@ -54,6 +55,7 @@
 		3A7FB92541A5F848689241E1 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		79F6644CEF354FA4D521A9BA /* LibraryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryStore.swift; sourceTree = "<group>"; };
 		86587596978C7D7A172CA03E /* DiziUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DiziUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8686E35C9F6777DCD047DB8A /* DictionaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryView.swift; sourceTree = "<group>"; };
 		89D7C1647EEC53579F92423C /* Dizi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Dizi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		950D485C1F8F347121E6746A /* Library */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Library; path = Dizi/Library; sourceTree = SOURCE_ROOT; };
@@ -105,6 +107,7 @@
 			children = (
 				DB234CECED42DB96C159D214 /* AppIcon.icon */,
 				940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */,
+				8686E35C9F6777DCD047DB8A /* DictionaryView.swift */,
 				F7DDEBD62C1197359510C59D /* DiziApp.swift */,
 				2C6B3DF07D1A77E660CB3E30 /* Info.plist */,
 				79F6644CEF354FA4D521A9BA /* LibraryStore.swift */,
@@ -242,6 +245,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B0494E44A5D2F65AC2868249 /* DictionaryView.swift in Sources */,
 				694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */,
 				C4CDA40015A7B9D147D4FC20 /* LibraryStore.swift in Sources */,
 				CCA985315C19D0AAD75388D1 /* PieceCard.swift in Sources */,
