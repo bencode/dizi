@@ -38,7 +38,7 @@ private let slow = Tempo(bpm: 60, beat: 480)
 
     #expect(
         clicks.prefix(5) == [
-            Click(time: 0, accent: true), Click(time: 1, accent: false),
+            Click(time: 0, accent: true, countIn: true), Click(time: 1, accent: false, countIn: true),
             Click(time: 2, accent: true), Click(time: 3, accent: false), Click(time: 4, accent: true),
         ])
     #expect(clicks.count == 2 + 27 * 2)
@@ -125,7 +125,7 @@ private func pickup() throws -> Score {
     #expect(run.countInLength(timeline) == 960)
     #expect(
         run.clicks(timeline).prefix(4) == [
-            Click(time: 0, accent: true), Click(time: 1, accent: false),
+            Click(time: 0, accent: true, countIn: true), Click(time: 1, accent: false, countIn: true),
             Click(time: 2, accent: false), Click(time: 3, accent: true),
         ])
     #expect(run.beat(at: 2.5, in: timeline).map { [$0.index, $0.count] } == [1, 2])
@@ -200,4 +200,18 @@ func repeatedScore() throws -> Score {
     #expect(passage(0, 0, in: timeline)?.until == 960)
     let both = try #require(passage(0, 2, in: timeline))
     #expect(both.from == 0 && both.until == 3840)
+}
+
+@Test func countsInAsManyBarsAsSetOrNone() throws {
+    let timeline = Timeline(score: try molihua())
+    let two = Run(from: 0, countInBars: 2, tempo: slow)
+    let none = Run(from: 0, countInBars: 0, tempo: slow)
+
+    // Two bars of 2/4: four clicks, the bars' first beats accented, then the first note at 4 seconds.
+    #expect(two.clicks(timeline).prefix(4).map(\.accent) == [true, false, true, false])
+    #expect(two.clicks(timeline).prefix(5).map(\.countIn) == [true, true, true, true, false])
+    #expect(two.position(at: 0, in: timeline) == .countIn(beatsLeft: 4))
+    #expect(two.position(at: 4, in: timeline) == .entry(0, progress: 0))
+    #expect(none.position(at: 0, in: timeline) == .entry(0, progress: 0))
+    #expect(none.clicks(timeline).allSatisfy { !$0.countIn })
 }

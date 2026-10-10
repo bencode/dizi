@@ -92,6 +92,14 @@ public struct Click: Sendable, Equatable {
     public let time: Double
     /// The first beat of a bar.
     public let accent: Bool
+    /// A click of the count-in: it sounds even when the music's clicks are off.
+    public let countIn: Bool
+
+    public init(time: Double, accent: Bool, countIn: Bool = false) {
+        self.time = time
+        self.accent = accent
+        self.countIn = countIn
+    }
 }
 
 /// Bars to practise (选段): from one printed bar through another, as played.
@@ -116,16 +124,19 @@ public func passage(_ one: Int, _ other: Int, in timeline: Timeline) -> Passage?
     return Passage(first: first, last: last, from: from, until: closing.start + closing.duration)
 }
 
-/// One pass of 走谱 from an entry: a bar of count-in, then the score up to `until` (a tick; nil = its end).
-/// Time 0 is the first count-in click.
+/// One pass of 走谱 from an entry: `countInBars` bars of count-in, then the score up to `until` (a tick; nil =
+/// its end). Time 0 is the first count-in click.
 public struct Run: Sendable, Equatable {
     public let from: Int
     public let until: Int?
+    /// 预备拍: whole bars of clicks before the music, 0 for none.
+    public let countInBars: Int
     public let tempo: Tempo
 
-    public init(from: Int, until: Int? = nil, tempo: Tempo) {
+    public init(from: Int, until: Int? = nil, countInBars: Int = 1, tempo: Tempo) {
         self.from = from
         self.until = until
+        self.countInBars = countInBars
         self.tempo = tempo
     }
 
@@ -141,11 +152,11 @@ public struct Run: Sendable, Equatable {
         case finished
     }
 
-    /// The count-in's length in ticks: one full bar of the start's time signature, even when the music
-    /// starts on a pickup; none in 散板.
+    /// The count-in's length in ticks: `countInBars` full bars of the start's time signature, even when the
+    /// music starts on a pickup; none in 散板.
     public func countInLength(_ timeline: Timeline) -> Int {
         let bar = timeline.bars.first { $0.measure == timeline.entries[from].measure }
-        return bar?.fullLength.map { max(1, $0 / tempo.beat) * tempo.beat } ?? 0
+        return bar?.fullLength.map { countInBars * max(1, $0 / tempo.beat) * tempo.beat } ?? 0
     }
 
     public func position(at seconds: Double, in timeline: Timeline) -> Position {
@@ -162,8 +173,9 @@ public struct Run: Sendable, Equatable {
         let origin = timeline.entries[from].start
         let end = end(timeline)
         let lead = countInLength(timeline)
+        let bar = countInBars > 0 ? lead / countInBars : 1
         let countIn = stride(from: 0, to: lead, by: tempo.beat).map { tick in
-            Click(time: tempo.seconds(tick), accent: tick == 0)
+            Click(time: tempo.seconds(tick), accent: tick % bar == 0, countIn: true)
         }
         let music = timeline.bars.filter { $0.start + $0.duration > origin && $0.start < end }.flatMap { bar in
             beats(of: bar).filter { $0.tick >= origin && $0.tick < end }.map { beat in

@@ -147,13 +147,15 @@ final class Player {
         guard canPlay, let audio else { return }
         transport = transport.next(.play)
         guard case .running(let from, _) = transport else { return }
-        let run = Run(from: from, until: passage?.until, tempo: Tempo(bpm: Double(bpm), beat: beat))
+        let run = Run(
+            from: from, until: passage?.until, countInBars: CountIn.chosen.rawValue,
+            tempo: Tempo(bpm: Double(bpm), beat: beat))
         do {
             let melody =
                 demoOn && canDemo
                 ? melodySamples(run.melody(timeline, score: score), voices: voices, sampleRate: RunAudio.sampleRate)
                 : nil
-            try audio.start(run.clicks(timeline), clicksAudible: clickOn, melody: melody)
+            try audio.start(run.clicks(timeline), musicClicksAudible: clickOn, melody: melody)
         } catch {
             logger.error("Cannot start the clicks: \(error, privacy: .public)")
             transport = transport.next(.stop)

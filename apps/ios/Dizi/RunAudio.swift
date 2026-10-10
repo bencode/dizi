@@ -16,26 +16,31 @@ final class RunAudio {
     private let format: AVAudioFormat
     private let accentBuffer: AVAudioPCMBuffer
     private let beatBuffer: AVAudioPCMBuffer
+    /// A click's length of silence: the music's clicks while 节拍 is off, still keeping the run's clock.
+    private let silentBuffer: AVAudioPCMBuffer
     /// Host time of the run's time 0, while a run is scheduled.
     private var startHostTime: UInt64?
 
     init() throws {
         guard let format = AVAudioFormat(standardFormatWithSampleRate: Self.sampleRate, channels: 1),
             let accent = buffer(clickSamples(frequency: 1_760, sampleRate: format.sampleRate), format: format),
-            let beat = buffer(clickSamples(frequency: 1_175, sampleRate: format.sampleRate), format: format)
+            let beat = buffer(clickSamples(frequency: 1_175, sampleRate: format.sampleRate), format: format),
+            let silent = buffer([Float](repeating: 0, count: Int(beat.frameLength)), format: format)
         else { throw RunAudioError.noAudioFormat }
         self.format = format
         accentBuffer = accent
         beatBuffer = beat
+        silentBuffer = silent
         for node in [clickNode, melodyNode] {
             engine.attach(node)
             engine.connect(node, to: engine.mainMixerNode, format: format)
         }
     }
 
-    /// Starts a run; time 0 is the first click. Silent clicks still drive the clock. The melody, rendered at
+    /// Starts a run; time 0 is the first click. The count-in always sounds; the music's clicks sound when
+    /// `musicClicksAudible`, and are silent otherwise but still drive the clock. The melody, rendered at
     /// `sampleRate` from time 0, starts on the same sample.
-    func start(_ clicks: [Click], clicksAudible: Bool, melody: [Float]?) throws {
+    func start(_ clicks: [Click], musicClicksAudible: Bool, melody: [Float]?) throws {
         try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
         try AVAudioSession.sharedInstance().setActive(true)
         if !engine.isRunning {
@@ -43,11 +48,12 @@ final class RunAudio {
         }
         clickNode.stop()
         melodyNode.stop()
-        clickNode.volume = clicksAudible ? 1 : 0
         for click in clicks {
             let when = AVAudioTime(
                 sampleTime: AVAudioFramePosition(click.time * format.sampleRate), atRate: format.sampleRate)
-            clickNode.scheduleBuffer(click.accent ? accentBuffer : beatBuffer, at: when)
+            let sound =
+                click.countIn || musicClicksAudible ? (click.accent ? accentBuffer : beatBuffer) : silentBuffer
+            clickNode.scheduleBuffer(sound, at: when)
         }
         if let melody, let melodyBuffer = buffer(melody, format: format) {
             melodyNode.scheduleBuffer(melodyBuffer, at: AVAudioTime(sampleTime: 0, atRate: format.sampleRate))
