@@ -127,15 +127,14 @@ extension ShelfList where Leading == EmptyView {
     }
 }
 
-/// A list's section header: the title in Song, the count at the right.
+/// A list's section header: the title, the count at the right.
 struct SectionHeader: View {
     let title: Text
     let count: Text
-    @Environment(SongFont.self) private var song
 
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
-            title.font(song.font(17, bold: true, relativeTo: .headline)).foregroundStyle(Theme.ink)
+            title.font(.headline).foregroundStyle(Theme.ink)
             Spacer()
             count.font(.footnote).foregroundStyle(Theme.muted)
         }
