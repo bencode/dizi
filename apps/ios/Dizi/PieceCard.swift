@@ -4,7 +4,6 @@ import SwiftUI
 /// A card in the list: a tile with the title's first character, the title and its line of facts, the level.
 struct PieceCard: View {
     let row: ShelfRow
-    @Environment(\.colorScheme) private var colorScheme
     @Environment(SongFont.self) private var song
 
     var body: some View {
@@ -22,7 +21,6 @@ struct PieceCard: View {
                 meta.font(.footnote).foregroundStyle(Theme.muted)
             }
             Spacer(minLength: 0)
-            levelDots
         }
         .padding(.vertical, Theme.Space.medium)
         .padding(.horizontal, 14)
@@ -39,10 +37,18 @@ struct PieceCard: View {
         }
     }
 
-    private var level: Int {
+    private var level: Stage {
         switch row {
         case .piece(let piece): piece.level
         case .series(let series): series.level
+        }
+    }
+
+    /// ` · 进阶` in accent on a 进阶 card; 入门 cards carry no mark.
+    @ViewBuilder private var advancedTag: some View {
+        if level == .advanced {
+            Text(verbatim: " · ")
+            Text(levelTitle(.advanced)).foregroundStyle(Theme.accent)
         }
     }
 
@@ -55,27 +61,20 @@ struct PieceCard: View {
                     Text(verbatim: " · ")
                     Text("第\(lesson)课")
                 }
+                advancedTag
             }
         case .series(let series):
-            if let lesson = series.firstLesson {
-                Text("\(series.pieces.count) 首 · 第\(lesson)课起")
-            } else {
-                Text("\(series.pieces.count) 首")
+            HStack(spacing: 0) {
+                if let lesson = series.firstLesson {
+                    Text("\(series.pieces.count) 首 · 第\(lesson)课起")
+                } else {
+                    Text("\(series.pieces.count) 首")
+                }
+                advancedTag
             }
         }
     }
 
-    /// Four dots, as many lit as the level: accent, gold in the dark.
-    private var levelDots: some View {
-        HStack(spacing: 3) {
-            ForEach(1...4, id: \.self) { dot in
-                Circle()
-                    .fill(dot <= level ? (colorScheme == .dark ? Theme.gold : Theme.accent) : Theme.dotOff)
-                    .frame(width: 6, height: 6)
-            }
-        }
-        .accessibilityHidden(true)
-    }
 }
 
 /// The pieces of one series, as cards.

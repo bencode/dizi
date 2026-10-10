@@ -10,7 +10,8 @@ export type Entry = {
   id: string
   title: string
   category: Category
-  level: 1 | 2 | 3 | 4
+  /** 1 入门 (course part a), 2 进阶 (part b). */
+  level: 1 | 2
   lesson?: number
   /** Pieces sharing a series fold into one card in the app: '双吐练习'. */
   series?: string
@@ -22,7 +23,7 @@ export type Outcome = { built: Built[]; errors: string[]; warnings: string[] }
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null
 const isCategory = (value: unknown): value is Category => categories.some((category) => category === value)
-const isLevel = (value: unknown): value is Entry['level'] => value === 1 || value === 2 || value === 3 || value === 4
+const isLevel = (value: unknown): value is Entry['level'] => value === 1 || value === 2
 const isCount = (value: unknown): value is number => Number.isInteger(value) && (value as number) >= 1
 
 /** One catalog piece checked field by field: the entry, or what is wrong with it. */
@@ -33,7 +34,7 @@ const parseEntry = (value: unknown, at: string): Entry | string[] => {
     ...(typeof id === 'string' && /^[a-z0-9-]+$/.test(id) ? [] : [`${at}.id: expected lowercase letters, digits, -`]),
     ...(typeof title === 'string' && title !== '' ? [] : [`${at}.title: expected text`]),
     ...(isCategory(category) ? [] : [`${at}.category: expected ${categories.join(', ')}`]),
-    ...(isLevel(level) ? [] : [`${at}.level: expected 1 to 4`]),
+    ...(isLevel(level) ? [] : [`${at}.level: expected 1 (入门) or 2 (进阶)`]),
     ...(lesson === undefined || isCount(lesson) ? [] : [`${at}.lesson: expected a lesson number`]),
     ...(series === undefined || (typeof series === 'string' && series !== '') ? [] : [`${at}.series: expected text`]),
     ...(publish === undefined || publish === true ? [] : [`${at}.publish: expected true, or leave it out`]),

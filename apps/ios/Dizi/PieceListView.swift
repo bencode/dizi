@@ -5,7 +5,7 @@ struct PieceListView: View {
     @Environment(LibraryStore.self) private var library
     @Environment(SongFont.self) private var song
     @State private var query = ""
-    @State private var level: Int?
+    @State private var level: Stage?
 
     var body: some View {
         content
@@ -80,7 +80,7 @@ struct PieceListView: View {
     private var levels: some View {
         let chips = HStack(spacing: Theme.Space.small) {
             chip("全部", value: nil)
-            ForEach(1...4, id: \.self) { chip(levelTitle($0), value: $0) }
+            ForEach(Stage.allCases, id: \.self) { chip(levelTitle($0), value: $0) }
         }
         // At large text sizes the five chips scroll sideways instead of clipping.
         // Scrolling, the row runs to the screen edges and starts on the gutter.
@@ -91,7 +91,7 @@ struct PieceListView: View {
         }
     }
 
-    private func chip(_ title: LocalizedStringKey, value: Int?) -> some View {
+    private func chip(_ title: LocalizedStringKey, value: Stage?) -> some View {
         let isOn = level == value
         return Button {
             level = value
@@ -122,12 +122,10 @@ struct PieceListView: View {
     }
 }
 
-func levelTitle(_ level: Int) -> LocalizedStringKey {
+func levelTitle(_ level: Stage) -> LocalizedStringKey {
     switch level {
-    case 1: "入门"
-    case 2: "初级"
-    case 3: "中级"
-    default: "高级"
+    case .beginner: "入门"
+    case .advanced: "进阶"
     }
 }
 

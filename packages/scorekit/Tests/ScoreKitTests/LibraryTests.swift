@@ -38,7 +38,7 @@ private func catalog(updated: Int, scores: [String], version: Int = 1) throws ->
     #expect(unusedScores(cached: ["scores/a.json", "scores/old.json"], catalog: latest) == ["scores/old.json"])
 }
 
-private func piece(_ id: String, _ category: String = "etude", level: Int = 2, series: String? = nil) throws
+private func piece(_ id: String, _ category: String = "etude", level: Int = 1, series: String? = nil) throws
     -> LibraryPiece
 {
     let seriesField = series.map { #","series":"\#($0)""# } ?? ""
@@ -66,13 +66,13 @@ private func ids(_ rows: [ShelfRow]) -> [String] { rows.map(\.id) }
 
 @Test func filtersByLevelAndPinyinAndUnfoldsASingleMatch() throws {
     let pieces = [
-        try piece("zizhudiao", "piece", level: 3), try piece("tones", "tones", level: 1),
-        try piece("shuangtu-1", level: 2, series: "双吐"), try piece("shuangtu-2", level: 3, series: "双吐"),
+        try piece("molihua", "piece", level: 2), try piece("tones", "tones", level: 1),
+        try piece("shuangtu-1", level: 1, series: "双吐"), try piece("shuangtu-2", level: 2, series: "双吐"),
     ]
 
     // Empty categories are dropped; a series with one match shows the piece itself.
-    #expect(shelf(pieces, level: 3, query: "").map { $0.0 } == [.etude, .piece])
-    #expect(ids(shelf(pieces, level: 3, query: "")[0].1) == ["shuangtu-2"])
-    #expect(ids(shelf(pieces, level: nil, query: " ZiZhu ").flatMap(\.1)) == ["zizhudiao"])
-    #expect(shelf(pieces, level: 4, query: "").isEmpty)
+    #expect(shelf(pieces, level: .advanced, query: "").map { $0.0 } == [.etude, .piece])
+    #expect(ids(shelf(pieces, level: .advanced, query: "")[0].1) == ["shuangtu-2"])
+    #expect(ids(shelf(pieces, level: nil, query: " MoLi ").flatMap(\.1)) == ["molihua"])
+    #expect(shelf(pieces, level: .beginner, query: "molihua").isEmpty)
 }

@@ -5,8 +5,8 @@ public struct PieceSeries: Hashable, Sendable {
     public let name: String
     public let pieces: [LibraryPiece]
 
-    /// The lowest level among its pieces.
-    public var level: Int { pieces.map(\.level).min() ?? 1 }
+    /// The earliest stage among its pieces.
+    public var level: Stage { pieces.map(\.level).min() ?? .beginner }
     /// The first lesson it comes from, if any piece has one.
     public var firstLesson: Int? { pieces.compactMap(\.lesson).min() }
 }
@@ -26,7 +26,7 @@ public enum ShelfRow: Hashable, Sendable, Identifiable {
 
 /// The list as shown: per category (empty ones dropped), the pieces matching `level` (nil = all) and `query`,
 /// each series with two or more matches folded into one row at its first member.
-public func shelf(_ pieces: [LibraryPiece], level: Int?, query: String) -> [(PieceCategory, [ShelfRow])] {
+public func shelf(_ pieces: [LibraryPiece], level: Stage?, query: String) -> [(PieceCategory, [ShelfRow])] {
     let needle = query.trimmingCharacters(in: .whitespaces)
     let matching = pieces.filter { piece in
         (level == nil || piece.level == level) && (needle.isEmpty || matches(piece, needle))

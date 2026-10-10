@@ -11,14 +11,10 @@ enum Theme {
     static let onAccent = Color("OnAccent")
     /// The band behind what has been played.
     static let wash = Color("Wash")
-    /// Level dots: the accent in light, gold in dark.
-    static let gold = Color("Gold")
     /// Behind a card's first character.
     static let tile = Color("Tile")
     /// The edge of an outlined control (an off pill, the stop ring): rule in light, a step brighter in dark.
     static let outline = Color("Outline")
-    /// An unlit level dot.
-    static let dotOff = Color("DotOff")
 
     /// Score digits, tempo, titles: New York, the system serif.
     static func serif(_ size: CGFloat, weight: Font.Weight = .medium) -> Font {

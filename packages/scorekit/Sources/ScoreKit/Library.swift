@@ -29,8 +29,7 @@ public struct LibraryPiece: Decodable, Sendable, Hashable, Identifiable {
     public let id: String
     public let title: String
     public let category: PieceCategory
-    /// 1 入门 … 4 高级
-    public let level: Int
+    public let level: Stage
     public let lesson: Int?
     /// Pieces sharing a series fold into one card: 双吐练习.
     public let series: String?
@@ -39,6 +38,16 @@ public struct LibraryPiece: Decodable, Sendable, Hashable, Identifiable {
     public let time: String
     /// The score file, relative to the catalog: `scores/<hash>.json`.
     public let score: String
+}
+
+/// The course's two stages; a catalog with any other level does not decode.
+public enum Stage: Int, Decodable, Sendable, Hashable, Comparable, CaseIterable {
+    /// 入门: the course's part a.
+    case beginner = 1
+    /// 进阶: the course's part b.
+    case advanced = 2
+
+    public static func < (lhs: Stage, rhs: Stage) -> Bool { lhs.rawValue < rhs.rawValue }
 }
 
 public enum PieceCategory: String, Decodable, Sendable, CaseIterable {

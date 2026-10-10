@@ -18,7 +18,7 @@ type Catalog = {
     id: string
     title: string
     category: 'tones' | 'etude' | 'piece'
-    level: 1 | 2 | 3 | 4 // 入门 … 高级
+    level: 1 | 2 // 1 入门 (the course's part a), 2 进阶 (part b)
     lesson?: number // the course lesson it comes from
     series?: string // pieces sharing it fold into one card: '双吐练习'
     key: string // as printed: '1=E'
