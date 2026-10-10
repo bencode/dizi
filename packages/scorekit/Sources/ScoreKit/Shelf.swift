@@ -24,24 +24,24 @@ public enum ShelfRow: Hashable, Sendable, Identifiable {
     }
 }
 
-/// The list as shown: per category (empty ones dropped), the pieces matching `level` (nil = all) and `query`,
-/// each series with two or more matches folded into one row at its first member.
-public func shelf(_ pieces: [LibraryPiece], level: Stage?, query: String) -> [(PieceCategory, [ShelfRow])] {
+/// The list as shown: per section of the catalog (empty ones dropped), the pieces matching `level` (nil = all)
+/// and `query`, each series with two or more matches folded into one row at its first member.
+public func shelf(_ catalog: LibraryCatalog, level: Stage?, query: String) -> [(LibrarySection, [ShelfRow])] {
     let needle = query.trimmingCharacters(in: .whitespaces)
-    let matching = pieces.filter { piece in
+    let matching = catalog.pieces.filter { piece in
         (level == nil || piece.level == level) && (needle.isEmpty || matches(piece, needle))
     }
     let members = Dictionary(grouping: matching.filter { $0.series != nil }) { $0.series ?? "" }
-    let rows = matching.compactMap { piece -> (PieceCategory, ShelfRow)? in
+    let rows = matching.compactMap { piece -> (String, ShelfRow)? in
         guard let name = piece.series, let group = members[name], group.count > 1 else {
-            return (piece.category, .piece(piece))
+            return (piece.section, .piece(piece))
         }
         // The series takes the place of its first member; the others are inside it.
-        return group.first == piece ? (piece.category, .series(PieceSeries(name: name, pieces: group))) : nil
+        return group.first == piece ? (piece.section, .series(PieceSeries(name: name, pieces: group))) : nil
     }
-    return PieceCategory.allCases.compactMap { category in
-        let inCategory = rows.filter { $0.0 == category }.map(\.1)
-        return inCategory.isEmpty ? nil : (category, inCategory)
+    return catalog.sections.compactMap { section in
+        let inSection = rows.filter { $0.0 == section.id }.map(\.1)
+        return inSection.isEmpty ? nil : (section, inSection)
     }
 }
 

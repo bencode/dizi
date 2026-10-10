@@ -3,7 +3,8 @@
 //   npm run library [-- <library-dir>]      default: priv/library, else the examples in docs/examples
 //
 // A library directory holds catalog.json and one <id>.jianpu per piece:
-//   { "pieces": [ { "id": "laoliuban", "title": "老六板", "category": "piece", "level": 2, "lesson": 28 } ] }
+//   { "sections": [ { "id": "pieces", "title": "乐曲" } ],
+//     "pieces": [ { "id": "laoliuban", "title": "老六板", "section": "pieces", "level": 1, "lesson": 28 } ] }
 // Output: apps/ios/Dizi/Library/, laid out like the published library (docs/library.md).
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -15,7 +16,7 @@ const requested = process.argv[2]
 const privateLibrary = join(root, 'priv/library')
 
 const directory = requested ?? (existsSync(join(privateLibrary, 'catalog.json')) ? privateLibrary : null)
-const { built, errors, warnings } = directory === null ? fromExamples(root) : fromLibrary(directory)
+const { sections, built, errors, warnings } = directory === null ? fromExamples(root) : fromLibrary(directory)
 
 for (const message of warnings) console.error(`warning: ${message}`)
 if (errors.length > 0) {
@@ -24,7 +25,11 @@ if (errors.length > 0) {
 }
 rmSync(output, { recursive: true, force: true })
 mkdirSync(join(output, 'scores'), { recursive: true })
-const { scores, catalog } = listing(built, Math.floor(Date.now() / 1000))
+const { scores, catalog } = listing(sections, built, Math.floor(Date.now() / 1000))
 for (const score of scores) writeFileSync(join(output, score.path), score.body)
 writeFileSync(join(output, 'catalog.json'), catalog)
 console.log(`library: ${String(built.length)} pieces from ${directory ?? 'docs/examples'}`)
+for (const section of sections) {
+  const count = built.filter(({ entry }) => entry.section === section.id).length
+  console.log(`  ${section.title}  ${String(count)}`)
+}

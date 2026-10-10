@@ -5,10 +5,12 @@ import Testing
 
 private func catalog(updated: Int, scores: [String], version: Int = 1) throws -> LibraryCatalog {
     let pieces = scores.enumerated().map { index, score in
-        #"{"id":"p\#(index)","title":"曲\#(index)","category":"piece","level":1,"#
+        #"{"id":"p\#(index)","title":"曲\#(index)","section":"pieces","level":1,"#
             + #""key":"1=D","time":"2/4","score":"\#(score)"}"#
     }
-    let json = #"{"irVersion":\#(version),"updated":\#(updated),"pieces":[\#(pieces.joined(separator: ","))]}"#
+    let json =
+        #"{"irVersion":\#(version),"updated":\#(updated),"sections":[{"id":"pieces","title":"乐曲"}],"#
+        + #""pieces":[\#(pieces.joined(separator: ","))]}"#
     return try LibraryCatalog.decode(from: Data(json.utf8))
 }
 
@@ -38,41 +40,50 @@ private func catalog(updated: Int, scores: [String], version: Int = 1) throws ->
     #expect(unusedScores(cached: ["scores/a.json", "scores/old.json"], catalog: latest) == ["scores/old.json"])
 }
 
-private func piece(_ id: String, _ category: String = "etude", level: Int = 1, series: String? = nil) throws
-    -> LibraryPiece
-{
+/// A catalog with three sections, in this order: scales, tonguing, pieces.
+private func library(_ pieces: [String]) throws -> LibraryCatalog {
+    let sections = #"[{"id":"scales","title":"音阶与指法"},{"id":"tonguing","title":"吐音"},{"id":"pieces","title":"乐曲"}]"#
+    let json = #"{"irVersion":1,"updated":1,"sections":\#(sections),"pieces":[\#(pieces.joined(separator: ","))]}"#
+    return try LibraryCatalog.decode(from: Data(json.utf8))
+}
+
+private func piece(_ id: String, _ section: String = "tonguing", level: Int = 1, series: String? = nil) -> String {
     let seriesField = series.map { #","series":"\#($0)""# } ?? ""
-    let json =
-        #"{"id":"\#(id)","title":"曲\#(id)","category":"\#(category)","level":\#(level)\#(seriesField),"#
+    return #"{"id":"\#(id)","title":"曲\#(id)","section":"\#(section)","level":\#(level)\#(seriesField),"#
         + #""key":"1=D","time":"2/4","score":"scores/\#(id).json"}"#
-    return try JSONDecoder().decode(LibraryPiece.self, from: Data(json.utf8))
 }
 
 private func ids(_ rows: [ShelfRow]) -> [String] { rows.map(\.id) }
 
+@Test func rejectsACatalogWithAPieceOutsideItsSections() {
+    #expect(throws: LibraryError.unknownSection("etude")) {
+        try library([piece("a", "etude")])
+    }
+}
+
 @Test func foldsASeriesIntoOneRowAtItsFirstMember() throws {
-    let pieces = [
-        try piece("a"), try piece("shuangtu-1", series: "双吐"), try piece("b"),
-        try piece("shuangtu-2", series: "双吐"),
-    ]
+    let catalog = try library([
+        piece("a"), piece("shuangtu-1", series: "双吐"), piece("b"), piece("shuangtu-2", series: "双吐"),
+    ])
 
-    let shelved = shelf(pieces, level: nil, query: "")
+    let shelved = shelf(catalog, level: nil, query: "")
 
-    #expect(shelved.map(\.0) == [.etude])
+    #expect(shelved.map(\.0.id) == ["tonguing"])
     #expect(ids(shelved[0].1) == ["a", "series:双吐", "b"])
     guard case .series(let series) = shelved[0].1[1] else { return }
     #expect(series.pieces.map(\.id) == ["shuangtu-1", "shuangtu-2"])
 }
 
 @Test func filtersByLevelAndPinyinAndUnfoldsASingleMatch() throws {
-    let pieces = [
-        try piece("molihua", "piece", level: 2), try piece("tones", "tones", level: 1),
-        try piece("shuangtu-1", level: 1, series: "双吐"), try piece("shuangtu-2", level: 2, series: "双吐"),
-    ]
+    let catalog = try library([
+        piece("molihua", "pieces", level: 2), piece("yinjie", "scales", level: 1),
+        piece("shuangtu-1", level: 1, series: "双吐"), piece("shuangtu-2", level: 2, series: "双吐"),
+    ])
 
-    // Empty categories are dropped; a series with one match shows the piece itself.
-    #expect(shelf(pieces, level: .advanced, query: "").map { $0.0 } == [.etude, .piece])
-    #expect(ids(shelf(pieces, level: .advanced, query: "")[0].1) == ["shuangtu-2"])
-    #expect(ids(shelf(pieces, level: nil, query: " MoLi ").flatMap(\.1)) == ["molihua"])
-    #expect(shelf(pieces, level: .beginner, query: "molihua").isEmpty)
+    // Sections keep the catalog's order, empty ones are dropped; a series with one match shows the piece itself.
+    #expect(shelf(catalog, level: nil, query: "").map(\.0.id) == ["scales", "tonguing", "pieces"])
+    #expect(shelf(catalog, level: .advanced, query: "").map(\.0.id) == ["tonguing", "pieces"])
+    #expect(ids(shelf(catalog, level: .advanced, query: "")[0].1) == ["shuangtu-2"])
+    #expect(ids(shelf(catalog, level: nil, query: " MoLi ").flatMap(\.1)) == ["molihua"])
+    #expect(shelf(catalog, level: .beginner, query: "molihua").isEmpty)
 }

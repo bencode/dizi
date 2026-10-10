@@ -14,10 +14,13 @@ upivot-dizi/library/scores/<hash>.json         a compiled score (IR); <hash> = f
 type Catalog = {
   irVersion: 1 // the IR version of every score listed; an app that cannot read it ignores the catalog
   updated: number // Unix seconds when the catalog was built or published
+  // The list's groups in display order (长音与连音 … 乐曲); only those with pieces in this catalog. Content, so a new
+  // group, a new title or a new order needs a publish, not an app release.
+  sections: { id: string; title: string }[]
   pieces: {
     id: string
     title: string
-    category: 'tones' | 'etude' | 'piece'
+    section: string // the id of one of `sections`
     level: 1 | 2 // 1 入门 (the course's part a), 2 进阶 (part b)
     lesson?: number // the course lesson it comes from
     series?: string // pieces sharing it fold into one card: '双吐练习'
@@ -28,6 +31,7 @@ type Catalog = {
 }
 ```
 
+- Within a section, pieces show in catalog order, kept by hand in the source (`priv/library/catalog.json`). A catalog whose piece names no listed section is rejected whole.
 - A changed score gets a new name, so a cached copy is never stale. Old score files stay, so an app holding an older catalog keeps working.
 - Scores are uploaded before the catalog, so the catalog never lists a missing file. A score already on OSS is not uploaded again.
 

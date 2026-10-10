@@ -32,12 +32,12 @@ struct PieceListView: View {
     @ViewBuilder private var content: some View {
         switch library.catalog {
         case .success(let catalog):
-            let sections = shelf(catalog.pieces, level: level, query: query)
+            let sections = shelf(catalog, level: level, query: query)
             List {
                 Group {
                     // Headers are plain rows, not Section headers: those pin while scrolling and pad themselves.
-                    ForEach(sections, id: \.0) { category, rows in
-                        sectionHeader(category.title, count: rows.map(\.pieceCount).reduce(0, +))
+                    ForEach(sections, id: \.0.id) { section, rows in
+                        sectionHeader(section.title, count: rows.map(\.pieceCount).reduce(0, +))
                         ForEach(rows) { row in
                             link(to: row)
                         }
@@ -112,7 +112,7 @@ struct PieceListView: View {
         .accessibilityAddTraits(isOn ? .isSelected : [])
     }
 
-    private func sectionHeader(_ title: LocalizedStringKey, count: Int) -> some View {
+    private func sectionHeader(_ title: String, count: Int) -> some View {
         HStack(alignment: .firstTextBaseline) {
             Text(title).font(song.font(17, bold: true, relativeTo: .headline)).foregroundStyle(Theme.ink)
             Spacer()
@@ -149,16 +149,6 @@ extension View {
         listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
             .listRowInsets(EdgeInsets(top: 4, leading: Theme.Space.gutter, bottom: 4, trailing: Theme.Space.gutter))
-    }
-}
-
-extension PieceCategory {
-    var title: LocalizedStringKey {
-        switch self {
-        case .tones: "长音与音阶"
-        case .etude: "练习曲"
-        case .piece: "乐曲"
-        }
     }
 }
 
