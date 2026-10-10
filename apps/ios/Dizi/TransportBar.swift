@@ -108,6 +108,8 @@ struct Switch: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.subheadline)
+            .lineLimit(1)
+            .fixedSize()
             .padding(.horizontal, 14)
             .frame(minHeight: 36)
             .foregroundStyle(isOn ? Theme.onAccent : Theme.ink)
