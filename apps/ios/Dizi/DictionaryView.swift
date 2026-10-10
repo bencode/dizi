@@ -44,14 +44,13 @@ struct DictionaryView: View {
 struct EntryLink: View {
     let entry: DictionaryEntry
     let fingerings: [Int: NoteFingering]
-    @Environment(SongFont.self) private var song
 
     var body: some View {
         NavigationLink {
             EntryView(entry: entry, fingerings: fingerings)
         } label: {
             VStack(alignment: .leading, spacing: 3) {
-                Text(verbatim: entry.title).font(song.font(17, relativeTo: .body)).foregroundStyle(Theme.ink)
+                Text(verbatim: entry.title).font(.body).foregroundStyle(Theme.ink)
                 // The Chinese names; the pinyin ones are only for search.
                 Text(verbatim: entry.aliases.filter { !$0.allSatisfy(\.isASCII) }.joined(separator: " · "))
                     .font(.footnote).foregroundStyle(Theme.muted)

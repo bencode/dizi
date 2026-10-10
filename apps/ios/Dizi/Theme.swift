@@ -16,7 +16,7 @@ enum Theme {
     /// The edge of an outlined control (an off pill, the stop ring): rule in light, a step brighter in dark.
     static let outline = Color("Outline")
 
-    /// Score digits, tempo, titles: New York, the system serif.
+    /// Score digits and tempo: New York, the system serif.
     static func serif(_ size: CGFloat, weight: Font.Weight = .medium) -> Font {
         .system(size: size, weight: weight, design: .serif)
     }

@@ -4,12 +4,11 @@ import SwiftUI
 /// A card in the list: a tile with the title's first character, the title and its line of facts, the level.
 struct PieceCard: View {
     let row: ShelfRow
-    @Environment(SongFont.self) private var song
 
     var body: some View {
         HStack(spacing: Theme.Space.medium) {
             Text(verbatim: String(title.prefix(1)))
-                .font(song.font(19, relativeTo: .title3))
+                .font(.title3.weight(.medium))
                 .foregroundStyle(Theme.accent)
                 .frame(width: 38, height: 38)
                 .background(Theme.tile, in: RoundedRectangle(cornerRadius: 10))
@@ -17,7 +16,7 @@ struct PieceCard: View {
                 .dynamicTypeSize(...DynamicTypeSize.xxLarge)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 3) {
-                Text(verbatim: title).font(song.font(17, relativeTo: .body)).foregroundStyle(Theme.ink).lineLimit(1)
+                Text(verbatim: title).font(.body).foregroundStyle(Theme.ink).lineLimit(1)
                 meta.font(.footnote).foregroundStyle(Theme.muted)
             }
             Spacer(minLength: 0)

@@ -51,7 +51,6 @@ enum CountIn: Int, CaseIterable, Identifiable {
 struct SettingsView: View {
     @AppStorage("appearance") private var appearance: Appearance = .system
     @AppStorage(CountIn.key) private var countIn: CountIn = .one
-    @Environment(SongFont.self) private var song
 
     var body: some View {
         List {
@@ -90,7 +89,7 @@ struct SettingsView: View {
             .listRowSeparatorTint(Theme.rule)
         } header: {
             Text(title)
-                .font(song.font(17, bold: true, relativeTo: .headline))
+                .font(.headline)
                 .foregroundStyle(Theme.ink)
                 .textCase(nil)
         } footer: {
