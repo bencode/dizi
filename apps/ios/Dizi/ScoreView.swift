@@ -324,7 +324,7 @@ private enum Tone {
     }
 }
 
-/// The pinned line above the score: `1=F  2/4`, the practice tempo `− ♩=72 +`, then 全按作5 and the composer.
+/// The pinned line above the score: `1=F  2/4`, the practice tempo `− ♩=72 +`, then 全按作5.
 struct ScoreHeader: View {
     @Bindable var player: Player
     @State private var dialShown = false
@@ -349,12 +349,11 @@ struct ScoreHeader: View {
         .dynamicTypeSize(...DynamicTypeSize.xxLarge)
     }
 
-    /// With 选段 off: the fingering and the composer. On: what to tap next, then the marked bars.
+    /// With 选段 off: the fingering. On: what to tap next, then the marked bars.
     private var selectionText: Text {
         switch player.selection {
         case .off:
-            let fingering = player.score.header.fingering.map { "全按作\($0.degree)" }
-            return Text(verbatim: [fingering, player.score.meta.composer].compactMap { $0 }.joined(separator: " · "))
+            return Text(verbatim: player.score.header.fingering.map { "全按作\($0.degree)" } ?? "")
         case .picking: return Text("点起始小节")
         case .first: return Text("点结束小节")
         case .passage(let passage) where passage.first == passage.last: return Text("第 \(passage.first + 1) 小节")

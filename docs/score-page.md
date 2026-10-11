@@ -93,6 +93,7 @@ Then interaction: playhead, playback, beat.
 ```text
 ┌─────────────────────────────┐
 │ ‹ 曲目        茉莉花          │
+│               江苏民歌        │  composer or origin (navigation subtitle)
 │ 1=F  2/4  ♩=72               │  header
 ├─────────────────────────────┤
 │                             │
