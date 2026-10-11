@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
-"""Prepares the demo-melody voice from the CC0 dizi pack (freesound.org/people/Hypnotriod/packs/21613).
+"""Prepares the demo-melody voice from the Salamander Grand Piano V3 (CC BY 3.0, Alexander Holm,
+github.com/sfzinstruments/SalamanderGrandPiano).
 
-For each recorded note (the pack's other files are pitch-shifted copies): measure its tuning on the straight
-part, cut attack + a loop taken from the straight part (before the player adds 气震音), crossfade the loop's
-end into its start so the seam is continuous, and write a CAF plus a manifest entry.
+For each kept note (C4 to C8, a sample every minor third, velocity layer 10 of 16): decode the FLAC, mix to mono,
+cut at the onset, keep the first seconds with a fade to silence, even out the loudness across the notes (one RMS
+over the strike, as loud as the clicks), and write a CAF plus a manifest entry.
 
-Usage: tools/prepare-samples.py <pack-directory> <output-directory>
+Usage: tools/prepare-samples.py <flac-directory> <output-directory>
 """
-import glob
 import json
 import os
-import re
 import subprocess
 import sys
 import tempfile
@@ -18,30 +17,25 @@ import wave
 
 import numpy as np
 
-RECORDED = [67, 69, 71, 72, 74, 76, 78, 79, 81, 83, 84, 86, 88, 90, 91]
-LOOP_START, LOOP_END, CROSSFADE = 1.2, 3.0, 0.1  # seconds from the note's onset
+NAMES = ["C", "D#", "F#", "A"]
+KEPT = range(60, 109, 3)  # MIDI C4 … C8
+LAYER = 10
+LENGTH, FADE = 4.0, 0.5  # seconds kept from the onset; the last FADE of them fades out
+STRIKE, LOUDNESS = 0.3, 0.2  # every note's RMS over its first STRIKE seconds
+PEAK = 0.95  # no sample above it: a bright high note is turned down instead
+
+
+def name(midi):
+    return f"{NAMES[(midi % 12) // 3]}{midi // 12 - 1}v{LAYER}.flac"
 
 
 def read(path):
-    with wave.open(path) as w:
-        data = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16).astype(np.float64) / 32768
-        return data, w.getframerate()
-
-
-def fundamental(frame, rate, low=300, high=2200):
-    """YIN: the lag where the signal best repeats, refined between samples."""
-    taus = np.arange(int(rate / high), int(rate / low))
-    half = len(frame) // 2
-    diff = np.array([np.sum((frame[:half] - frame[t:t + half]) ** 2) for t in taus])
-    normalized = diff * taus / np.cumsum(diff)
-    candidates = np.where(normalized < 0.15)[0]
-    i = candidates[0] if len(candidates) else int(np.argmin(normalized))
-    while i + 1 < len(normalized) and normalized[i + 1] < normalized[i]:
-        i += 1
-    if 0 < i < len(normalized) - 1:
-        a, b, c = normalized[i - 1], normalized[i], normalized[i + 1]
-        i = i + 0.5 * (a - c) / (a - 2 * b + c)
-    return rate / (taus[0] + i)
+    """The file as mono samples in -1…1, and its rate."""
+    with tempfile.NamedTemporaryFile(suffix=".wav") as tmp:
+        subprocess.run(["afconvert", "-f", "WAVE", "-d", "LEI16", path, tmp.name], check=True)
+        with wave.open(tmp.name) as w:
+            data = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16).astype(np.float64) / 32768
+            return data.reshape(-1, w.getnchannels()).mean(axis=1), w.getframerate()
 
 
 def onset(x, rate):
@@ -50,31 +44,12 @@ def onset(x, rate):
     return max(0, int(np.argmax(rms > rms.max() * 0.1)) * hop - int(rate * 0.005))
 
 
-def cents_off(x, rate, midi):
-    target = 440 * 2 ** ((midi - 69) / 12)
-    frames = range(int(0.5 * rate), int(LOOP_END * rate), 2048)
-    return float(np.median([1200 * np.log2(fundamental(x[i:i + 2048], rate) / target) for i in frames]))
-
-
-def aligned_end(x, loop_start, target, rate):
-    """The loop end near `target` whose preceding waveform best matches the one before the loop start,
-    so the crossfade joins two signals in phase instead of partly cancelling them."""
-    window, reach = 256, int(rate * 0.01)
-    before_start = x[loop_start - window:loop_start]
-    return min(range(target - reach, target + reach),
-               key=lambda end: float(np.sum((x[end - window:end] - before_start) ** 2)))
-
-
-def prepared(path, midi):
+def prepared(path):
     raw, rate = read(path)
-    x = raw[onset(raw, rate):]
-    loop_start, fade = int(LOOP_START * rate), int(CROSSFADE * rate)
-    loop_end = aligned_end(x, loop_start, int(LOOP_END * rate), rate)
-    out = x[:loop_end].copy()
-    ramp = np.linspace(0, 1, fade)
-    out[loop_end - fade:loop_end] = x[loop_end - fade:loop_end] * (1 - ramp) + x[loop_start - fade:loop_start] * ramp
-    return out, rate, {"midi": midi, "tuneCents": round(cents_off(x, rate, midi), 1),
-                       "loopStart": loop_start, "loopEnd": loop_end}
+    out = raw[onset(raw, rate):][:int(LENGTH * rate)].copy()
+    fade = int(FADE * rate)
+    out[-fade:] *= np.linspace(1, 0, fade)
+    return out, rate
 
 
 def write_caf(samples, rate, path):
@@ -87,16 +62,22 @@ def write_caf(samples, rate, path):
         subprocess.run(["afconvert", "-f", "caff", "-d", "LEI16", tmp.name, path], check=True)
 
 
-def main(pack, output):
+def evened(samples, rate):
+    """The note at the set's loudness, or quieter where that would push a sample past PEAK."""
+    gain = LOUDNESS / np.sqrt(np.mean(samples[:int(STRIKE * rate)] ** 2))
+    return samples * min(gain, PEAK / np.abs(samples).max())
+
+
+def main(source, output):
     entries = []
-    for midi in RECORDED:
-        path = glob.glob(os.path.join(pack, f"*_{midi:03d}_*.wav"))[0]
-        samples, rate, entry = prepared(path, midi)
+    for midi in KEPT:
+        raw, rate = prepared(os.path.join(source, name(midi)))
+        samples = evened(raw, rate)
         write_caf(samples, rate, os.path.join(output, f"{midi}.caf"))
-        entries.append({**entry, "sampleRate": rate})
-        print(f"{midi}: tune {entry['tuneCents']:+.1f} cents, {len(samples) / rate:.2f} s")
+        entries.append({"midi": midi, "sampleRate": rate})
+        print(f"{midi}: {name(midi)}, peak {np.abs(samples).max():.2f}")
     with open(os.path.join(output, "manifest.json"), "w") as f:
-        json.dump({"source": "https://freesound.org/people/Hypnotriod/packs/21613/", "license": "CC0-1.0",
+        json.dump({"source": "https://github.com/sfzinstruments/SalamanderGrandPiano", "license": "CC-BY-3.0",
                    "voices": entries}, f, indent=2)
         f.write("\n")
 

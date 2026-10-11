@@ -2,9 +2,9 @@ import AVFoundation
 import Foundation
 import ScoreKit
 
-/// The demo melody's voice, read from `Samples/dizi-c` in the app bundle (see its README for the source).
+/// The demo melody's voice, read from `Samples/piano` in the app bundle (see its README for the source).
 func bundledVoices() throws -> [Voice] {
-    guard let folder = Bundle.main.url(forResource: "dizi-c", withExtension: nil, subdirectory: "Samples") else {
+    guard let folder = Bundle.main.url(forResource: "piano", withExtension: nil, subdirectory: "Samples") else {
         throw VoicesError.missing
     }
     let manifest = try JSONDecoder().decode(
@@ -12,7 +12,7 @@ func bundledVoices() throws -> [Voice] {
     return try manifest.voices.map { entry in
         Voice(
             samples: try samples(of: folder.appending(path: "\(entry.midi).caf")), sampleRate: entry.sampleRate,
-            midi: entry.midi, tuneCents: entry.tuneCents, loop: entry.loopStart..<entry.loopEnd)
+            midi: entry.midi)
     }
 }
 
@@ -24,9 +24,6 @@ enum VoicesError: Error {
 private struct Manifest: Decodable {
     struct Entry: Decodable {
         let midi: Int
-        let tuneCents: Double
-        let loopStart: Int
-        let loopEnd: Int
         let sampleRate: Double
     }
 

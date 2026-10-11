@@ -56,6 +56,12 @@ struct SettingsView: View {
         List {
             choices("外观", selection: $appearance)
             choices("预备拍", selection: $countIn, footer: "关掉节拍时，预备拍照样出声")
+            // The CC BY credit of the demo's piano samples (Samples/piano).
+            Section {
+            } footer: {
+                Text("示范的钢琴音色来自 Salamander Grand Piano（Alexander Holm），依 CC BY 3.0 使用")
+                    .font(.footnote).foregroundStyle(Theme.muted)
+            }
         }
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
