@@ -23,11 +23,20 @@ struct PieceDetailView: View {
                     player.pause()
                 }
             }
+            // Hands are on the flute: the screen stays on while a run is playing or paused.
+            .onChange(of: keepsAwake, initial: true) { _, awake in UIApplication.shared.isIdleTimerDisabled = awake }
             .onDisappear {
+                UIApplication.shared.isIdleTimerDisabled = false
                 if case .success(let player) = loaded {
                     player.stop()
                 }
             }
+    }
+
+    private var keepsAwake: Bool {
+        guard case .success(let player) = loaded else { return false }
+        if case .stopped = player.transport { return false }
+        return true
     }
 
     @ViewBuilder private var content: some View {
