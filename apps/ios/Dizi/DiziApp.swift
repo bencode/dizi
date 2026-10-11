@@ -3,6 +3,8 @@ import SwiftUI
 @main
 struct DiziApp: App {
     @State private var library = LibraryStore()
+    @State private var personal = PersonalLibrary()
+    @Environment(\.scenePhase) private var scenePhase
     @AppStorage("appearance") private var appearance: Appearance = .system
 
     init() {
@@ -22,11 +24,18 @@ struct DiziApp: App {
             // activates search gets that place.
             .tabViewSearchActivation(.searchTabSelection)
             .environment(library)
+            .environment(personal)
             .tint(Theme.accent)
             // On the tabs, not a list: they run once, and a list's tasks restart each time a piece is closed.
             .task {
                 library.load()
                 await library.refresh()
+            }
+            // 我的曲谱 are edited in the Files app, so they are read again whenever the app comes back.
+            .onChange(of: scenePhase, initial: true) { _, phase in
+                if phase == .active {
+                    personal.reload()
+                }
             }
             .task { apply(appearance) }
             .onChange(of: appearance) { _, chosen in apply(chosen) }

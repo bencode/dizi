@@ -411,7 +411,7 @@ struct ScoreHeader: View {
 }
 
 /// `1=F  2/4`
-private func headerText(_ score: Score) -> String {
+func headerText(_ score: Score) -> String {
     let key = score.header.key
     let accidental = key.accidental.map { $0 == .sharp ? "♯" : "♭" } ?? ""
     let parts: [String?] = [

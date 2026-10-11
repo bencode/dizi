@@ -10,7 +10,7 @@ Run `scripts/check.sh` after every change. Work is done only when it prints `All
 | --- | --- | --- |
 | Format | `swift-format` (bundled with Xcode), config `.swift-format` | any formatting difference; fix with `xcrun swift-format format --in-place <files>` |
 | Lint | SwiftLint, config `.swiftlint.yml` | errors; warnings (e.g. a function over 40 lines, a file over 200) call for a second look, not a mechanical split |
-| Library | `npm run library`: compiles `priv/library` (or, without it, `docs/examples`) into `apps/ios/Dizi/Library/` | a catalog problem or a score with errors |
+| Library | `npm run library`: compiles `priv/library` (or, without it, `docs/examples`) into `apps/ios/Dizi/Library/`; `npm run parser:bundle`: bundles the parser into `apps/ios/Dizi/Parser/parser.js` for 我的曲谱 | a catalog problem or a score with errors |
 | Project | XcodeGen | `apps/ios/Dizi.xcodeproj` out of date with `apps/ios/project.yml` |
 | Parser and tools | `npm run --workspace packages/parser check`: TypeScript strict, ESLint (strict type-checked), Prettier, Vitest; `npm run check:tools`: the same for `tools/*.ts` | type errors, lint or format issues, failing tests |
 | Score examples | the parser recompiles `docs/examples/molihua.jianpu` | `docs/examples/molihua.ir.json` differs from the compiled output |
@@ -36,6 +36,7 @@ Programs are data flowing through transformations; effects stay at the edge. Sou
 
 - Layout: `apps/` holds runnable products (`apps/ios`; later server, web, android); `packages/` holds shared libraries in any language (`packages/scorekit` Swift, `packages/parser` TypeScript); `tools/` build and one-off scripts; `docs/examples/` the spec's example score and its IR. TypeScript packages are npm workspaces listed explicitly in the root `package.json`.
 - `packages/parser` compiles score text ([format](docs/score-format.md)) into the [IR](docs/score-ir.md); Node 24 runs its `.ts` files directly, no build step. `node packages/parser/src/cli.ts <file>` prints the IR or the diagnostics.
+- The app compiles personal scores (我的曲谱, [how](docs/library.md#personal-scores-我的曲谱)) with the same parser: `npm run parser:bundle` (esbuild) writes it to `apps/ios/Dizi/Parser/parser.js` (gitignored), run in JavaScriptCore by ScoreKit's `JianpuCompiler`. Run it after cloning and after changing the parser.
 
 - `apps/ios/project.yml` defines the Xcode project; never edit `apps/ios/Dizi.xcodeproj` by hand. Run `xcodegen generate` in `apps/ios/` after changing the spec, and commit both.
 - `packages/scorekit` holds the logic that needs no UI: the [score IR](docs/score-ir.md) model and the score layout. Test it with Swift Testing on the Mac; it is fast and needs no simulator. The app draws what ScoreKit computes.

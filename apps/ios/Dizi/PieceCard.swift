@@ -6,27 +6,8 @@ struct PieceCard: View {
     let row: ShelfRow
 
     var body: some View {
-        HStack(spacing: Theme.Space.medium) {
-            Text(verbatim: String(title.prefix(1)))
-                .font(.title3.weight(.medium))
-                .foregroundStyle(Theme.accent)
-                .frame(width: 38, height: 38)
-                .background(Theme.tile, in: RoundedRectangle(cornerRadius: 10))
-                // The glyph fills a fixed tile.
-                .dynamicTypeSize(...DynamicTypeSize.xxLarge)
-                .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(verbatim: title).font(.body).foregroundStyle(Theme.ink).lineLimit(1)
-                meta.font(.footnote).foregroundStyle(Theme.muted)
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(.vertical, Theme.Space.medium)
-        .padding(.horizontal, 14)
-        .background(Theme.raised, in: RoundedRectangle(cornerRadius: 14))
-        .overlay { RoundedRectangle(cornerRadius: 14).strokeBorder(Theme.rule, lineWidth: 1) }
-        .accessibilityElement(children: .combine)
-        .accessibilityValue(Text(levelTitle(level)))
+        CardLayout(title: title) { meta }
+            .accessibilityValue(Text(levelTitle(level)))
     }
 
     private var title: String {
@@ -74,6 +55,35 @@ struct PieceCard: View {
         }
     }
 
+}
+
+/// A card's look, shared by library and personal scores: the tile, the title, a line below it.
+struct CardLayout<Meta: View>: View {
+    let title: String
+    @ViewBuilder var meta: Meta
+
+    var body: some View {
+        HStack(spacing: Theme.Space.medium) {
+            Text(verbatim: String(title.prefix(1)))
+                .font(.title3.weight(.medium))
+                .foregroundStyle(Theme.accent)
+                .frame(width: 38, height: 38)
+                .background(Theme.tile, in: RoundedRectangle(cornerRadius: 10))
+                // The glyph fills a fixed tile.
+                .dynamicTypeSize(...DynamicTypeSize.xxLarge)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(verbatim: title).font(.body).foregroundStyle(Theme.ink).lineLimit(1)
+                meta.font(.footnote).foregroundStyle(Theme.muted)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, Theme.Space.medium)
+        .padding(.horizontal, 14)
+        .background(Theme.raised, in: RoundedRectangle(cornerRadius: 14))
+        .overlay { RoundedRectangle(cornerRadius: 14).strokeBorder(Theme.rule, lineWidth: 1) }
+        .accessibilityElement(children: .combine)
+    }
 }
 
 /// The pieces of one series, as cards.

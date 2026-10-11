@@ -9,9 +9,11 @@
 /* Begin PBXBuildFile section */
 		012CC5E161A08809FF4437FF /* RunAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB92B401D832BB364EDD2858 /* RunAudio.swift */; };
 		10F94D349285BC70691F27B3 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = F2AF968099F1CC1C2518E6DA /* Localizable.xcstrings */; };
+		18049177FE7742CC9CE4563C /* PersonalLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77782AE9AFE07694AAC2031F /* PersonalLibrary.swift */; };
 		19A7AB3A6A9B33437E1CA0F7 /* ScoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E825365B13D701E585670E85 /* ScoreView.swift */; };
 		1C82DAB466F726D3BC86ACBC /* PieceListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D9FBF8D0C34328E8A93612 /* PieceListView.swift */; };
 		28DC3C1319B643481CE61A0B /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2F03512C3298090F9FCB53 /* Player.swift */; };
+		2D8F71BBE1F07612352EFC17 /* PersonalShelf.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50442017F6C6CB6210321AF /* PersonalShelf.swift */; };
 		31FE4B35E75F4F98B7846937 /* Library in Resources */ = {isa = PBXBuildFile; fileRef = 950D485C1F8F347121E6746A /* Library */; };
 		3E699F796C095BA3FD05AF50 /* Voices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DDF2829D5D3185F122237C4 /* Voices.swift */; };
 		432E2FAF7F8AC03D762AFCA7 /* TransportBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */; };
@@ -19,6 +21,7 @@
 		5FB89F6AE1E2CE42078FF548 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19975A9A20809DA1FDD4886E /* SearchView.swift */; };
 		694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7DDEBD62C1197359510C59D /* DiziApp.swift */; };
 		71BBD1C6819A7DF3B13D1E24 /* TempoDial.swift in Sources */ = {isa = PBXBuildFile; fileRef = 800EF1DC11734024252ACB56 /* TempoDial.swift */; };
+		77D7F1A9EEB7565EDE84A6CA /* Parser in Resources */ = {isa = PBXBuildFile; fileRef = 9E51EF45BEF0F0A09FE9705B /* Parser */; };
 		804EC165DEA0995AB5F6270C /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DB234CECED42DB96C159D214 /* AppIcon.icon */; };
 		9C80785EB6CB99C263A4033E /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7FB92541A5F848689241E1 /* Theme.swift */; };
 		B0494E44A5D2F65AC2868249 /* DictionaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8686E35C9F6777DCD047DB8A /* DictionaryView.swift */; };
@@ -52,6 +55,7 @@
 		2C6B3DF07D1A77E660CB3E30 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		33A4F41FB44B5B2F0B205D89 /* Samples */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Samples; path = Dizi/Samples; sourceTree = SOURCE_ROOT; };
 		3A7FB92541A5F848689241E1 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		77782AE9AFE07694AAC2031F /* PersonalLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalLibrary.swift; sourceTree = "<group>"; };
 		79F6644CEF354FA4D521A9BA /* LibraryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryStore.swift; sourceTree = "<group>"; };
 		800EF1DC11734024252ACB56 /* TempoDial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempoDial.swift; sourceTree = "<group>"; };
 		86587596978C7D7A172CA03E /* DiziUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DiziUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -59,9 +63,11 @@
 		89D7C1647EEC53579F92423C /* Dizi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Dizi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		940FD75DFA2AF4C90BB71B79 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		950D485C1F8F347121E6746A /* Library */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Library; path = Dizi/Library; sourceTree = SOURCE_ROOT; };
+		9E51EF45BEF0F0A09FE9705B /* Parser */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Parser; path = Dizi/Parser; sourceTree = SOURCE_ROOT; };
 		A5D9FBF8D0C34328E8A93612 /* PieceListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceListView.swift; sourceTree = "<group>"; };
 		AB92B401D832BB364EDD2858 /* RunAudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunAudio.swift; sourceTree = "<group>"; };
 		AD2F9D0A9FA611EE51B5E630 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		D50442017F6C6CB6210321AF /* PersonalShelf.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalShelf.swift; sourceTree = "<group>"; };
 		DB234CECED42DB96C159D214 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		E825365B13D701E585670E85 /* ScoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreView.swift; sourceTree = "<group>"; };
 		EB1C17AA2689870EAD830B9C /* scorekit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scorekit; path = ../../packages/scorekit; sourceTree = SOURCE_ROOT; };
@@ -94,6 +100,7 @@
 			isa = PBXGroup;
 			children = (
 				950D485C1F8F347121E6746A /* Library */,
+				9E51EF45BEF0F0A09FE9705B /* Parser */,
 				33A4F41FB44B5B2F0B205D89 /* Samples */,
 				91B23B00863E128D038FF620 /* Dizi */,
 				9A08F97B0119846354B5A61D /* DiziUITests */,
@@ -112,6 +119,8 @@
 				2C6B3DF07D1A77E660CB3E30 /* Info.plist */,
 				79F6644CEF354FA4D521A9BA /* LibraryStore.swift */,
 				F2AF968099F1CC1C2518E6DA /* Localizable.xcstrings */,
+				77782AE9AFE07694AAC2031F /* PersonalLibrary.swift */,
+				D50442017F6C6CB6210321AF /* PersonalShelf.swift */,
 				035DC4279B86CF3EF6B6B6E2 /* PieceCard.swift */,
 				1657F2512FB10BB5DB9A727B /* PieceDetailView.swift */,
 				A5D9FBF8D0C34328E8A93612 /* PieceListView.swift */,
@@ -234,6 +243,7 @@
 				C50C666DD7C22E635F515C10 /* Assets.xcassets in Resources */,
 				31FE4B35E75F4F98B7846937 /* Library in Resources */,
 				10F94D349285BC70691F27B3 /* Localizable.xcstrings in Resources */,
+				77D7F1A9EEB7565EDE84A6CA /* Parser in Resources */,
 				E188A2E7A8091A2A88D0CAE9 /* Samples in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -248,6 +258,8 @@
 				B0494E44A5D2F65AC2868249 /* DictionaryView.swift in Sources */,
 				694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */,
 				C4CDA40015A7B9D147D4FC20 /* LibraryStore.swift in Sources */,
+				18049177FE7742CC9CE4563C /* PersonalLibrary.swift in Sources */,
+				2D8F71BBE1F07612352EFC17 /* PersonalShelf.swift in Sources */,
 				CCA985315C19D0AAD75388D1 /* PieceCard.swift in Sources */,
 				E4E731720DFB69589538B60F /* PieceDetailView.swift in Sources */,
 				1C82DAB466F726D3BC86ACBC /* PieceListView.swift in Sources */,
