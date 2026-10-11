@@ -47,6 +47,8 @@ struct PieceDetailView: View {
                 .safeAreaBar(edge: .top) { ScoreHeader(player: player) }
                 .safeAreaBar(edge: .bottom) { TransportBar(player: player) }
                 .background(Theme.ground)
+                // The composer or origin under the title, as printed scores have it; an empty one shows nothing.
+                .navigationSubtitle(Text(verbatim: player.score.meta.composer ?? ""))
         case .failure:
             unavailable("曲谱无法打开", detail: "这首曲谱的数据有误，请先练习其他曲目")
         case nil:
