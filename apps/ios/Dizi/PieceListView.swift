@@ -34,12 +34,17 @@ struct PieceListView: View {
     @ViewBuilder private var content: some View {
         switch library.catalog {
         case .success(let catalog):
-            ShelfList(sections: shelf(catalog, kind: kind, level: level, query: ""))
-                .animation(.easeInOut(duration: 0.2), value: level)
-                // Pinned under the title, so the level can change anywhere in the list.
-                .safeAreaBar(edge: .top) {
-                    levels.frame(maxWidth: .infinity, alignment: .leading)
+            ShelfList(sections: shelf(catalog, kind: kind, level: level, query: "")) {
+                // Personal scores have no level, so they show under 全部 only.
+                if kind == .repertoire, level == nil {
+                    PersonalShelf()
                 }
+            }
+            .animation(.easeInOut(duration: 0.2), value: level)
+            // Pinned under the title, so the level can change anywhere in the list.
+            .safeAreaBar(edge: .top) {
+                levels.frame(maxWidth: .infinity, alignment: .leading)
+            }
         case .failure:
             unavailable("曲库无法打开", detail: "请稍后重新打开应用")
         case nil:
@@ -159,10 +164,13 @@ extension ShelfRow {
 }
 
 extension View {
-    /// Where a card leads, on each tab's stack: a piece to its score, a series to its own list.
+    /// Where a card leads, on each tab's stack: a piece (library or personal) to its score, a series to its own list.
     func libraryDestinations() -> some View {
         navigationDestination(for: LibraryPiece.self) { piece in
-            PieceDetailView(piece: piece)
+            PieceDetailView(source: .library(piece))
+        }
+        .navigationDestination(for: PersonalPiece.self) { piece in
+            PieceDetailView(source: .personal(piece))
         }
         .navigationDestination(for: PieceSeries.self) { series in
             SeriesView(series: series)

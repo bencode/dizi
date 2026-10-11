@@ -4,19 +4,25 @@ import SwiftUI
 
 private let logger = Logger(subsystem: "io.upivot.dizi", category: "score")
 
+/// What a score page shows: a library piece, loaded from the library, or a personal score, already compiled.
+enum PieceSource: Hashable {
+    case library(LibraryPiece)
+    case personal(PersonalPiece)
+}
+
 struct PieceDetailView: View {
-    let piece: LibraryPiece
+    let source: PieceSource
     @Environment(LibraryStore.self) private var library
     @State private var loaded: Result<Player, any Error>?
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         content
-            .navigationTitle(piece.title)
+            .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             // The transport bar owns the bottom of the page.
             .toolbar(.hidden, for: .tabBar)
-            .task { loaded = loadScore(piece, from: library).map { Player(pieceID: piece.id, score: $0) } }
+            .task { loaded = score.map { Player(pieceID: playerID, score: $0) } }
             .onChange(of: scenePhase) { _, phase in
                 // Leaving the app (or a phone call) stops the audio; pause so the page is not left running.
                 if phase != .active, case .success(let player) = loaded {
@@ -31,6 +37,28 @@ struct PieceDetailView: View {
                     player.stop()
                 }
             }
+    }
+
+    private var title: String {
+        switch source {
+        case .library(let piece): piece.title
+        case .personal(let piece): piece.title
+        }
+    }
+
+    /// Keys the saved tempo; personal names are kept apart from library ids.
+    private var playerID: String {
+        switch source {
+        case .library(let piece): piece.id
+        case .personal(let piece): "personal.\(piece.name)"
+        }
+    }
+
+    private var score: Result<Score, any Error> {
+        switch source {
+        case .library(let piece): loadScore(piece, from: library)
+        case .personal(let piece): .success(piece.score)
+        }
     }
 
     private var keepsAwake: Bool {

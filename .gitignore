@@ -8,3 +8,4 @@ xcuserdata/
 .build/
 node_modules/
 apps/ios/Dizi/Library/
+apps/ios/Dizi/Parser/

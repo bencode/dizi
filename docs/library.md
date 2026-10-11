@@ -68,6 +68,15 @@ type Catalog = {
 
 The cache is `Application Support/Library/` (excluded from backup), not `Caches/`, so the library stays available offline. A fresh development build is newer than the last publish, so locally edited scores show until a newer catalog is published.
 
+## Personal scores (我的曲谱)
+
+Scores the player keeps for themselves, such as copyrighted songs from a course, never enter this library and never leave the phone.
+
+- **Where.** They are `.jianpu` files in the app's Documents folder, which the Files app shows as 我的 iPhone › 鱼米竹笛. They arrive by AirDrop, the Mac's Finder, or the Files app.
+- **When they are read.** The app reads and compiles every file again at launch and each time it comes back to the foreground, so an edit in Files shows on return.
+- **How they are compiled.** On the phone, by the same parser as the tools: `npm run parser:bundle` bundles `packages/parser` into `apps/ios/Dizi/Parser/parser.js` (gitignored), and the app runs it in JavaScriptCore.
+- **What the player sees.** They are listed first on the 乐曲 tab, under 全部. A file that does not compile shows its first error, `第 12 行：…`, instead of opening.
+
 ## What is published
 
 - A piece is uploaded only when its entry in `priv/library/catalog.json` has `"publish": true`. Without it, the piece stays private: it is bundled in development builds but never uploaded.

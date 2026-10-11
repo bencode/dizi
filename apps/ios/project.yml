@@ -18,12 +18,16 @@ targets:
     platform: iOS
     sources:
       - path: Dizi
-        excludes: ["Samples/**", "Library/**"]
+        excludes: ["Samples/**", "Library/**", "Parser/**"]
       - path: Dizi/Samples
         type: folder
         buildPhase: resources
       # Built by `npm run library` (not committed): the catalog and the compiled scores.
       - path: Dizi/Library
+        type: folder
+        buildPhase: resources
+      # Built by `npm run parser:bundle` (not committed): the score parser, run on the phone for 我的曲谱.
+      - path: Dizi/Parser
         type: folder
         buildPhase: resources
     # The generated launch screen, on the 宣纸 ground instead of the system background.
@@ -34,6 +38,9 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         UILaunchScreen:
           UIColorName: Ground
+        # 我的曲谱: Documents shows in the Files app, where the player puts their score files.
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: true
     dependencies:
       - package: ScoreKit
     scheme:
