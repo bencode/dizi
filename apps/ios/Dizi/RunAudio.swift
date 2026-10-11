@@ -4,11 +4,28 @@ import ScoreKit
 
 private let logger = Logger(subsystem: "io.upivot.dizi", category: "audio")
 
-/// The audio edge of 走谱: plays a run's clicks and, optionally, its demo melody, both sample-accurately from
-/// one start time, and reports the time since the run began, which is the clock the cursor follows.
+/// The audio edge of 走谱: plays a run's clicks and, optionally, its demo melody, sample-accurately on one clock,
+/// and reports the time since the run began, which is the clock the cursor follows. Sound is scheduled only a
+/// moment ahead, so what has not been scheduled yet can be replaced: a tempo change from a bar line on.
 @MainActor
 final class RunAudio {
     static let sampleRate = 44_100.0
+    /// How far ahead of the clock sound is scheduled; a change takes effect after it at the earliest.
+    private static let horizon = 0.5
+
+    /// What a run sounds, in seconds from its own time 0: its clicks (the count-in always sounds; the music's
+    /// clicks only when `musicClicksAudible`) and, optionally, its melody rendered at `sampleRate`.
+    struct Material {
+        let clicks: [Click]
+        let musicClicksAudible: Bool
+        let melody: [Float]?
+    }
+
+    /// Material sounding from `start` (seconds of the run's clock) until the next source's start.
+    private struct Source {
+        let start: Double
+        let material: Material
+    }
 
     private let engine = AVAudioEngine()
     private let clickNode = AVAudioPlayerNode()
@@ -20,6 +37,10 @@ final class RunAudio {
     private let silentBuffer: AVAudioPCMBuffer
     /// Host time of the run's time 0, while a run is scheduled.
     private var startHostTime: UInt64?
+    private var sources: [Source] = []
+    /// The frame up to which sound has been scheduled.
+    private var scheduledFrame = 0
+    private var feeder: Task<Void, Never>?
 
     init() throws {
         guard let format = AVAudioFormat(standardFormatWithSampleRate: Self.sampleRate, channels: 1),
@@ -37,10 +58,11 @@ final class RunAudio {
         }
     }
 
-    /// Starts a run; time 0 is the first click. The count-in always sounds; the music's clicks sound when
-    /// `musicClicksAudible`, and are silent otherwise but still drive the clock. The melody, rendered at
-    /// `sampleRate` from time 0, starts on the same sample.
-    func start(_ clicks: [Click], musicClicksAudible: Bool, melody: [Float]?) throws {
+    /// Seconds of the run's clock up to which sound is scheduled: a change can start here at the earliest.
+    var scheduledUntil: Double { Double(scheduledFrame) / format.sampleRate }
+
+    /// Starts a run; time 0 is the first click.
+    func start(_ material: Material) throws {
         try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
         try AVAudioSession.sharedInstance().setActive(true)
         if !engine.isRunning {
@@ -48,35 +70,94 @@ final class RunAudio {
         }
         clickNode.stop()
         melodyNode.stop()
-        for click in clicks {
-            let when = AVAudioTime(
-                sampleTime: AVAudioFramePosition(click.time * format.sampleRate), atRate: format.sampleRate)
-            let sound =
-                click.countIn || musicClicksAudible ? (click.accent ? accentBuffer : beatBuffer) : silentBuffer
-            clickNode.scheduleBuffer(sound, at: when)
-        }
-        if let melody, let melodyBuffer = buffer(melody, format: format) {
-            melodyNode.scheduleBuffer(melodyBuffer, at: AVAudioTime(sampleTime: 0, atRate: format.sampleRate))
-        }
+        sources = [Source(start: 0, material: material)]
+        scheduledFrame = 0
         // Both nodes start on one host time a moment ahead, so they cannot drift apart.
         let startTime = AVAudioTime(hostTime: mach_absolute_time() + AVAudioTime.hostTime(forSeconds: 0.05))
+        startHostTime = startTime.hostTime
+        feed()
         clickNode.play(at: startTime)
         melodyNode.play(at: startTime)
-        startHostTime = startTime.hostTime
+        feeder = Task { [weak self] in
+            while true {
+                do {
+                    try await Task.sleep(for: .milliseconds(100))
+                } catch is CancellationError {
+                    return
+                } catch {
+                    logger.error("Audio feeder stopped: \(error, privacy: .public)")
+                    return
+                }
+                self?.feed()
+            }
+        }
+    }
+
+    /// Sounds `material` from `start` (at or after `scheduledUntil`) instead of what was to come; a change that
+    /// has not begun is dropped.
+    func replace(from start: Double, with material: Material) {
+        sources = sources.filter { $0.start < scheduledUntil } + [Source(start: start, material: material)]
     }
 
     /// Ends the run and gives the audio back: the hardware (pause() would keep the IO thread running) and the
     /// session, so music that 走谱 interrupted may resume.
     func stop() {
+        feeder?.cancel()
+        feeder = nil
         clickNode.stop()
         melodyNode.stop()
         engine.stop()
         startHostTime = nil
+        sources = []
         do {
             try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         } catch {
             logger.error("Cannot release the audio session: \(error, privacy: .public)")
         }
+    }
+
+    /// Schedules every source's sound from `scheduledFrame` up to the horizon ahead of the clock, each source
+    /// within its own stretch of time, at exact frames on the nodes' shared timeline.
+    private func feed() {
+        let rate = format.sampleRate
+        let target = Int(((time ?? 0) + Self.horizon) * rate)
+        guard target > scheduledFrame else { return }
+        let starts = sources.map { Int(($0.start * rate).rounded()) }
+        for (index, source) in sources.enumerated() {
+            let ends = index + 1 < starts.count ? starts[index + 1] : Int.max
+            // A source the clock has passed, or one still to come, has no window: lower ≥ upper.
+            let (lower, upper) = (max(scheduledFrame, starts[index]), min(target, ends))
+            guard lower < upper else { continue }
+            schedule(source.material, offset: starts[index], window: lower..<upper, cut: ends)
+        }
+        scheduledFrame = target
+    }
+
+    /// The part of `material` (whose time 0 is frame `offset`) falling in `window`; its melody fades out just
+    /// before `cut`, where the next source takes over.
+    private func schedule(_ material: Material, offset: Int, window: Range<Int>, cut: Int) {
+        let rate = format.sampleRate
+        let fade = Int(0.005 * rate)
+        for click in material.clicks {
+            let frame = offset + Int((click.time * rate).rounded())
+            // The next source sounds the bar line's click itself; rounding must not sound it twice.
+            guard window.contains(frame), frame < cut - fade else { continue }
+            let sound =
+                click.countIn || material.musicClicksAudible
+                ? (click.accent ? accentBuffer : beatBuffer) : silentBuffer
+            clickNode.scheduleBuffer(sound, at: AVAudioTime(sampleTime: AVAudioFramePosition(frame), atRate: rate))
+        }
+        guard let melody = material.melody else { return }
+        let (lower, upper) = (max(window.lowerBound - offset, 0), min(window.upperBound - offset, melody.count))
+        guard lower < upper else { return }  // the melody has ended
+        let slice = lower..<upper
+        let samples = slice.map { index in
+            let left = cut - (offset + index)
+            return left < fade ? melody[index] * Float(max(left, 0)) / Float(fade) : melody[index]
+        }
+        guard let part = buffer(samples, format: format) else { return }
+        melodyNode.scheduleBuffer(
+            part, at: AVAudioTime(sampleTime: AVAudioFramePosition(offset + slice.lowerBound), atRate: rate))
     }
 
     /// Seconds since time 0 of the current run, from the render clock; when the engine has stopped under the run

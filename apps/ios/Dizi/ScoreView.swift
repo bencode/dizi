@@ -327,14 +327,13 @@ private enum Tone {
 /// The pinned line above the score: `1=F  2/4`, the practice tempo `− ♩=72 +`, then 全按作5 and the composer.
 struct ScoreHeader: View {
     @Bindable var player: Player
+    @State private var dialShown = false
 
     var body: some View {
         HStack(spacing: 0) {
             Text(verbatim: headerText(player.score))
                 .padding(.trailing, Theme.Space.small)
             tempo
-                .disabled(player.isRunning)
-                .opacity(player.isRunning ? 0.4 : 1)
             Spacer(minLength: Theme.Space.small)
             selectionText.lineLimit(1)
             Button("选段") { player.toggleSelection() }
@@ -371,11 +370,22 @@ struct ScoreHeader: View {
                 Label("减慢", systemImage: "minus").frame(width: 44, height: 44).contentShape(Rectangle())
             }
             .disabled(player.bpm <= Player.tempoRange.lowerBound)
-            Text(verbatim: "\(beatSymbol(player.score.startingTempo?.beat))\(player.bpm)")
-                .font(Theme.serif(15))
-                .monospacedDigit()
-                .foregroundStyle(Theme.ink)
-                .fixedSize()
+            // The value opens the dial, for large changes.
+            Button {
+                dialShown = true
+            } label: {
+                Text(verbatim: "\(beatSymbol(player.score.startingTempo?.beat))\(player.bpm)")
+                    .font(Theme.serif(15))
+                    .monospacedDigit()
+                    .foregroundStyle(Theme.ink)
+                    .fixedSize()
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .popover(isPresented: $dialShown) {
+                TempoDial(player: player).presentationCompactAdaptation(.popover)
+            }
             Button {
                 player.bpm = min(Player.tempoRange.upperBound, player.bpm + 1)
             } label: {
@@ -392,8 +402,6 @@ struct ScoreHeader: View {
         .accessibilityLabel("速度")
         .accessibilityValue("每分钟 \(player.bpm) 拍")
         .accessibilityAdjustableAction { direction in
-            // Locked while playing, as the buttons are.
-            guard !player.isRunning else { return }
             switch direction {
             case .increment: player.bpm = min(Player.tempoRange.upperBound, player.bpm + 1)
             case .decrement: player.bpm = max(Player.tempoRange.lowerBound, player.bpm - 1)
@@ -420,6 +428,6 @@ private func timeText(_ time: TimeSignature) -> String? {
 }
 
 /// `♩=` for a quarter-note beat; an unusual beat shows the number alone rather than a wrong note symbol.
-private func beatSymbol(_ beat: Int?) -> String {
+func beatSymbol(_ beat: Int?) -> String {
     [240: "♪=", 480: "♩=", 720: "♩.=", 960: "𝅗𝅥="][beat ?? 480] ?? ""
 }

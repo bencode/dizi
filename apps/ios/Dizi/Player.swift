@@ -12,10 +12,18 @@ final class Player {
     let score: Score
     let timeline: Timeline
     private(set) var transport: Transport = .stopped(start: 0)
-    private var run: Run?
+    private var performance: Performance?
+    /// The practice tempo. While running, a change applies from a coming bar line, once the player stops changing it.
     var bpm: Int {
-        didSet { UserDefaults.standard.set(bpm, forKey: tempoKey) }
+        didSet {
+            UserDefaults.standard.set(bpm, forKey: tempoKey)
+            if isRunning, bpm != oldValue {
+                retimeSoon()
+            }
+        }
     }
+    /// 原速: the written tempo (the slower end of a range), or 72 for a score without one.
+    let writtenBPM: Int
     var clickOn = true
     /// 示范: the app plays the melody too.
     var demoOn = false
@@ -27,6 +35,8 @@ final class Player {
     private let audio: RunAudio?
     private let voices: [Voice]
     private var finishTask: Task<Void, Never>?
+    /// A tempo change waiting for the player to stop changing it.
+    private var retimeTask: Task<Void, Never>?
     /// Pauses the run when the system stops its audio; lives as long as the run.
     private var interruptionTask: Task<Void, Never>?
 
@@ -37,7 +47,8 @@ final class Player {
         beat = written?.beat ?? 480
         tempoKey = "tempo.\(pieceID)"
         let saved = UserDefaults.standard.integer(forKey: tempoKey)
-        bpm = saved > 0 ? saved : written.flatMap(defaultBPM) ?? 72
+        writtenBPM = written.flatMap(defaultBPM) ?? 72
+        bpm = saved > 0 ? saved : writtenBPM
         audio = {
             do {
                 return try RunAudio()
@@ -71,13 +82,13 @@ final class Player {
 
     /// Where the run is now, read from the audio clock.
     var position: Run.Position? {
-        guard let run, let time = audio?.time else { return nil }
-        return run.position(at: time, in: timeline)
+        guard let performance, let time = audio?.time else { return nil }
+        return performance.position(at: time, in: timeline)
     }
 
     var beatInBar: (index: Int, count: Int)? {
-        guard let run, let time = audio?.time else { return nil }
-        return run.beat(at: time, in: timeline)
+        guard let performance, let time = audio?.time else { return nil }
+        return performance.beat(at: time, in: timeline)
     }
 
     /// Where the playhead stands: the sounding entry and how much of it has passed while running,
@@ -138,7 +149,7 @@ final class Player {
     /// Pauses a running run; does nothing otherwise (e.g. when the app leaves the screen).
     func pause() {
         guard isRunning else { return }
-        let entry = sweep?.entry ?? run?.from ?? 0
+        let entry = sweep?.entry ?? performance?.segments[0].run.from ?? 0
         halt()
         transport = transport.next(.pause(entry: entry))
     }
@@ -151,20 +162,67 @@ final class Player {
             from: from, until: passage?.until, countInBars: CountIn.chosen.rawValue,
             tempo: Tempo(bpm: Double(bpm), beat: beat))
         do {
-            let melody =
-                demoOn && canDemo
-                ? melodySamples(run.melody(timeline, score: score), voices: voices, sampleRate: RunAudio.sampleRate)
-                : nil
-            try audio.start(run.clicks(timeline), musicClicksAudible: clickOn, melody: melody)
+            try audio.start(material(of: run))
         } catch {
             logger.error("Cannot start the clicks: \(error, privacy: .public)")
             transport = transport.next(.stop)
             return
         }
-        self.run = run
-        finishTask = Task { [weak self, length = run.length(timeline)] in
+        let performance = Performance(run)
+        self.performance = performance
+        finishWhen(performance)
+        interruptionTask = Task { [weak self, interruptions = audio.interruptions()] in
+            for await _ in interruptions {
+                self?.pause()
+                return
+            }
+        }
+    }
+
+    /// What a run sounds: its clicks and, with 示范 on, its melody.
+    private func material(of run: Run) -> RunAudio.Material {
+        let melody =
+            demoOn && canDemo
+            ? melodySamples(run.melody(timeline, score: score), voices: voices, sampleRate: RunAudio.sampleRate)
+            : nil
+        return RunAudio.Material(clicks: run.clicks(timeline), musicClicksAudible: clickOn, melody: melody)
+    }
+
+    /// Applies the tempo 0.3 s after the last change, so holding + or swiping the dial changes it once.
+    private func retimeSoon() {
+        retimeTask?.cancel()
+        retimeTask = Task { [weak self] in
             do {
-                try await Task.sleep(for: .seconds(length))
+                try await Task.sleep(for: .seconds(0.3))
+            } catch is CancellationError {
+                return
+            } catch {
+                logger.error("Tempo change timer failed: \(error, privacy: .public)")
+                return
+            }
+            self?.retime()
+        }
+    }
+
+    /// The running performance at the current tempo from the first bar line not yet scheduled; with none left
+    /// before the end, the tempo waits for the next 开始.
+    private func retime() {
+        guard isRunning, let audio, let performance,
+            let retimed = performance.retimed(
+                Tempo(bpm: Double(bpm), beat: beat), from: audio.scheduledUntil, in: timeline),
+            let change = retimed.segments.last
+        else { return }
+        audio.replace(from: change.start, with: material(of: change.run))
+        self.performance = retimed
+        finishWhen(retimed)
+    }
+
+    /// Finishes the run when the performance ends, counted from now on the audio clock.
+    private func finishWhen(_ performance: Performance) {
+        finishTask?.cancel()
+        finishTask = Task { [weak self, left = performance.length(timeline) - (audio?.time ?? 0)] in
+            do {
+                try await Task.sleep(for: .seconds(max(left, 0)))
             } catch is CancellationError {
                 return  // stopped or paused before the end
             } catch {
@@ -172,12 +230,6 @@ final class Player {
                 return
             }
             self?.finish()
-        }
-        interruptionTask = Task { [weak self, interruptions = audio.interruptions()] in
-            for await _ in interruptions {
-                self?.pause()
-                return
-            }
         }
     }
 
@@ -189,10 +241,12 @@ final class Player {
     private func halt() {
         finishTask?.cancel()
         finishTask = nil
+        retimeTask?.cancel()
+        retimeTask = nil
         interruptionTask?.cancel()
         interruptionTask = nil
         audio?.stop()
-        run = nil
+        performance = nil
     }
 }
 

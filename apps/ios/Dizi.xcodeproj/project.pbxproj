@@ -18,6 +18,7 @@
 		45066C24AA96725AF5407ABB /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD2F9D0A9FA611EE51B5E630 /* SettingsView.swift */; };
 		5FB89F6AE1E2CE42078FF548 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19975A9A20809DA1FDD4886E /* SearchView.swift */; };
 		694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7DDEBD62C1197359510C59D /* DiziApp.swift */; };
+		71BBD1C6819A7DF3B13D1E24 /* TempoDial.swift in Sources */ = {isa = PBXBuildFile; fileRef = 800EF1DC11734024252ACB56 /* TempoDial.swift */; };
 		804EC165DEA0995AB5F6270C /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = DB234CECED42DB96C159D214 /* AppIcon.icon */; };
 		9C80785EB6CB99C263A4033E /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7FB92541A5F848689241E1 /* Theme.swift */; };
 		B0494E44A5D2F65AC2868249 /* DictionaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8686E35C9F6777DCD047DB8A /* DictionaryView.swift */; };
@@ -52,6 +53,7 @@
 		33A4F41FB44B5B2F0B205D89 /* Samples */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Samples; path = Dizi/Samples; sourceTree = SOURCE_ROOT; };
 		3A7FB92541A5F848689241E1 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		79F6644CEF354FA4D521A9BA /* LibraryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryStore.swift; sourceTree = "<group>"; };
+		800EF1DC11734024252ACB56 /* TempoDial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempoDial.swift; sourceTree = "<group>"; };
 		86587596978C7D7A172CA03E /* DiziUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DiziUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		8686E35C9F6777DCD047DB8A /* DictionaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictionaryView.swift; sourceTree = "<group>"; };
 		89D7C1647EEC53579F92423C /* Dizi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Dizi.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -118,6 +120,7 @@
 				E825365B13D701E585670E85 /* ScoreView.swift */,
 				19975A9A20809DA1FDD4886E /* SearchView.swift */,
 				AD2F9D0A9FA611EE51B5E630 /* SettingsView.swift */,
+				800EF1DC11734024252ACB56 /* TempoDial.swift */,
 				3A7FB92541A5F848689241E1 /* Theme.swift */,
 				1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */,
 				0DDF2829D5D3185F122237C4 /* Voices.swift */,
@@ -253,6 +256,7 @@
 				19A7AB3A6A9B33437E1CA0F7 /* ScoreView.swift in Sources */,
 				5FB89F6AE1E2CE42078FF548 /* SearchView.swift in Sources */,
 				45066C24AA96725AF5407ABB /* SettingsView.swift in Sources */,
+				71BBD1C6819A7DF3B13D1E24 /* TempoDial.swift in Sources */,
 				9C80785EB6CB99C263A4033E /* Theme.swift in Sources */,
 				432E2FAF7F8AC03D762AFCA7 /* TransportBar.swift in Sources */,
 				3E699F796C095BA3FD05AF50 /* Voices.swift in Sources */,

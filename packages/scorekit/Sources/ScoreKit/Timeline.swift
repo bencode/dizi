@@ -196,7 +196,12 @@ public struct Run: Sendable, Equatable {
 
     /// Seconds from time 0 to the end of the run.
     public func length(_ timeline: Timeline) -> Double {
-        tempo.seconds(countInLength(timeline) + end(timeline) - timeline.entries[from].start)
+        seconds(atTick: end(timeline), in: timeline)
+    }
+
+    /// When a performance tick sounds, in seconds from time 0.
+    func seconds(atTick tick: Int, in timeline: Timeline) -> Double {
+        tempo.seconds(countInLength(timeline) + tick - timeline.entries[from].start)
     }
 
     /// Where a bar's beats fall. A first bar shorter than a full one is a pickup (弱起): its beats are the last

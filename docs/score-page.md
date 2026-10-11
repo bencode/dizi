@@ -34,7 +34,7 @@ playing --Stop / end of score-----▶ stopped, playhead back at the chosen start
 
 - The playhead **snaps to a note**: starting in the middle of a note makes no sense.
 - While playing it **reaches each note's digit exactly when the note should start**, and moves smoothly in between (a monotone cubic through those points), so bar lines and uneven spacing cause no lurch.
-- While playing, tempo and switches are locked; pause or stop to change them.
+- While playing, the switches (示范, 节拍, 选段) are locked; pause or stop to change them. The tempo is not: a change while playing applies from the next bar line at least half a second ahead, once the player stops changing it (0.3 s), and the music continues there without a count-in. Tapping the tempo opens a dial: a ruler swiped left and right, a haptic tick per step, and 原速 for the written tempo.
 
 ## Layers
 
