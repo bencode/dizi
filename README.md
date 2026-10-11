@@ -31,4 +31,4 @@ See [AGENTS.md](AGENTS.md) for what each check enforces.
 
 ## Credits
 
-The demo melody uses dizi recordings by [Hypnotriod](https://freesound.org/people/Hypnotriod/packs/21613/) (CC0), with thanks.
+The demo melody plays the [Salamander Grand Piano V3](https://github.com/sfzinstruments/SalamanderGrandPiano) by Alexander Holm, licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/); the samples are trimmed, mixed to mono and levelled (see `apps/ios/Dizi/Samples/piano/README.md`).

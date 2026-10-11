@@ -12,7 +12,7 @@ The most important screen: the score, and playing along with it.
 
 ## 走谱
 
-Pressing 开始 counts in one bar, clicks every beat (accent on each bar's downbeat), and moves the playhead along the score while the player plays. With **示范** on, the app plays the melody too, with real dizi samples (`apps/ios/Dizi/Samples/dizi-c`, CC0), retuned to A4 = 440.
+Pressing 开始 counts in one bar, clicks every beat (accent on each bar's downbeat), and moves the playhead along the score while the player plays. With **示范** on, the app plays the melody too, on a piano (`apps/ios/Dizi/Samples/piano`, Salamander Grand Piano, CC BY 3.0): a plain reference for pitch and rhythm, not an imitation of the dizi.
 
 - **Octave**: an undotted `1` is the tonic in A4…G♯5, where 筒音作5 puts it on the flute in that key (1=D → D5, 1=F → F5). Settings for the flute and 筒音作几 will override this later.
 - **Sync**: the whole melody of a run is rendered into one buffer and starts on the same sample as the clicks.

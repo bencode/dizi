@@ -1,0 +1,74 @@
+{
+  "source": "https://github.com/sfzinstruments/SalamanderGrandPiano",
+  "license": "CC-BY-3.0",
+  "voices": [
+    {
+      "midi": 60,
+      "sampleRate": 48000
+    },
+    {
+      "midi": 63,
+      "sampleRate": 48000
+    },
+    {
+      "midi": 66,
+      "sampleRate": 48000
+    },
+    {
+      "midi": 69,
+      "sampleRate": 48000
+    },
+    {
+      "midi": 72,
+      "sampleRate": 48000
+    },
+    {
+      "midi": 75,
+      "sampleRate": 48000
+    },
+    {
+      "midi": 78,
+      "sampleRate": 48000
+    },
+    {
+      "midi": 81,
+      "sampleRate": 48000
+    },
+    {
+      "midi": 84,
+      "sampleRate": 48000
+    },
+    {
+      "midi": 87,
+      "sampleRate": 48000
+    },
+    {
+      "midi": 90,
+      "sampleRate": 48000
+    },
+    {
+      "midi": 93,
+      "sampleRate": 48000
+    },
+    {
+      "midi": 96,
+      "sampleRate": 48000
+    },
+    {
+      "midi": 99,
+      "sampleRate": 48000
+    },
+    {
+      "midi": 102,
+      "sampleRate": 48000
+    },
+    {
+      "midi": 105,
+      "sampleRate": 48000
+    },
+    {
+      "midi": 108,
+      "sampleRate": 48000
+    }
+  ]
+}
