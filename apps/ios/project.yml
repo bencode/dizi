@@ -41,6 +41,8 @@ targets:
         # 我的曲谱: Documents shows in the Files app, where the player puts their score files.
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true
+        # 调音器 (and later 音准, 录音) listen to the player; nothing leaves the phone.
+        NSMicrophoneUsageDescription: 调音器要听你吹的音；声音只在手机上分析，不录下、不上传。
     dependencies:
       - package: ScoreKit
     scheme:

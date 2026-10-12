@@ -19,6 +19,8 @@
 		432E2FAF7F8AC03D762AFCA7 /* TransportBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */; };
 		45066C24AA96725AF5407ABB /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD2F9D0A9FA611EE51B5E630 /* SettingsView.swift */; };
 		5FB89F6AE1E2CE42078FF548 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19975A9A20809DA1FDD4886E /* SearchView.swift */; };
+		67F9FB9A279A58B6A59B16F5 /* Microphone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51AD1123E34720E0D9F58D42 /* Microphone.swift */; };
+		693975ECC6E8F4AAA823A04C /* TunerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 158E49A7F4FE6B84AAFCDEE7 /* TunerView.swift */; };
 		694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7DDEBD62C1197359510C59D /* DiziApp.swift */; };
 		71BBD1C6819A7DF3B13D1E24 /* TempoDial.swift in Sources */ = {isa = PBXBuildFile; fileRef = 800EF1DC11734024252ACB56 /* TempoDial.swift */; };
 		77D7F1A9EEB7565EDE84A6CA /* Parser in Resources */ = {isa = PBXBuildFile; fileRef = 9E51EF45BEF0F0A09FE9705B /* Parser */; };
@@ -47,6 +49,7 @@
 /* Begin PBXFileReference section */
 		035DC4279B86CF3EF6B6B6E2 /* PieceCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceCard.swift; sourceTree = "<group>"; };
 		0DDF2829D5D3185F122237C4 /* Voices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Voices.swift; sourceTree = "<group>"; };
+		158E49A7F4FE6B84AAFCDEE7 /* TunerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerView.swift; sourceTree = "<group>"; };
 		1657F2512FB10BB5DB9A727B /* PieceDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieceDetailView.swift; sourceTree = "<group>"; };
 		19975A9A20809DA1FDD4886E /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportBar.swift; sourceTree = "<group>"; };
@@ -55,6 +58,7 @@
 		2C6B3DF07D1A77E660CB3E30 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		33A4F41FB44B5B2F0B205D89 /* Samples */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Samples; path = Dizi/Samples; sourceTree = SOURCE_ROOT; };
 		3A7FB92541A5F848689241E1 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		51AD1123E34720E0D9F58D42 /* Microphone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Microphone.swift; sourceTree = "<group>"; };
 		77782AE9AFE07694AAC2031F /* PersonalLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalLibrary.swift; sourceTree = "<group>"; };
 		79F6644CEF354FA4D521A9BA /* LibraryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryStore.swift; sourceTree = "<group>"; };
 		800EF1DC11734024252ACB56 /* TempoDial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempoDial.swift; sourceTree = "<group>"; };
@@ -119,6 +123,7 @@
 				2C6B3DF07D1A77E660CB3E30 /* Info.plist */,
 				79F6644CEF354FA4D521A9BA /* LibraryStore.swift */,
 				F2AF968099F1CC1C2518E6DA /* Localizable.xcstrings */,
+				51AD1123E34720E0D9F58D42 /* Microphone.swift */,
 				77782AE9AFE07694AAC2031F /* PersonalLibrary.swift */,
 				D50442017F6C6CB6210321AF /* PersonalShelf.swift */,
 				035DC4279B86CF3EF6B6B6E2 /* PieceCard.swift */,
@@ -132,6 +137,7 @@
 				800EF1DC11734024252ACB56 /* TempoDial.swift */,
 				3A7FB92541A5F848689241E1 /* Theme.swift */,
 				1B5E6A6BA6182B6E96596C68 /* TransportBar.swift */,
+				158E49A7F4FE6B84AAFCDEE7 /* TunerView.swift */,
 				0DDF2829D5D3185F122237C4 /* Voices.swift */,
 			);
 			path = Dizi;
@@ -258,6 +264,7 @@
 				B0494E44A5D2F65AC2868249 /* DictionaryView.swift in Sources */,
 				694112722BD35E92BB8CC65E /* DiziApp.swift in Sources */,
 				C4CDA40015A7B9D147D4FC20 /* LibraryStore.swift in Sources */,
+				67F9FB9A279A58B6A59B16F5 /* Microphone.swift in Sources */,
 				18049177FE7742CC9CE4563C /* PersonalLibrary.swift in Sources */,
 				2D8F71BBE1F07612352EFC17 /* PersonalShelf.swift in Sources */,
 				CCA985315C19D0AAD75388D1 /* PieceCard.swift in Sources */,
@@ -271,6 +278,7 @@
 				71BBD1C6819A7DF3B13D1E24 /* TempoDial.swift in Sources */,
 				9C80785EB6CB99C263A4033E /* Theme.swift in Sources */,
 				432E2FAF7F8AC03D762AFCA7 /* TransportBar.swift in Sources */,
+				693975ECC6E8F4AAA823A04C /* TunerView.swift in Sources */,
 				3E699F796C095BA3FD05AF50 /* Voices.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

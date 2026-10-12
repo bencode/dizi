@@ -12,6 +12,16 @@ struct PieceListView: View {
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                if kind == .practice {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        NavigationLink {
+                            TunerView()
+                        } label: {
+                            Label("调音器", systemImage: "tuningfork")
+                        }
+                        .tint(Theme.ink)
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink {
                         SettingsView()
